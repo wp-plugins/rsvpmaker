@@ -1,10 +1,10 @@
-﻿=== RSVPmaker ===
+=== RSVPmaker ===
 Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
-Tags: event, calendar, rsvp, custom post type
+Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.01
-Stable tag: 0.6
+Stable tag: 0.6.1
 
 Event scheduling and RSVP tracking.
 
@@ -64,5 +64,11 @@ Do you have questions or issues with RSVPmaker? Use these support channels appro
 = 0.6 =
 
 * First public release November 2010.
+
+= 0.6.1 =
+
+* Fixed errors in database code for recording guests and payments
+* Added option to switch between 12-hour and 24-hour time formats
+* Added ability to set maximum participants per event.
 
 [Releases](http://www.rsvpmaker.com/release/)

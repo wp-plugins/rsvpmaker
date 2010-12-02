@@ -119,7 +119,7 @@ $mail->send($rsvp_to, $hdrs, $body);
 // now send confirmation
 
 $hdrs = array(
-              'From'    => $options["rsvp_to"],
+              'From'    => $rsvp_options["rsvp_to"],
               'Subject' => "Confirming RSVP $answer for ".$post->post_title." $date"
               );
 

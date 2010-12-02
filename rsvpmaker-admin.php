@@ -117,30 +117,30 @@ wp_nonce_field(-1,'add_date'.$i);
 <tr><td> Time:</td> 
 <td>Hour: <select name="event_hour[<?=$i?>]"> 
  
-<option  value="00">12 a.m.</option> 
-<option  value="1">1 a.m.</option> 
-<option  value="2">2 a.m.</option> 
-<option  value="3">3 a.m.</option> 
-<option  value="4">4 a.m.</option> 
-<option  value="5">5 a.m.</option> 
-<option  value="6">6 a.m.</option> 
-<option  value="7">7 a.m.</option> 
-<option  value="8">8 a.m.</option> 
-<option  value="9">9 a.m.</option> 
-<option  value="10">10 a.m.</option> 
-<option  value="11">11 a.m.</option> 
-<option  value="12">12 p.m.</option> 
-<option  value="13">1 p.m.</option> 
-<option  value="14">2 p.m.</option> 
-<option  value="15">3 p.m.</option> 
-<option  value="16">4 p.m.</option> 
-<option  value="17">5 p.m.</option> 
-<option  value="18">6 p.m.</option> 
-<option  selected = "selected"  value="19">7 p.m.</option> 
-<option  value="20">8 p.m.</option> 
-<option  value="21">9 p.m.</option> 
-<option  value="22">10 p.m.</option> 
-<option  value="23">11 p.m.</option></select> 
+<option  value="00">12 a.m. / 00:</option> 
+<option  value="1">1 a.m. / 01:</option> 
+<option  value="2">2 a.m. / 02:</option> 
+<option  value="3">3 a.m. / 03:</option> 
+<option  value="4">4 a.m. / 04:</option> 
+<option  value="5">5 a.m. / 05:</option> 
+<option  value="6">6 a.m. / 06:</option> 
+<option  value="7">7 a.m. / 07:</option> 
+<option  value="8">8 a.m. / 08:</option> 
+<option  value="9">9 a.m. / 09:</option> 
+<option  value="10">10 a.m. / 10:</option> 
+<option  value="11">11 a.m. / 11:</option> 
+<option  value="12">12 p.m. / 12:</option> 
+<option  value="13">1 p.m. / 13:</option> 
+<option  value="14">2 p.m. / 14:</option> 
+<option  value="15">3 p.m. / 15:</option> 
+<option  value="16">4 p.m. / 16:</option> 
+<option  value="17">5 p.m. / 17:</option> 
+<option  value="18">6 p.m. / 18:</option> 
+<option  selected = "selected"  value="19">7 p.m. / 19:</option> 
+<option  value="20">8 p.m. / 20:</option> 
+<option  value="21">9 p.m. / 21:</option> 
+<option  value="22">10 p.m. / 22:</option> 
+<option  value="23">11 p.m. / 23:</option></select> 
  
 Minutes: <select name="event_minutes[<?=$i?>]"> 
 <option value="00">00</option> 
@@ -322,7 +322,7 @@ add_action('save_post','save_calendar_data');
           function get_options()
           {
               // default values
-              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0);
+              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, time_format => 'g:i A');
               
               // get saved options
               $saved = get_option($this->db_option);
@@ -358,9 +358,11 @@ add_action('save_post','save_calendar_data');
               		//check security
               		check_admin_referer('calendar-nonce');
               		
-                  $options = stripslashes_deep($_POST["option"]);
-                  $options["rsvp_on"] = ($_POST["option"]["rsvp_on"]) ? 1 : 0;
-                  $options["paypal_enabled"] = ($_POST["option"]["paypal_enabled"]) ? 1 : 0;
+                  $newoptions = stripslashes_deep($_POST["option"]);
+                  $newoptions["rsvp_on"] = ($_POST["option"]["rsvp_on"]) ? 1 : 0;
+                  $newoptions["paypal_enabled"] = ($_POST["option"]["paypal_enabled"]) ? 1 : 0;
+				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
+				  $options = $newoptions;
 				  
                   update_option($this->db_option, $options);
                   
@@ -406,6 +408,12 @@ add_action('save_post','save_calendar_data');
 					<h3>Dates Style:</h3>
   <textarea name="option[dates_style]"  rows="2" cols="80" id="dates_style"><?=$options["dates_style"]?></textarea>
 	<br />
+<h3>Time Format:</h3>
+<p>
+<input type="radio" name="option[time_format]" value="g:i A" <?php if($options["time_format"] == "g:i A") echo ' checked="checked"'; ?> /> 12 hour AM/PM 
+<input type="radio" name="option[time_format]" value="H:i" <?php if($options["time_format"] == "H:i") echo ' checked="checked"'; ?> /> 24 hour 
+<br />
+
 					<h3>PayPal Enabled:</h3>
   <input type="checkbox" name="option[paypal_enabled]" value="1" <?php if($options["paypal_enabled"]) echo ' checked="checked" '; ?> /> check to prompt for PayPal pricing
 	<br />
@@ -418,10 +426,21 @@ add_action('save_post','save_calendar_data');
 <h3>PEAR Spredsheet Writer:</h3>
   <input type="checkbox" name="option[pear_spreadsheet]" value="1" <?php if($options["pear_spreadsheet"]) echo ' checked="checked" '; ?> /> Enable spreadsheet downloads of RSVP Reports. You must manually install the <a href="http://pear.php.net/package/Spreadsheet_Excel_Writer">PEAR Spreadsheet Writer</a> 
 	<br />
-
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
-		</div>
+		    <p><strong>Shortcodes and Event Listing / Calendar Views</strong></p>
+		    <p>RSVPMaker provides the following shortcodes for listing events, listing event headlines, and displaying a calendar with links to events.</p>
+		    <p>[event_listing format=&quot;headlines&quot;] displays a list of headlines</p>
+		    <p>[event_listing format=&quot;calendar&quot;] OR [event_listing calendar=&quot;1&quot;] displays the calendar</p>
+		    <p>[rsvpmaker_upcoming] displays the index of upcoming events. If an RSVP is requested, the event includes the RSVP button link to the single post view, which will include your RSVP form.</p>
+		    <p>[rsvpmaker_upcoming calendar=&quot;1&quot;] displays the calendar, followed by the index of upcoming events.</p>
+            <p>[rsvpmaker_upcoming no_event="We're working on it. Check back soon"] specifies a custom message to display if there are no upcoming events in the database.</p>
+            <div style="background-color: #FFFFFF; padding: 15px; text-align: center;">
+            <img src="<?=plugins_url()?>/rsvpmaker/shortcode.png" width="535" height="412" />
+<br /><em>Contents for an events page.</em>
+            </div>
+            
+	    </div>
 				
 	 </div>
 
@@ -483,10 +502,10 @@ foreach($eventlist as $event)
 
 function default_event_content($content) {
 global $post;
+global $rsvp_options;
 if(($post->post_type == 'event') && ($content == ''))
 {
-$o = get_option('RSVPMAKER_Options');
-return $o['default_content'];
+return $rsvp_options['default_content'];
 }
 else
 return $content;
@@ -525,11 +544,12 @@ if($_POST)
 		}
 
 }
-$o = get_option('RSVPMAKER_Options');
+
+global $rsvp_options;
 
 ?>
 <p>Multiple Events</p>
-<form id="form1" name="form1" method="post" action="<?=$_SERVER['file:///C|/Users/davidfcarr/web/pack179/wp-content/plugins/rsvpmaker/REQUEST_URI']?>">
+<form id="form1" name="form1" method="post" action="<?=$_SERVER['REQUEST_URI']?>">
 <?php
 $today = '<option value="0">None</option>';
 for($i=0; $i < 10; $i++)
@@ -542,7 +562,7 @@ $y2 = $y+1;
 wp_nonce_field(-1,'add_date'.$i);
 ?>
 <p>Headline: <input type="text" name="title[<?=$i?>]" /></p>
-<p><textarea name="body[<?=$i?>]" rows="5" cols="80"><?=$o["default_content"]?></textarea></p>
+<p><textarea name="body[<?=$i?>]" rows="5" cols="80"><?=$rsvp_options["default_content"]?></textarea></p>
 
 <div id="recur_date<?=$i?>" style="border-bottom: thin solid #888;">
 
@@ -684,13 +704,14 @@ if($_POST["recur-title"])
 	}
 
 }
-$o = get_option('RSVPMAKER_Options');
+
+global $rsvp_options;
 
 ?>
 <p>Recurring Event (same headline/description, mulitple dates)</p>
-<form id="form1" name="form1" method="post" action="<?=$_SERVER['file:///C|/Users/davidfcarr/web/pack179/wp-content/plugins/rsvpmaker/REQUEST_URI']?>">
+<form id="form1" name="form1" method="post" action="<?=$_SERVER['REQUEST_URI']?>">
 <p>Headline: <input type="text" name="recur-title" value="<?=stripslashes($_POST["recur-title"])?>" /></p>
-<p><textarea name="recur-body" rows="5" cols="80"><?=($_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $o["default_content"]?></textarea></p>
+<p><textarea name="recur-body" rows="5" cols="80"><?=($_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"]?></textarea></p>
 <?php
 $today = '<option value="0">None</option>';
 for($i=0; $i < 10; $i++)
@@ -845,5 +866,18 @@ foreach($results as $row)
 echo $dateline;
 }
 
+function rsvpmaker_admin_notice() {
+global $wpdb;
+$sql = "SELECT ID from $wpdb->posts WHERE post_status='publish' AND post_content LIKE '%[rsvpmaker_upcoming%' ";
+if($id =$wpdb->get_var($sql))
+	{
+	$permalink = get_permalink($id);
+	update_option('rsvpmaker_permalink',$permalink);
+	}
+else
+	echo '<div class="updated" style="background-color:#f66;"><p>RSVPMaker needs you to create a page with the [rsvpmaker_upcoming] shortcode to display event listings.</p></div>';
+}
+
+add_action('admin_notices', 'rsvpmaker_admin_notice');
 
 ?>

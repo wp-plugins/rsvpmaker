@@ -7,6 +7,7 @@ add_filter('the_content','event_content');
 add_shortcode('event_listing', 'event_listing');
 
 function event_listing($atts) {
+
 global $wpdb;
 
 $sql = "SELECT *, $wpdb->posts.ID as postID
@@ -40,7 +41,8 @@ foreach($results as $row)
 if($atts["calendar"] || $atts["format"] == 'calendar')
 	$listings .= cp_show_calendar($cal);
 
-if($eventlist && ($atts["format"] == 'headline') )
+//strpos test used to catch either "headline" or "headlines"
+if($eventlist && ( strpos($atts["format"],'headline') != 'false') )
 {
 foreach($eventlist as $event)
 	{
@@ -96,7 +98,7 @@ $nm = mktime(0, 0, 1, $cm+1, 1, $cy);
    $next_link = '<a href="' . $self . strftime('?cm=%m&amp;cy=%Y">%B, %Y</a>', $nm);
 
 $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
-   $next_link .= sprintf('<form action="%s" method="get"> or M: <input type="text" name="cm" value="%s" size="4" /> Y: <input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" ></form>', $self,date('m',$monthafter),date('Y',$monthafter));
+   $next_link .= sprintf('<form action="%s" method="get"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" ></form>', $self,date('m',$monthafter),date('Y',$monthafter));
 
 
 // $Id: cal.php,v 1.47 2003/12/31 13:04:27 goba Exp $
@@ -125,8 +127,7 @@ $content .= '<thead>
 $content .= "\n<tbody>\n";
 
 $content .= "\n<tfoot><tr>". '<td align="left" colspan="3">'. $prev_link. '</td>'.
-     '<td>&nbsp;</td>'.
-     '<td colspan="3" align="right">' . $next_link . "</td></tr></tfoot>";
+     '<td colspan="4" align="right">' . $next_link . "</td></tr></tfoot>";
 	 
 // Generate the requisite number of blank days to get things started
 for ($days = $i = date("w",$bom); $i > 0; $i--) {
@@ -289,6 +290,12 @@ query_posts($querystring);
 
 ob_start();
 
+if($atts["calendar"] || ($atts["format"] == "calendar") )
+	{
+	$atts["format"] = "calendar";
+	echo event_listing($atts);
+	}
+	
 if ( have_posts() ) {
 while ( have_posts() ) : the_post(); ?>
 
