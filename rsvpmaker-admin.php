@@ -4,6 +4,35 @@ function draw_eventdates() {
 
 global $post;
 global $wpdb;
+global $rsvp_options;
+
+$defaulthour = ($rsvp_options["defaulthour"]) ? ( (int) $rsvp_options["defaulthour"]) : 19;
+$defaultmin = ($rsvp_options["defaultmin"]) ? ( (int) $rsvp_options["defaultmin"]) : 0;
+
+for($i=0; $i < 24; $i++)
+	{
+	$selected = ($i == $defaulthour) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	if($i == 0)
+		$twelvehour = "12 a.m.";
+	elseif($i == 12)
+		$twelvehour = "12 p.m.";
+	elseif($i > 12)
+		$twelvehour = ($i - 12) ." p.m.";
+	else		
+		$twelvehour = $i." a.m.";
+
+	$houropt .= sprintf('<option  value="%s" %s>%s / %s:</option>',$padded,$selected,$twelvehour,$padded);
+	}
+
+for($i=0; $i < 60; $i += 5)
+	{
+	$selected = ($i == $defaultmin) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	$minopt .= sprintf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
+	}
+
+wp_nonce_field(-1,'add_date'.$i);
 
 $results = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."rsvp_dates WHERE postID=".$post->ID.' ORDER BY datetime',ARRAY_A);
 if($results)
@@ -49,7 +78,6 @@ $m = date('n');
 $y = date('Y');
 $y2 = $y+1;
 
-wp_nonce_field(-1,'add_date'.$i);
 ?>
 <div id="event_date<?=$i?>" style="border-bottom: thin solid #888;">
 <table width="100%">
@@ -116,38 +144,11 @@ wp_nonce_field(-1,'add_date'.$i);
           </tr> 
 <tr><td> Time:</td> 
 <td>Hour: <select name="event_hour[<?=$i?>]"> 
- 
-<option  value="00">12 a.m. / 00:</option> 
-<option  value="1">1 a.m. / 01:</option> 
-<option  value="2">2 a.m. / 02:</option> 
-<option  value="3">3 a.m. / 03:</option> 
-<option  value="4">4 a.m. / 04:</option> 
-<option  value="5">5 a.m. / 05:</option> 
-<option  value="6">6 a.m. / 06:</option> 
-<option  value="7">7 a.m. / 07:</option> 
-<option  value="8">8 a.m. / 08:</option> 
-<option  value="9">9 a.m. / 09:</option> 
-<option  value="10">10 a.m. / 10:</option> 
-<option  value="11">11 a.m. / 11:</option> 
-<option  value="12">12 p.m. / 12:</option> 
-<option  value="13">1 p.m. / 13:</option> 
-<option  value="14">2 p.m. / 14:</option> 
-<option  value="15">3 p.m. / 15:</option> 
-<option  value="16">4 p.m. / 16:</option> 
-<option  value="17">5 p.m. / 17:</option> 
-<option  value="18">6 p.m. / 18:</option> 
-<option  selected = "selected"  value="19">7 p.m. / 19:</option> 
-<option  value="20">8 p.m. / 20:</option> 
-<option  value="21">9 p.m. / 21:</option> 
-<option  value="22">10 p.m. / 22:</option> 
-<option  value="23">11 p.m. / 23:</option></select> 
+<?=$houropt?>
+</select> 
  
 Minutes: <select name="event_minutes[<?=$i?>]"> 
-<option value="00">00</option> 
-<option value="00">00</option> 
-<option value="15">15</option> 
-<option value="30">30</option> 
-<option value="45">45</option> 
+<?=$minopt?>
 </select> -
 
 Duration <select name="event_duration[<?=$i?>]">
@@ -322,7 +323,7 @@ add_action('save_post','save_calendar_data');
           function get_options()
           {
               // default values
-              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, time_format => 'g:i A');
+              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, time_format => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
               
               // get saved options
               $saved = get_option($this->db_option);
@@ -371,6 +372,35 @@ add_action('save_post','save_calendar_data');
               
               // URL for form submit, equals our current page
               $action_url = $_SERVER['REQUEST_URI'];
+
+
+$defaulthour = ($options["defaulthour"]) ? ( (int) $options["defaulthour"]) : 19;
+$defaultmin = ($options["defaultmin"]) ? ( (int) $options["defaultmin"]) : 0;
+
+for($i=0; $i < 24; $i++)
+	{
+	$selected = ($i == $defaulthour) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	if($i == 0)
+		$twelvehour = "12 a.m.";
+	elseif($i == 12)
+		$twelvehour = "12 p.m.";
+	elseif($i > 12)
+		$twelvehour = ($i - 12) ." p.m.";
+	else		
+		$twelvehour = $i." a.m.";
+
+	$houropt .= sprintf('<option  value="%s" %s>%s / %s:</option>',$padded,$selected,$twelvehour,$padded);
+	}
+
+for($i=0; $i < 60; $i += 5)
+	{
+	$selected = ($i == $defaultmin) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	$minopt .= sprintf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
+	}
+
+
 ?>
 
 <div class="wrap" style="max-width:950px !important;">
@@ -389,6 +419,15 @@ add_action('save_post','save_calendar_data');
 					<h3>Default Content for Events (such as standard meeting location):</h3>
   <textarea name="option[default_content]"  rows="5" cols="80" id="default_content"><?=$options["default_content"]?></textarea>
 	<br />
+Hour: <select name="option[defaulthour]"> 
+<?=$houropt?>
+</select> 
+ 
+Minutes: <select name="option[defaultmin]"> 
+<?=$minopt?>
+</select>
+<br />
+
 					
 					<h3>RSVP On:</h3>
   <input type="checkbox" name="option[rsvp_on]" value="1" <?php if($options["rsvp_on"]) echo ' checked="checked" '; ?> /> check to turn on by default

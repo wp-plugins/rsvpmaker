@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Editor built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php??page=rsvpmaker-admin.php">Options / Shortcode documentation</a>
 Author: David F. Carr
-Version: 0.6.1
+Version: 0.6.2
 Author URI: http://www.carrcommunications.com
 */
 
@@ -45,14 +45,50 @@ function create_post_type() {
     'capability_type' => 'post',
     'hierarchical' => false,
     'menu_position' => 5,
-    'supports' => array('title','editor','author','excerpt')
+    'supports' => array('title','editor','author','excerpt'),
+	'taxonomies' => array('event-type')
     )
   );
 
-/*
-couldn't get this to work yet
-,'taxonomies' => array('category')
-*/
+
+  // Add new taxonomy, make it hierarchical (like categories)
+  $labels = array(
+    'name' => _x( 'Event Types', 'taxonomy general name' ),
+    'singular_name' => _x( 'Event Type', 'taxonomy singular name' ),
+    'search_items' =>  __( 'Search Event Types' ),
+    'all_items' => __( 'All Event Types' ),
+    'parent_item' => __( 'Parent Event Type' ),
+    'parent_item_colon' => __( 'Parent Event Type:' ),
+    'edit_item' => __( 'Edit Event Type' ), 
+    'update_item' => __( 'Update Event Type' ),
+    'add_new_item' => __( 'Add New Event Type' ),
+    'new_item_name' => __( 'New Event Type' ),
+    'menu_name' => __( 'Event Type' ),
+  ); 	
+
+  register_taxonomy('event-type',array('event'), array(
+    'hierarchical' => true,
+    'labels' => $labels,
+    'show_ui' => true,
+    'query_var' => true,
+    'rewrite' => array( 'slug' => 'event-type' ),
+  ));
+
+
+global $wpdb;
+$sql = "SELECT slug FROM ".$wpdb->prefix."terms JOIN `".$wpdb->prefix."term_taxonomy` on ".$wpdb->prefix."term_taxonomy.term_id= ".$wpdb->prefix."terms.term_id WHERE taxonomy='event-type' AND slug='featured'";
+
+if(! $wpdb->get_var($sql) )
+	{
+	wp_insert_term(
+  'Featured', // the term 
+  'event-type', // the taxonomy
+  array(
+    'description'=> 'Featured event. Can be used to put selected events in a listing, for example on the home page',
+    'slug' => 'featured'
+  )
+);
+	}
 
 }
 

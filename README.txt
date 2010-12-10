@@ -3,8 +3,8 @@ Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
-Tested up to: 3.01
-Stable tag: 0.6.1
+Tested up to: 3.03
+Stable tag: 0.6.3
 
 Event scheduling and RSVP tracking.
 
@@ -23,9 +23,8 @@ If a fee is to be charged for the event, RSVPMaker can collect payments online u
 
 1. Upload the entire `rsvpmaker` folder to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
-
-
-Visit the RSVPmaker options page to configure default values for RSVP email notifications, etc.
+1. Visit the RSVPmaker options page to configure default values for RSVP email notifications, etc.
+1. Use the shortcodes documented on the options page to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget to an events listing to your WordPress sidebar.
 
 For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
 
@@ -57,7 +56,9 @@ Do you have questions or issues with RSVPmaker? Use these support channels appro
     GNU General Public License for more details.
 
     See the GNU General Public License at <http://www.gnu.org/licenses/>.
-
+	
+	RSVPMaker also includes code derived from the PayPal NVP API software
+	development kit for PHP.
 
 == Changelog ==
 
