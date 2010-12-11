@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Editor built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php??page=rsvpmaker-admin.php">Options / Shortcode documentation</a>
 Author: David F. Carr
-Version: 0.6.2
+Version: 0.7
 Author URI: http://www.carrcommunications.com
 */
 
@@ -27,10 +27,10 @@ add_action( 'init', 'create_post_type' );
 
 function create_post_type() {
 
-  register_post_type( 'event',
+  register_post_type( 'rsvpmaker',
     array(
       'labels' => array(
-        'name' => __( 'Events' ),
+        'name' => __( 'RSVP Events' ),
         'add_new_item' => __( 'Add New Event' ),
         'edit_item' => __( 'Edit Event' ),
         'new_item' => __( 'Events' ),
@@ -46,7 +46,7 @@ function create_post_type() {
     'hierarchical' => false,
     'menu_position' => 5,
     'supports' => array('title','editor','author','excerpt'),
-	'taxonomies' => array('event-type')
+	'taxonomies' => array('rsvpmaker-type')
     )
   );
 
@@ -66,23 +66,23 @@ function create_post_type() {
     'menu_name' => __( 'Event Type' ),
   ); 	
 
-  register_taxonomy('event-type',array('event'), array(
+  register_taxonomy('rsvpmaker-type',array('rsvpmaker'), array(
     'hierarchical' => true,
     'labels' => $labels,
     'show_ui' => true,
     'query_var' => true,
-    'rewrite' => array( 'slug' => 'event-type' ),
+    'rewrite' => array( 'slug' => 'rsvpmaker-type' ),
   ));
 
 
 global $wpdb;
-$sql = "SELECT slug FROM ".$wpdb->prefix."terms JOIN `".$wpdb->prefix."term_taxonomy` on ".$wpdb->prefix."term_taxonomy.term_id= ".$wpdb->prefix."terms.term_id WHERE taxonomy='event-type' AND slug='featured'";
+$sql = "SELECT slug FROM ".$wpdb->prefix."terms JOIN `".$wpdb->prefix."term_taxonomy` on ".$wpdb->prefix."term_taxonomy.term_id= ".$wpdb->prefix."terms.term_id WHERE taxonomy='rsvpmaker-type' AND slug='featured'";
 
 if(! $wpdb->get_var($sql) )
 	{
 	wp_insert_term(
   'Featured', // the term 
-  'event-type', // the taxonomy
+  'rsvpmaker-type', // the taxonomy
   array(
     'description'=> 'Featured event. Can be used to put selected events in a listing, for example on the home page',
     'slug' => 'featured'
@@ -138,6 +138,10 @@ $sql = "CREATE TABLE `".$wpdb->prefix."rsvp_volunteer_time` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
 dbDelta($sql);
+
+//defaults
+if(!$rsvp_options)
+	$rsvp_options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
 
 $rsvp_options["dbversion"] = 2;
 update_option('RSVPMAKER_Options',$rsvp_options);

@@ -560,7 +560,7 @@ if(!function_exists('event_scripts'))
 function event_scripts() {
 global $post;
 //Need Jquery for RSVP Form
-if( ($post->post_type == 'event') )
+if( ($post->post_type == 'rsvpmaker') )
 	wp_enqueue_script('jquery');
 } } // end event scripts
 
@@ -619,7 +619,7 @@ global $post;
 global $rsvp_options;
 
 //If the post is not an event, leave it alone
-if(! ($post->post_type == 'event') )
+if(! ($post->post_type == 'rsvpmaker') )
 	return $content;
 
 //On return from paypal payment process, show confirmation
@@ -900,7 +900,7 @@ foreach($events as $postID => $event)
 	echo "<h3>$event</h3>";
 	$sql = "SELECT count(*) FROM ".$wpdb->prefix."rsvpmaker WHERE yesno=1 AND event=".$postID;
 	if($rsvpcount = $wpdb->get_var($sql) )
-		echo '<p><a href="edit.php?post_type=event&page=rsvp&event='.$postID.'">RSVP YES: '.$rsvpcount."</a></p>";
+		echo '<p><a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$postID.'">RSVP YES: '.$rsvpcount."</a></p>";
 	}
 
 if($eventid = (int) $_GET["event"])
@@ -966,5 +966,10 @@ global $wpdb;
 		}
 return $spreadsheet;
 } } // end get spreadsheet data
+
+if(!function_exists('widgetlink') ) {
+function widgetlink($evdates,$plink,$evtitle) {
+	return sprintf('<a href="%s">%s</a> %s',$plink,$evtitle,$evdates);
+} } // end widgetlink
 
 ?>

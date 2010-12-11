@@ -176,7 +176,7 @@ GetRSVPAdminForm($post->ID);
 
 function my_events_menu() {
 
-add_meta_box( 'EventDatesBox', 'Event Dates, RSVP Options', 'draw_eventdates', 'event', 'normal', 'high' );
+add_meta_box( 'EventDatesBox', 'Event Dates, RSVP Options', 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
 
 }
 
@@ -315,7 +315,7 @@ add_action('save_post','save_calendar_data');
           // hook the options page
           function admin_menu()
           {
-              add_options_page('RSVPMAKER', 'RSVPMAKER', 5, basename(__FILE__), array(&$this, 'handle_options'));
+              add_options_page('RSVPMaker', 'RSVPMaker', 5, basename(__FILE__), array(&$this, 'handle_options'));
           }
           
           
@@ -323,7 +323,7 @@ add_action('save_post','save_calendar_data');
           function get_options()
           {
               // default values
-              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, time_format => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
+              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
               
               // get saved options
               $saved = get_option($this->db_option);
@@ -404,6 +404,16 @@ for($i=0; $i < 60; $i += 5)
 ?>
 
 <div class="wrap" style="max-width:950px !important;">
+
+<div style="float: right;">
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="N6ZRF6V6H39Q8">
+<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+</div>
+
 	<h2>Calendar Options</h2>
 				
 	<div id="poststuff" style="margin-top:10px;">
@@ -542,7 +552,7 @@ foreach($eventlist as $event)
 function default_event_content($content) {
 global $post;
 global $rsvp_options;
-if(($post->post_type == 'event') && ($content == ''))
+if(($post->post_type == 'rsvpmaker') && ($content == ''))
 {
 return $rsvp_options['default_content'];
 }
@@ -562,7 +572,7 @@ if($_POST)
 
 	$my_post['post_status'] = 'publish';
 	$my_post['post_author'] = 1;
-	$my_post['post_type'] = 'event';
+	$my_post['post_type'] = 'rsvpmaker';
 
 	foreach($_POST["recur_year"] as $index => $year)
 		{
@@ -723,7 +733,7 @@ if($_POST["recur-title"])
 	$my_post['post_content'] = $_POST["recur-body"];
 	$my_post['post_status'] = 'publish';
 	$my_post['post_author'] = 1;
-	$my_post['post_type'] = 'event';
+	$my_post['post_type'] = 'rsvpmaker';
 
 	foreach($_POST["recur_year"] as $index => $year)
 		{
@@ -868,9 +878,9 @@ Minutes: <select name="recur_minutes[<?=$i?>]">
 }
 
 function my_rsvp_menu() {
-add_submenu_page('edit.php?post_type=event', "RSVP Report", "RSVP Report", 2, "rsvp", "rsvp_report", $icon, $position );
-add_submenu_page('edit.php?post_type=event', "Recurring Event", "Recurring Event", 8, "add_dates", "add_dates", $icon, $position );
-add_submenu_page('edit.php?post_type=event', "Multiple Events", "Multiple Events", 8, "multiple", "multiple", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "RSVP Report", "RSVP Report", 2, "rsvp", "rsvp_report", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "Recurring Event", "Recurring Event", 8, "add_dates", "add_dates", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "Multiple Events", "Multiple Events", 8, "multiple", "multiple", $icon, $position );
 }
 
 add_action('admin_menu', 'my_rsvp_menu');
@@ -907,6 +917,11 @@ echo $dateline;
 
 function rsvpmaker_admin_notice() {
 global $wpdb;
+
+if($_GET["update"] == "eventslug")
+	{
+	$wpdb->query("UPDATE $wpdb->posts SET post_type='rsvpmaker' WHERE post_type='event' OR post_type='rsvp-event' ");
+	}
 $sql = "SELECT ID from $wpdb->posts WHERE post_status='publish' AND post_content LIKE '%[rsvpmaker_upcoming%' ";
 if($id =$wpdb->get_var($sql))
 	{
@@ -914,7 +929,12 @@ if($id =$wpdb->get_var($sql))
 	update_option('rsvpmaker_permalink',$permalink);
 	}
 else
-	echo '<div class="updated" style="background-color:#f66;"><p>RSVPMaker needs you to create a page with the [rsvpmaker_upcoming] shortcode to display event listings.</p></div>';
+	echo '<div class="updated" style="background-color:#fee;"><p>RSVPMaker needs you to create a page with the [rsvpmaker_upcoming] shortcode to display event listings.</p></div>';
+
+$sql = "SELECT count(*) from $wpdb->posts WHERE post_type='event' OR post_type='rsvp-event' ";
+if($count =$wpdb->get_var($sql))
+	echo '<div class="updated" style="background-color:#fee;"><p>RSVPMaker has detected '.$count.' posts that appear to have been created with an earlier release. You need to update them to reflect the new permalink naming. Update now? <a href="./index.php?post_type=rsvpmaker&update=eventslug" style="font-weight: bold;">Yes</a> (The post_type field will be changed from &quot;event&quot; to &quot;rsvpmaker&quot; also changing the permalink structure).</p></div>';
+
 }
 
 add_action('admin_notices', 'rsvpmaker_admin_notice');

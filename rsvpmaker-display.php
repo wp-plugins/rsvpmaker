@@ -182,6 +182,8 @@ class CPEventsWidget extends WP_Widget {
     function widget($args, $instance) {		
         extract( $args );
         $title = apply_filters('widget_title', $instance['title']);
+		$limit = ($instance["limit"]) ? $instance["limit"] : 10;
+		$dateformat = ($instance["dateformat"]) ? $instance["dateformat"] : 'M. j';
         ?>
               <?php echo $before_widget; ?>
                   <?php if ( $title )
@@ -193,7 +195,7 @@ $sql = "SELECT *, $wpdb->posts.ID as postID
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
 WHERE datetime > CURDATE( ) AND $wpdb->posts.post_status = 'publish'
-ORDER BY datetime LIMIT 0, 10";
+ORDER BY datetime LIMIT 0, $limit";
 			  
 			  $results = $wpdb->get_results($sql,ARRAY_A);
 			  if($results)
@@ -202,12 +204,30 @@ ORDER BY datetime LIMIT 0, 10";
 			  foreach($results as $row)
 			  	{
 				if($ev[$row["postID"]])
+					$ev[$row["postID"]] .= ", ".date($dateformat,strtotime($row["datetime"]) );
+				else
+					{
+					$ev[$row["postID"]] = date($dateformat,strtotime($row["datetime"]) );
+					$plink[$row["postID"]] = get_permalink($row["postID"]);
+					$evtitle[$row["postID"]] = $row["post_title"];  
+					}
+				}
+			
+			//pluggable function widgetlink can be overridden from custom.php
+			
+			  foreach($ev as $id => $e)
+			  	echo "<li>".widgetlink($e,$plink[$id],$evtitle[$id])."</li>";
+
+/*			  foreach($results as $row)
+			  	{
+				if($ev[$row["postID"]])
 					$ev[$row["postID"]] .= ", ".date('M. j',strtotime($row["datetime"]) );
 				else
 					$ev[$row["postID"]] = '<a href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a> ".date('M. j',strtotime($row["datetime"]) );
 				}
 			  foreach($ev as $e)
 			  	echo "<li>$e</li>";
+*/
 			  echo "\n</ul>\n";
 			  }
 			  
@@ -220,14 +240,22 @@ ORDER BY datetime LIMIT 0, 10";
     function update($new_instance, $old_instance) {				
 	$instance = $old_instance;
 	$instance['title'] = strip_tags($new_instance['title']);
+	$instance['dateformat'] = strip_tags($new_instance['dateformat']);
+	$instance['limit'] = (int) $new_instance['limit'];
         return $instance;
     }
 
     /** @see WP_Widget::form */
     function form($instance) {				
         $title = esc_attr($instance['title']);
+		$limit = ($instance["limit"]) ? $instance["limit"] : 10;
+		$dateformat = ($instance["dateformat"]) ? $instance["dateformat"] : 'M. j';
         ?>
             <p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?> <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" /></label></p>
+            <p><label for="<?php echo $this->get_field_id('limit'); ?>"><?php _e('Number to Show:'); ?> <input class="widefat" id="<?php echo $this->get_field_id('limit'); ?>" name="<?php echo $this->get_field_name('limit'); ?>" type="text" value="<?php echo $limit; ?>" /></label></p>
+
+            <p><label for="<?php echo $this->get_field_id('dateformat'); ?>"><?php _e('Date Format:'); ?> <input class="widefat" id="<?php echo $this->get_field_id('dateformat'); ?>" name="<?php echo $this->get_field_name('dateformat'); ?>" type="text" value="<?php echo $dateformat; ?>" /></label> (PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date</a> format string)</p>
+
         <?php 
     }
 
@@ -248,7 +276,7 @@ function rsvpmaker_where($where) {
 
 global $wpdb;
 
-return " AND $wpdb->posts.post_type = 'event' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'private') AND datetime > CURDATE( )";
+return " AND $wpdb->posts.post_type = 'rsvpmaker' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'private') AND datetime > CURDATE( )";
 
 }
 
@@ -284,7 +312,7 @@ add_filter('posts_distinct', 'rsvpmaker_distinct' );
 
 $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
-$querystring = "post_type=event&paged=$paged";
+$querystring = "post_type=rsvpmaker&paged=$paged";
 $wpdb->show_errors();
 query_posts($querystring);
 
@@ -327,7 +355,7 @@ add_shortcode("rsvpmaker_upcoming","rsvpmaker_upcoming");
 function date_title( $title, $sep, $seplocation ) {
 global $post;
 global $wpdb;
-if($post->post_type == 'event')
+if($post->post_type == 'rsvpmaker')
 	{
 	// get first date associated with event
 	$sql = "SELECT datetime FROM ".$wpdb->prefix."rsvp_dates WHERE postID = $post->ID ORDER BY datetime";

@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.03
-Stable tag: 0.6.3
+Stable tag: 0.7
 
 Event scheduling and RSVP tracking.
 
@@ -18,6 +18,7 @@ If a fee is to be charged for the event, RSVPMaker can collect payments online u
 
 [__RSVPmaker.com__](http://www.rsvpmaker.com/)
 
+Also available at [__RSVPmaker.com__](http://www.rsvpmaker.com/): a prototype of ChimpBlast plugin for sending event invites and other email broadcasts through the MailChimp broadcast email service.
 
 == Installation ==
 
@@ -62,14 +63,24 @@ Do you have questions or issues with RSVPmaker? Use these support channels appro
 
 == Changelog ==
 
-= 0.6 =
+= 0.7 =
 
-* First public release November 2010.
+* Custom post type slug changed from 'event' to 'rsvpmaker' in an attempt to avoid name conflicts, permalink issues.
+* Widget now lets you set the # of posts to display and date format string
+
+= 0.6.2 =
+
+* Updated to WP 3.03
+* Addition of event type taxonomy
 
 = 0.6.1 =
 
 * Fixed errors in database code for recording guests and payments
 * Added option to switch between 12-hour and 24-hour time formats
 * Added ability to set maximum participants per event.
+
+= 0.6 =
+
+* First public release November 2010.
 
 [Releases](http://www.rsvpmaker.com/release/)
