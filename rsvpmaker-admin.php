@@ -323,7 +323,7 @@ add_action('save_post','save_calendar_data');
           function get_options()
           {
               // default values
-              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
+              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
               
               // get saved options
               $saved = get_option($this->db_option);

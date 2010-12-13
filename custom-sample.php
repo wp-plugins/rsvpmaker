@@ -1,4 +1,5 @@
 <?php
+//any of the functions in rsvpmaker-pluggable.php can be overriden by adding your own custom.php file to the rsvpmaker directory. Here are some sample customizations
 
 //I use this in conjunction with a Mailchimp integration plugin (not yet released publicly). You can insert your own function to log email addresses to a database table or the service of your choice
 function capture_email($rsvp) {
@@ -134,6 +135,11 @@ $hdrs = $mime->headers($hdrs);
 
 $mail->send($rsvp["email"], $hdrs, $body);
 
+}
+
+// changes the default formatting for event links that appear in the widget
+function widgetlink($evdates,$plink,$evtitle) {
+	return sprintf('%s <a href="%s">%s</a> ',$evdates,$plink,$evtitle);
 }
 
 

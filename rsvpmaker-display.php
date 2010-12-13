@@ -42,13 +42,15 @@ if($atts["calendar"] || $atts["format"] == 'calendar')
 	$listings .= cp_show_calendar($cal);
 
 //strpos test used to catch either "headline" or "headlines"
-if($eventlist && ( strpos($atts["format"],'headline') != 'false') )
+if($eventlist && ( $atts["format"] == 'headline' || $atts["format"] == 'headlines') )
 {
 foreach($eventlist as $event)
 	{
-	$permalink = get_permalink($event["postID"]);
-	if($atts["format"] == 'headline')
-		$listings .= sprintf('<li><a href="%s">%s</a> %s</li>'."\n",$permalink,$event["post_title"],$dateline[$event["postID"]]);
+	if($atts["permalinkhack"])
+		$permalink = site_url() ."?p=".$event["postID"];
+	else
+		$permalink = get_permalink($event["postID"]);
+	$listings .= sprintf('<li><a href="%s">%s</a> %s</li>'."\n",$permalink,$event["post_title"],$dateline[$event["postID"]]);
 	}	
 
 	if($atts["title"])

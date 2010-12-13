@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Editor built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php??page=rsvpmaker-admin.php">Options / Shortcode documentation</a>
 Author: David F. Carr
-Version: 0.7
+Version: 0.7.1
 Author URI: http://www.carrcommunications.com
 */
 
@@ -15,6 +15,10 @@ if (version_compare($wp_version,"3.0","<"))
 	exit("RSVPmaker plugin requires WordPress 3.0 or greater");
 
 $rsvp_options = get_option('RSVPMAKER_Options');
+
+//defaults
+if(!$rsvp_options)
+	$rsvp_options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
 
 if(file_exists(WP_PLUGIN_DIR."/rsvpmaker/custom.php") )
 	include WP_PLUGIN_DIR."/rsvpmaker/custom.php";
@@ -41,7 +45,7 @@ function create_post_type() {
     'publicly_queryable' => true,
     'show_ui' => true, 
     'query_var' => true,
-    'rewrite' => true,
+    'rewrite' => array( 'slug' => 'rsvpmaker', 'with_front' => true ),
     'capability_type' => 'post',
     'hierarchical' => false,
     'menu_position' => 5,
@@ -138,10 +142,6 @@ $sql = "CREATE TABLE `".$wpdb->prefix."rsvp_volunteer_time` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
 dbDelta($sql);
-
-//defaults
-if(!$rsvp_options)
-	$rsvp_options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
 
 $rsvp_options["dbversion"] = 2;
 update_option('RSVPMAKER_Options',$rsvp_options);
