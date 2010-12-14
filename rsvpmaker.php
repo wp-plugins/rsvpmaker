@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Editor built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php??page=rsvpmaker-admin.php">Options / Shortcode documentation</a>
 Author: David F. Carr
-Version: 0.7.1
+Version: 0.7.2
 Author URI: http://www.carrcommunications.com
 */
 

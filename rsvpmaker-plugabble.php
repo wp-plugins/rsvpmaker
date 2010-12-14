@@ -881,7 +881,7 @@ global $rsvp_options;
 
 $sql = "SELECT *
 FROM `".$wpdb->prefix."rsvp_dates`
-JOIN wp_posts ON ".$wpdb->prefix."rsvp_dates.postID = wp_posts.ID
+JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."posts.ID
 WHERE datetime > CURDATE( )
 ORDER BY datetime";
 
@@ -895,6 +895,7 @@ foreach($results as $row)
 	$events[$row["postID"]] .= " ".date('F jS',$t);
 	}
 
+if($events)
 foreach($events as $postID => $event)
 	{
 	echo "<h3>$event</h3>";
