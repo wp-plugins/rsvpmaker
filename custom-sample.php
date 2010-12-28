@@ -11,8 +11,10 @@ if(!$_POST["onfile"] && function_exists('ChimpAdd'))
 	}
 }
 
+
 // customize the fields to be included with the RSVP form (in addition to name and email)
 // this example was used with several political campaigns to collect contact info, plus the occupation/employer data needed for campaign finance reporting related to fundraisers
+//custom fields must follow format name="profile[customfield]"
 function rsvp_profile($profile) {
 
 if($profile["city"])
@@ -87,6 +89,34 @@ size="20" value="" />
 </table>
 <?php
 	}
+
+}
+
+// changes the formatting of rsvp details in the rsvp report
+function format_rsvp_details($results) {
+
+	if($results)
+	foreach($results as $index => $row)
+		{
+		$row["yesno"] = ($row["yesno"]) ? "YES" : "NO";
+		
+		echo '<h3>'.$row["yesno"]." ".$row["first"]." ".$row["last"]." ".$row["email"];
+		if($row["guestof"])
+			echo " (guest of ".$row["guestof"].")";
+		echo "</h3>";
+		echo "<p>";
+		if($row["details"])
+			{
+			$details = unserialize($row["details"]);
+			// custom formatting for each individual's details
+			echo sprintf("<p><strong>%s %s:</strong> %s %s</p>\n",$details["first"],$details["last"],$details["email"], $details["phone"]);
+			}
+		if($row["note"])
+			echo "note: " . nl2br($row["note"]);
+		echo "</p>";
+		
+		echo sprintf('<p><a href="%s&delete=%d">Delete record for: %s %s</a></p>',admin_url().'edit.php?post_type=rsvpmaker&page=rsvp',$row["id"],$row["first"],$row["last"]);
+		}
 
 }
 

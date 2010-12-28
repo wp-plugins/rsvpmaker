@@ -5,20 +5,34 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Editor built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php??page=rsvpmaker-admin.php">Options / Shortcode documentation</a>
 Author: David F. Carr
-Version: 0.7.2
+Version: 0.7.3
 Author URI: http://www.carrcommunications.com
 */
 
 global $wp_version;
 
 if (version_compare($wp_version,"3.0","<"))
-	exit("RSVPmaker plugin requires WordPress 3.0 or greater");
+	exit( __("RSVPmaker plugin requires WordPress 3.0 or greater",'rsvpmaker') );
+
+global $pagenow;
+global $post;
+if(($_GET["post_type"] == 'rsvpmaker') || ($post->post_type == 'rsvpmaker') || ($pagenow == 'plugins.php') )
+	{
+	//if we're on the admin page for adding a new event, or are editing or viewing an event, or are on the plugins activation page
+	$locale = get_locale();
+	$mofile = WP_PLUGIN_DIR . '/rsvpmaker/translation/rsvpmaker-' . $locale . '.mo';
+	load_textdomain('rsvpmaker',$mofile);
+	}
 
 $rsvp_options = get_option('RSVPMAKER_Options');
 
 //defaults
 if(!$rsvp_options)
-	$rsvp_options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
+	$rsvp_options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => __('Thank you!','rsvpmaker'),'default_content' =>'', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">'. __('RSVP Now!','rsvpmaker').'</a></p>','rsvp_on' => 0, 'time_format' => 'g:i A', 'long_date' => 'l F jS, Y', 'short_date' => 'F jS', 'defaulthour' => 19, 'defaultmin' => 0);
+if(!$rsvp_options["long_date"])
+	$rsvp_options["long_date"] = 'l F jS, Y';
+if(!$rsvp_options["short_date"])
+	$rsvp_options["short_date"] = 'F jS';
 
 if(file_exists(WP_PLUGIN_DIR."/rsvpmaker/custom.php") )
 	include WP_PLUGIN_DIR."/rsvpmaker/custom.php";
@@ -45,7 +59,7 @@ function create_post_type() {
     'publicly_queryable' => true,
     'show_ui' => true, 
     'query_var' => true,
-    'rewrite' => array( 'slug' => 'rsvpmaker', 'with_front' => true ),
+    'rewrite' => false, 
     'capability_type' => 'post',
     'hierarchical' => false,
     'menu_position' => 5,
@@ -54,6 +68,11 @@ function create_post_type() {
     )
   );
 
+// explicit rewrite function seems to work better than letting WP do it automatically
+global $wp_rewrite;
+$rsvpmaker_structure = '/rsvpmaker/%rsvpmaker%';
+$wp_rewrite->add_rewrite_tag("%rsvpmaker%", '([^/]+)', "rsvpmaker=");
+$wp_rewrite->add_permastruct('rsvpmaker', $rsvpmaker_structure, false);
 
   // Add new taxonomy, make it hierarchical (like categories)
   $labels = array(
@@ -78,6 +97,9 @@ function create_post_type() {
     'rewrite' => array( 'slug' => 'rsvpmaker-type' ),
   ));
 
+//make sure new rules will be generated for custom post type
+if($wp_rewrite->extra_permastructs["rsvpmaker"][0] != '/rsvpmaker/%rsvpmaker%')
+	flush_rewrite_rules();
 
 global $wpdb;
 $sql = "SELECT slug FROM ".$wpdb->prefix."terms JOIN `".$wpdb->prefix."term_taxonomy` on ".$wpdb->prefix."term_taxonomy.term_id= ".$wpdb->prefix."terms.term_id WHERE taxonomy='rsvpmaker-type' AND slug='featured'";
@@ -95,9 +117,6 @@ if(! $wpdb->get_var($sql) )
 	}
 
 }
-
-//make sure new rules will be generated for custom post type
-add_action('admin_init', 'flush_rewrite_rules');
 
 function cpevent_activate() {
 global $wpdb;

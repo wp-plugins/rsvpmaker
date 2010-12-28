@@ -42,18 +42,18 @@ foreach($results as $row)
 	{
 	echo "\n<div class=\"event_dates\"> \n";
 	$t = strtotime($row["datetime"]);
-	echo date('l F jS, Y',$t);
+	echo date($rsvp_options["long_date"],$t);
 	$dur = $row["duration"];
 	if($dur != 'allday')
-		echo date(' g:i A',$t);
+		echo date(' '.$rsvp_options["time_format"],$t);
 	if(is_numeric($dur) )
-		echo " to ".date ('g:i A',$dur);
+		echo " to ".date ($rsvp_options["time_format"],$dur);
 	echo sprintf(' <input type="checkbox" name="delete_date[]" value="%d" /> Delete',$row["id"]);
 	echo "</div>\n";
 	}
 }
 
-echo '<p><em>Enter one or more dates. For an event starting at 12:30 p.m., you would select 12 p.m. and 30 minutes. Specifying the duration is optional.</em> </p>';
+echo '<p><em>'.__('Enter one or more dates. For an event starting at 1:30 p.m., you would select 1 p.m. (or 13: for 24-hour format) and then 30 minutes. Specifying the duration is optional.','rsvpmaker').'</em> </p>';
 
 if(!$start)
 	$start = 1;
@@ -82,8 +82,7 @@ $y2 = $y+1;
 <div id="event_date<?=$i?>" style="border-bottom: thin solid #888;">
 <table width="100%">
 <tr>
-            <td width="32">Date:</td> 
-            <td width="*"><div id="date_block">Month: 
+            <td width="*"><div id="date_block"><?=__('Month:','rsvpmaker')?> 
               <select name="event_month[<?=$i?>]"> 
               <option value="<?=$m?>"><?=$m?></option> 
               <option value="1">1</option> 
@@ -99,7 +98,7 @@ $y2 = $y+1;
               <option value="11">11</option> 
               <option value="12">12</option> 
               </select> 
-            Day 
+            <?=__('Day:','rsvpmaker')?> 
             <select name="event_day[<?=$i?>]"> 
               <?=$today?> 
               <option value="1">1</option> 
@@ -134,7 +133,7 @@ $y2 = $y+1;
               <option value="30">30</option> 
               <option value="31">31</option> 
             </select> 
-            Year
+            <?=__('Year','rsvpmaker')?>
             <select name="event_year[<?=$i?>]"> 
               <option value="<?=$y?>"><?=$y?></option> 
               <option value="<?=$y2?>"><?=$y2?></option> 
@@ -142,18 +141,18 @@ $y2 = $y+1;
 </div> 
             </td> 
           </tr> 
-<tr><td> Time:</td> 
-<td>Hour: <select name="event_hour[<?=$i?>]"> 
+<tr> 
+<td><?=__('Hour:','rsvpmaker')?> <select name="event_hour[<?=$i?>]"> 
 <?=$houropt?>
 </select> 
  
-Minutes: <select name="event_minutes[<?=$i?>]"> 
+<?=__('Minutes:','rsvpmaker')?> <select name="event_minutes[<?=$i?>]"> 
 <?=$minopt?>
 </select> -
 
-Duration <select name="event_duration[<?=$i?>]">
-<option value="">Not set (optional)</option>
-<option value="allday">All day/don't show time in headline</option>
+<?=__('Duration','rsvpmaker')?> <select name="event_duration[<?=$i?>]">
+<option value=""><?=__('Not set (optional)','rsvpmaker')?></option>
+<option value="allday"><?=__("All day/don't show time in headline",'rsvpmaker')?></option>
 <?php for($h = 1; $h < 24; $h++) { ?>
 <option value="<?=$h?>"><?=$h?> hours</option>
 <option value="<?=$h?>:15"><?=$h?>:15</option>
@@ -176,7 +175,7 @@ GetRSVPAdminForm($post->ID);
 
 function my_events_menu() {
 
-add_meta_box( 'EventDatesBox', 'Event Dates, RSVP Options', 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
+add_meta_box( 'EventDatesBox', __('Event Dates, RSVP Options','rsvpmaker'), 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
 
 }
 
@@ -322,9 +321,8 @@ add_action('save_post','save_calendar_data');
           // handle plugin options
           function get_options()
           {
-              // default values
-              $options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => 'Thank you!','default_content' =>'', 'event_headline' => '<li style="list-style: none;"><a style="color: #0033FF;" href="[permalink]">[title]</a> [dates] </li>', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">RSVP Now!</a></p>','rsvp_on' => 0, 'paypal_enabled' => 0, 'time_format' => 'g:i A', 'defaulthour' => 19, 'defaultmin' => 0);
-              
+              global $rsvp_options;
+			  $options = $rsvp_options;            
               // get saved options
               $saved = get_option($this->db_option);
               
@@ -361,7 +359,6 @@ add_action('save_post','save_calendar_data');
               		
                   $newoptions = stripslashes_deep($_POST["option"]);
                   $newoptions["rsvp_on"] = ($_POST["option"]["rsvp_on"]) ? 1 : 0;
-                  $newoptions["paypal_enabled"] = ($_POST["option"]["paypal_enabled"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
 				  $options = $newoptions;
 				  
@@ -457,19 +454,29 @@ Minutes: <select name="option[defaultmin]">
 					<h3>Dates Style:</h3>
   <textarea name="option[dates_style]"  rows="2" cols="80" id="dates_style"><?=$options["dates_style"]?></textarea>
 	<br />
+					<h3>Date Format (long):</h3>
+  <input type="text" name="option[long_date]"  id="long_date" value="<?=$options["long_date"]?>" /> (used in event display, PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date format string</a>)
+	<br />
+					<h3>Date Format (short):</h3>
+  <input type="text" name="option[short_date]"  id="short_date" value="<?=$options["short_date"]?>" /> (used in headlines for event_listing shortcode)
+	<br />
 <h3>Time Format:</h3>
 <p>
 <input type="radio" name="option[time_format]" value="g:i A" <?php if($options["time_format"] == "g:i A") echo ' checked="checked"'; ?> /> 12 hour AM/PM 
 <input type="radio" name="option[time_format]" value="H:i" <?php if($options["time_format"] == "H:i") echo ' checked="checked"'; ?> /> 24 hour 
-<br />
 
-					<h3>PayPal Enabled:</h3>
-  <input type="checkbox" name="option[paypal_enabled]" value="1" <?php if($options["paypal_enabled"]) echo ' checked="checked" '; ?> /> check to prompt for PayPal pricing
-	<br />
+<br />
 					<h3>PayPal Configuration File:</h3>
   <input type="text" name="option[paypal_config]" value="<?=$options["paypal_config"]?>" size="80" />
-	
-    <br /><em>Sample config file included with distribution. Must be manually configured. For security reasons, we recommend storing the file outside of web root. For example, /home/account/paypal_config.php where web content is stored in /home/account/public_html/</em>
+<?php
+if($config = $options["paypal_config"])
+if(file_exists($config) )
+	echo ' <span style="color: green;">OK</span>';
+else
+	echo ' <span style="color: red;">error: file not found</span>';
+
+?>	
+    <br /><em>To enable PayPal payments, you must manually create a configuration file. Sample config file included with distribution. Must be manually configured. For security reasons, we recommend storing the file outside of web root. For example, /home/account/paypal_config.php where web content is stored in /home/account/public_html/</em>
     
     <br />
 <h3>PEAR Spredsheet Writer:</h3>
@@ -477,20 +484,8 @@ Minutes: <select name="option[defaultmin]">
 	<br />
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
-		    <p><strong>Shortcodes and Event Listing / Calendar Views</strong></p>
-		    <p>RSVPMaker provides the following shortcodes for listing events, listing event headlines, and displaying a calendar with links to events.</p>
-		    <p>[event_listing format=&quot;headlines&quot;] displays a list of headlines</p>
-		    <p>[event_listing format=&quot;calendar&quot;] OR [event_listing calendar=&quot;1&quot;] displays the calendar</p>
-		    <p>[rsvpmaker_upcoming] displays the index of upcoming events. If an RSVP is requested, the event includes the RSVP button link to the single post view, which will include your RSVP form.</p>
-		    <p>[rsvpmaker_upcoming calendar=&quot;1&quot;] displays the calendar, followed by the index of upcoming events.</p>
-            <p>[rsvpmaker_upcoming no_event="We're working on it. Check back soon"] specifies a custom message to display if there are no upcoming events in the database.</p>
-            <div style="background-color: #FFFFFF; padding: 15px; text-align: center;">
-            <img src="<?=plugins_url()?>/rsvpmaker/shortcode.png" width="535" height="412" />
-<br /><em>Contents for an events page.</em>
-            </div>
-            
 	    </div>
-				
+		
 	 </div>
 
 	</div>
@@ -877,10 +872,33 @@ Minutes: <select name="recur_minutes[<?=$i?>]">
 <?php
 }
 
+
+function rsvpmaker_doc () {
+?>
+<h2>Documentation</h2>
+<p>More detailed documentation at <a href="http://www.rsvpmaker.com/documentation/">http://www.rsvpmaker.com/documentation/</a></p>
+		    <h3>Shortcodes and Event Listing / Calendar Views</strong></h3>
+		    <p>RSVPMaker provides the following shortcodes for listing events, listing event headlines, and displaying a calendar with links to events.</p>
+		    <p>[event_listing format=&quot;headlines&quot;] displays a list of headlines</p>
+		    <p>[event_listing format=&quot;calendar&quot;] OR [event_listing calendar=&quot;1&quot;] displays the calendar</p>
+		    <p>[rsvpmaker_upcoming] displays the index of upcoming events. If an RSVP is requested, the event includes the RSVP button link to the single post view, which will include your RSVP form.</p>
+		    <p>[rsvpmaker_upcoming calendar=&quot;1&quot;] displays the calendar, followed by the index of upcoming events.</p>
+            <p>[rsvpmaker_upcoming no_event="We're working on it. Check back soon"] specifies a custom message to display if there are no upcoming events in the database.</p>
+            <div style="background-color: #FFFFFF; padding: 15px; text-align: center;">
+            <img src="<?=plugins_url()?>/rsvpmaker/shortcode.png" width="535" height="412" />
+<br /><em>Contents for an events page.</em>
+            </div>
+            
+<?php
+
+}
+
+
 function my_rsvp_menu() {
 add_submenu_page('edit.php?post_type=rsvpmaker', "RSVP Report", "RSVP Report", 2, "rsvp", "rsvp_report", $icon, $position );
 add_submenu_page('edit.php?post_type=rsvpmaker', "Recurring Event", "Recurring Event", 8, "add_dates", "add_dates", $icon, $position );
 add_submenu_page('edit.php?post_type=rsvpmaker', "Multiple Events", "Multiple Events", 8, "multiple", "multiple", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "Documentation", "Documentation", 8, "rsvpmaker_doc", "rsvpmaker_doc", $icon, $position );
 }
 
 add_action('admin_menu', 'my_rsvp_menu');

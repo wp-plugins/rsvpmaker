@@ -9,6 +9,7 @@ add_shortcode('event_listing', 'event_listing');
 function event_listing($atts) {
 
 global $wpdb;
+global $rsvp_options;
 
 $sql = "SELECT *, $wpdb->posts.ID as postID
 FROM `".$wpdb->prefix."rsvp_dates`
@@ -23,16 +24,10 @@ $results = $wpdb->get_results($sql,ARRAY_A);
 
 foreach($results as $row)
 	{
-	$dateblock[$row["postID"]] .= "\n<div> \n";
 	$t = strtotime($row["datetime"]);
-	$dateblock[$row["postID"]] .= date('l F jS, Y',$t);
-	$dateline[$row["postID"]] .= date('F jS',$t)." ";
-	$dur = $row["duration"];
-	if($dur != 'allday')
-		$dateblock[$row["postID"]] .= date(' g:i A',$t);
-	if(is_numeric($dur) )
-		$dateblock[$row["postID"]] .= " to ".date ('g:i A',$dur);
-	$dateblock[$row["postID"]] .= "</div>\n";
+	if($dateline[$row["postID"]])
+		$dateline[$row["postID"]] .= ", ";
+	$dateline[$row["postID"]] .= date($rsvp_options["short_date"],$t);
 	if(!$eventlist[$row["postID"]])
 		$eventlist[$row["postID"]] = $row;
 	$cal[date('Y-m-d',$t)] .= '<div><a style="font-size: x-small;  line-height: 1;" href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
@@ -61,7 +56,6 @@ foreach($eventlist as $event)
 
 	return $listings;
 }
-
 
 function cp_show_calendar($eventarray) 
 {

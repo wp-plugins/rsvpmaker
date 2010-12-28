@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.03
-Stable tag: 0.7.2
+Stable tag: 0.7.3
 
 Event scheduling and RSVP tracking.
 
@@ -25,21 +25,19 @@ Also available at [__RSVPmaker.com__](http://www.rsvpmaker.com/): a prototype of
 1. Upload the entire `rsvpmaker` folder to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Visit the RSVPmaker options page to configure default values for RSVP email notifications, etc.
-1. Use the shortcodes documented on the options page to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget to an events listing to your WordPress sidebar.
+1. See the documentation for shortcodes you can use to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget if you would like to add an events listing to your WordPress sidebar.
+1. Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
+
+Advanced configuration
+1. To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
+1. You can override any of the functions in rsvpmaker-pluggable.php by creating your own custom.php file and adding it to the rsvpmaker directory. You can, for example, override the function that displays the RSVP form to include more, fewer, or different fields.
 
 For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
-
-== Frequently Asked Questions ==
-
-Do you have questions or issues with RSVPmaker? Use these support channels appropriately.
-
-1. [Docs](http://www.rsvpmaker.com/)
-
-[Support](http://www.rsvpmaker.com/)
 
 == Screenshots ==
 
 1. screenshot-1.png
+1. screenshot-2.png
 
 == Credits ==
 
@@ -63,7 +61,13 @@ Do you have questions or issues with RSVPmaker? Use these support channels appro
 
 == Changelog ==
 
-= 0.7.1 =
+= 0.7.3 =
+
+Updated code for displaying RSVP Reports. Added functionality for deleting entries.
+
+Beginning to introduce translation support. See translations directory for rsvp.pot file to be used by translators.
+
+= 0.7.2 =
 
 Bug fix, RSVP Reports
 
