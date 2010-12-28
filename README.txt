@@ -26,11 +26,9 @@ Also available at [__RSVPmaker.com__](http://www.rsvpmaker.com/): a prototype of
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Visit the RSVPmaker options page to configure default values for RSVP email notifications, etc.
 1. See the documentation for shortcodes you can use to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget if you would like to add an events listing to your WordPress sidebar.
-1. Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
-
-Advanced configuration
-1. To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
-1. You can override any of the functions in rsvpmaker-pluggable.php by creating your own custom.php file and adding it to the rsvpmaker directory. You can, for example, override the function that displays the RSVP form to include more, fewer, or different fields.
+1. OPTIONAL: Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
+1. OPTIONAL: To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
+1. OPTIONAL: You can override any of the functions in rsvpmaker-pluggable.php by creating your own rsvpmaker-custom.php file and adding it to the plugins directory (the directory above the rsvpmaker folder). You can, for example, override the function that displays the RSVP form to include more, fewer, or different fields.
 
 For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
 
