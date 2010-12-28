@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.03
-Stable tag: 0.7.3
+Stable tag: 0.7.4
 
 Event scheduling and RSVP tracking.
 
@@ -61,11 +61,14 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 
 == Changelog ==
 
+= 0.7.4 =
+
+Bug fix to prevent customizations from being overwritten. Custom functions should be placed in rsvpmaker-custom.php and the file must be installed in the plugins directory above the rsvpmaker folder: wp-content/plugins/ instead of wp-content/plugins/rsvpmaker/
+
 = 0.7.3 =
 
-Updated code for displaying RSVP Reports. Added functionality for deleting entries.
-
-Beginning to introduce translation support. See translations directory for rsvp.pot file to be used by translators.
+* Updated code for displaying RSVP Reports. Added functionality for deleting entries.
+* Beginning to introduce translation support. See translations directory for rsvp.pot file to be used by translators.
 
 = 0.7.2 =
 
