@@ -133,9 +133,12 @@ if($_POST["onfile"])
 	{
 	$details = $wpdb->get_var("SELECT details FROM ".$wpdb->prefix."rsvpmaker WHERE email='".$rsvp["email"]."' ORDER BY id DESC");
 	if($details)
-		{
 		$contact = unserialize($details);
+	else	
+		$contact = rsvpmaker_profile_lookup($rsvp["email"]);
 		
+	if($contact)
+		{
 		foreach($contact as $name => $value)
 			{
 			if(!$rsvp[$name])
@@ -647,7 +650,7 @@ if ( !filter_var($e, FILTER_VALIDATE_EMAIL) )
 
 if($_GET["rsvp"])
 	{
-	$rsvpconfirm = '<div id="rsvpconfirm">
+	$rsvpconfirm = '<div id="rsvpconfirm" style="padding: 10px; margin-bottom: 10px; border: medium solid #EEE;">
 <h3>RSVP Recorded</h3>	
 <p>'.nl2br($rsvp_confirm).'</p></div>
 ';
@@ -731,7 +734,7 @@ $content = '<div style="'.$rsvp_options["dates_style"].'">'.$dateblock."\n</div>
 if($rsvp_max)
 	{
 	$sql = "SELECT SUM(participants) FROM ".$wpdb->prefix."rsvpmaker WHERE event=$post->ID";
-	$total = $wpdb->get_var($sql);
+	$total = (int) $wpdb->get_var($sql);
 	$content .= "<p>$total participants signed up out of $rsvp_max allowed.</p>\n";
 	if($total >= $rsvp_max)
 		$too_many = true;
@@ -882,10 +885,15 @@ return $content;
 if(!function_exists('rsvp_report') )
 {
 function rsvp_report() {
+
 global $wpdb;
 global $rsvp_options;
-
 $wpdb->show_errors();
+?>
+<div class="wrap"> 
+	<div id="icon-edit" class="icon32"><br /></div>
+<h2>RSVP Report</h2> 
+<?php
 
 if($deletenow = $_POST["deletenow"])
 	{
@@ -914,8 +922,6 @@ if($delete = $_GET["delete"])
 ',admin_url().'edit.php?post_type=rsvpmaker&page=rsvp',$row->first,$row->last,$delete,$guestcheck,wp_create_nonce('rsvpdelete') );
 	}
 
-
-$eventlist = "<h2>Events</h2>\n";
 
 $sql = "SELECT *
 FROM `".$wpdb->prefix."rsvp_dates`
@@ -972,7 +978,7 @@ $excel_url = plugins_url().'/rsvpmaker/excel_rsvp.php?event='.$eventid;
 	}
 
 if($eventlist && !$_GET["rsvp_print"])
-	echo $eventlist;
+	echo "<h2>Events</h2>\n".$eventlist;
 
 } } // end rsvp report
 
@@ -1003,6 +1009,8 @@ function format_rsvp_details($results) {
 		if(!$_GET["rsvp_print"])
 			echo sprintf('<p><a href="%s&delete=%d">Delete record for: %s %s</a></p>',admin_url().'edit.php?post_type=rsvpmaker&page=rsvp',$row["id"],$row["first"],$row["last"]);
 		}
+
+echo "</div>\n";
 } } // end format_rsvp_details
 
 if(!function_exists('rsvp_print') ) {

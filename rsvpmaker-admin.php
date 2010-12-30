@@ -231,61 +231,66 @@ if($_POST["event_month"])
 		}
 	
 	if($_POST["setrsvp"]["on"])
-		{
-		$setrsvp = $_POST["setrsvp"];
-		
-		if($_POST["deadyear"] && $_POST["deadmonth"] && $_POST["deadday"])
-			$setrsvp["deadline"] = strtotime($_POST["deadyear"].'-'.$_POST["deadmonth"].'-'.$_POST["deadday"].' 23:59:59');
-		foreach($setrsvp as $name => $value)
-			{
-			$field = '_rsvp_'.$name;
-			$single = true;
-			$current = get_post_meta($postID, $field, $single);
-			 
-			if($value && ($current == "") )
-				add_post_meta($postID, $field, $value, true);
-			
-			elseif($value != $current)
-				update_post_meta($postID, $field, $value);
-			
-			elseif($value == "")
-				delete_post_meta($postID, $field, $current);
-			}
-		
-		if($_POST["unit"])
-			{
-			foreach($_POST["unit"] as $index => $value)
-				{
-				if($value && $_POST["price"][$index])
-					{
-					$per["unit"][$index] = $value;
-					$per["price"][$index] = $_POST["price"][$index];
-					}
-				}	
-			
-			$value = $per;
-			$field = "_per";
-			
-			$current = get_post_meta($postID, $field, $single); 
-			
-			if($value && ($current == "") )
-				add_post_meta($postID, $field, $value, true);
-			
-			elseif($value != $current)
-				update_post_meta($postID, $field, $value);
-			
-			elseif($value == "")
-				delete_post_meta($postID, $field, $current);
-
-			
-			}
-		}
+		save_rsvp_meta($postID);
 	else
 		delete_post_meta($postID, '_rsvp_on', '1');
 	
 	
 	}
 }
+
+function save_rsvp_meta($postID)
+{
+$setrsvp = $_POST["setrsvp"];
+
+if($_POST["deadyear"] && $_POST["deadmonth"] && $_POST["deadday"])
+	$setrsvp["deadline"] = strtotime($_POST["deadyear"].'-'.$_POST["deadmonth"].'-'.$_POST["deadday"].' 23:59:59');
+foreach($setrsvp as $name => $value)
+	{
+	$field = '_rsvp_'.$name;
+	$single = true;
+	$current = get_post_meta($postID, $field, $single);
+	 
+	if($value && ($current == "") )
+		add_post_meta($postID, $field, $value, true);
+	
+	elseif($value != $current)
+		update_post_meta($postID, $field, $value);
+	
+	elseif($value == "")
+		delete_post_meta($postID, $field, $current);
+	}
+
+if($_POST["unit"])
+	{
+	foreach($_POST["unit"] as $index => $value)
+		{
+		if($value && $_POST["price"][$index])
+			{
+			$per["unit"][$index] = $value;
+			$per["price"][$index] = $_POST["price"][$index];
+			}
+		}	
+	
+	$value = $per;
+	$field = "_per";
+	
+	$current = get_post_meta($postID, $field, $single); 
+	
+	if($value && ($current == "") )
+		add_post_meta($postID, $field, $value, true);
+	
+	elseif($value != $current)
+		update_post_meta($postID, $field, $value);
+	
+	elseif($value == "")
+		delete_post_meta($postID, $field, $current);
+
+	
+	}
+}
+
+
 
 add_action('admin_menu', 'my_events_menu');
 
@@ -580,9 +585,12 @@ if($_POST)
   			if($postID = wp_insert_post( $my_post ) )
 				{
 				$sql = "INSERT INTO ".$wpdb->prefix."rsvp_dates SET datetime='$cddate', postID=". $postID;
-				echo $sql."<br />";
 				$wpdb->show_errors();
-				$wpdb->query($sql);
+				$return = $wpdb->query($sql);
+				if($return == false)
+					echo '<div class="updated">'."Error: $sql.</div>\n";
+				else
+					echo '<div class="updated">'."Added post # $postID for $cddate.</div>\n";	
 				}
 			}		
 		}
@@ -592,7 +600,12 @@ if($_POST)
 global $rsvp_options;
 
 ?>
-<p>Multiple Events</p>
+<div class="wrap"> 
+	<div id="icon-edit" class="icon32"><br /></div> 
+<h2>Multiple Events</h2> 
+
+<p>Use this form to enter multiple events quickly with basic formatting.</p>
+
 <form id="form1" name="form1" method="post" action="<?=$_SERVER['REQUEST_URI']?>">
 <?php
 $today = '<option value="0">None</option>';
@@ -709,7 +722,7 @@ Minutes: <select name="recur_minutes[<?=$i?>]">
 
 <input type="submit" name="button" id="button" value="Submit" />
 </form>
-
+</div>
 <?php
 }
 
@@ -721,6 +734,9 @@ global $wpdb;
 
 if($_POST)
 {
+
+if(!wp_verify_nonce($_POST['add_recur'],'recur'))
+	die("Security error");
 
 if($_POST["recur-title"])
 	{
@@ -734,14 +750,35 @@ if($_POST["recur-title"])
 		{
 		if($_POST["recur_day"][$index] )
 			{
-			$cddate = $year . "-" . $_POST["recur_month"][$index]  . "-" . $_POST["recur_day"][$index] . " " . $_POST["recur_hour"][$index] . ":" . $_POST["recur_minutes"][$index] . ":00";
+			$cddate = $year . "-" . $_POST["recur_month"][$index]  . "-" . $_POST["recur_day"][$index] . " " . $_POST["event_hour"] . ":" . $_POST["event_minutes"] . ":00";
+
+			$dpart = explode(':',$_POST["event_duration"]);			
+			
+			if( is_numeric($dpart[0]) )
+				{
+				$dpart = explode(':',$_POST["event_duration"][$index]);			
+				$hour = $_POST["event_hour"] + $dpart[0];
+				$minutes = $_POST["event_minutes"] + $dpart[1];
+				$duration = mktime( $hour, $minutes,0,$_POST["recur_month"][$index],$_POST["recur_day"][$index],$year);
+				}
+			else
+				$duration = $_POST["event_duration"]; // empty or all day
+
 // Insert the post into the database
   			if($postID = wp_insert_post( $my_post ) )
 				{
-				$sql = "INSERT INTO ".$wpdb->prefix."rsvp_dates SET datetime='$cddate', postID=". $postID;
-				echo $sql."<br />";
+				$sql = "INSERT INTO ".$wpdb->prefix."rsvp_dates SET datetime='$cddate', duration='$duration', postID=". $postID;
+				
 				$wpdb->show_errors();
-				$wpdb->query($sql);
+				$return = $wpdb->query($sql);
+				if($return == false)
+					echo '<div class="updated">'."Error: $sql.</div>\n";
+				else
+					echo '<div class="updated">Posted: event for '.$cddate.' <a href="post.php?action=edit&post='.$postID.'">Edit</a> / <a href="'.site_url().'/?p='.$postID.'">View</a></div>';	
+
+				if($_POST["setrsvp"]["on"])
+					save_rsvp_meta($postID);
+
 				}
 			}		
 		}
@@ -752,26 +789,146 @@ if($_POST["recur-title"])
 global $rsvp_options;
 
 ?>
-<p>Recurring Event (same headline/description, mulitple dates)</p>
-<form id="form1" name="form1" method="post" action="<?=$_SERVER['REQUEST_URI']?>">
-<p>Headline: <input type="text" name="recur-title" value="<?=stripslashes($_POST["recur-title"])?>" /></p>
-<p><textarea name="recur-body" rows="5" cols="80"><?=($_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"]?></textarea></p>
-<?php
-$today = '<option value="0">None</option>';
-for($i=0; $i < 10; $i++)
-{
+<div class="wrap"> 
+	<div id="icon-edit" class="icon32"><br /></div> 
+<h2>Recurring Event</h2> 
 
-$m = date('n');
+<?php
+
+$defaulthour = ($_GET["hour"]) ? ( (int) $_GET["hour"]) : 19;
+$defaultmin = ($_GET["minutes"]) ? ( (int) $_GET["minutes"]) : 0;
+
+for($i=0; $i < 24; $i++)
+	{
+	$selected = ($i == $defaulthour) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	if($i == 0)
+		$twelvehour = "12 a.m.";
+	elseif($i == 12)
+		$twelvehour = "12 p.m.";
+	elseif($i > 12)
+		$twelvehour = ($i - 12) ." p.m.";
+	else		
+		$twelvehour = $i." a.m.";
+
+	$houropt .= sprintf('<option  value="%s" %s>%s / %s:</option>',$padded,$selected,$twelvehour,$padded);
+	}
+
+for($i=0; $i < 60; $i += 5)
+	{
+	$selected = ($i == $defaultmin) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	$minopt .= sprintf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
+	}
+
+$cm = date('n');
 $y = date('Y');
 $y2 = $y+1;
 
-wp_nonce_field(-1,'add_date'.$i);
+if(!$_GET["week"])
+{
 ?>
-<div id="recur_date<?=$i?>" style="border-bottom: thin solid #888;">
+
+<p>Use this form to create multiple events with the same headline, description, and RSVP paramaters. You can have the program automatically calculate dates for a regular montly schedule.</p>
+
+<p><em>Optional: Calculate dates for a recurring schedule ...</em></p>
+
+<form method="get" action="edit.php" id="recursked">
+
+<p>Regular schedule: 
+
+<select name="week" id="week">
+
+<option value="First">First</option> 
+<option value="Second">Second</option> 
+<option value="Third">Third</option> 
+<option value="Fourth">Fourth</option> 
+<option value="Last">Last</option> 
+</select>
+
+<select name="dayofweek" id="dayofweek">
+
+<option value="Sunday">Sunday</option> 
+<option value="Monday">Monday</option> 
+<option value="Tuesday">Tuesday</option> 
+<option value="Wednesday">Wednesday</option> 
+<option value="Thursday">Thursday</option> 
+<option value="Friday">Friday</option> 
+<option value="Saturday">Saturday</option> 
+</select>
+
+</p>
+        <table border="0">
+
+<tr><td> Time:</td>
+
+<td>Hour: <select name="hour" id="hour">
+<?=$houropt?>
+</select>
+
+Minutes: <select id="minutes" name="minutes">
+<?=$minopt?>
+</select> 
+
+<em>For an event starting at 12:30 p.m., you would select 12 p.m. and 30 minutes.</em>
+
+</td>
+
+          </tr>
+</table>
+
+<input type="hidden" name="post_type" value="rsvpmaker" />
+<input type="hidden" name="page" value="add_dates" />
+<input type="submit" value="Get Dates" />
+</form>
+
+<p><em>... or enter dates individually.</em></p>
+
+<?php
+$futuremonths = 12;
+for($i =0; $i < $futuremonths; $i++)
+	$projected[$i] = mktime(0,0,0,$cm+$i,1); // first day of month
+}
+else
+{
+	$week = $_GET["week"];
+	$dow = $_GET["dayofweek"];
+	$futuremonths = 12;
+	for($i =0; $i < $futuremonths; $i++)
+		{
+		$thisdate = mktime(0,0,0,$cm+$i,1); // first day of month
+		$datetext = "$week $dow ". date("F Y",$thisdate);
+		$projected[$i] = strtotime($datetext);
+		}//end for loop
+
+echo "<p>Loading recurring series of dates for $week $dow. To omit a date in the series, change the day field to &quot;Not Set&quot;</p>\n";
+}
+
+?>
+
+<h3>Enter Recurring Events</h3>
+
+<form id="form1" name="form1" method="post" action="<?=$_SERVER['REQUEST_URI']?>">
+<p>Headline: <input type="text" name="recur-title" size="60" value="<?=stripslashes($_POST["recur-title"])?>" /></p>
+<p><textarea name="recur-body" rows="5" cols="80"><?=($_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"]?></textarea></p>
+<?php
+wp_nonce_field('recur','add_recur');
+
+foreach($projected as $i => $ts)
+{
+
+$today = date('d',$ts);
+$cm = date('n',$ts);
+$y = date('Y',$ts);
+
+$y2 = $y+1;
+
+?>
+<div id="recur_date<?=$i?>" style="margin-bottom: 5px;">
 
 Month: 
               <select name="recur_month[<?=$i?>]"> 
-              <option value="<?=$m?>"><?=$m?></option> 
+              <option value="<?=$cm?>"><?=$cm?></option> 
               <option value="1">1</option> 
               <option value="2">2</option> 
               <option value="3">3</option> 
@@ -787,7 +944,11 @@ Month:
               </select> 
             Day 
             <select name="recur_day[<?=$i?>]"> 
-              <?=$today?> 
+<?php
+if($week)
+	echo sprintf('<option value="%s">%s</option>',$today,$today);
+?>
+              <option value="">Not Set</option>
               <option value="1">1</option> 
               <option value="2">2</option> 
               <option value="3">3</option> 
@@ -826,48 +987,45 @@ Month:
               <option value="<?=$y2?>"><?=$y2?></option> 
             </select> 
 
-Hour: <select name="recur_hour[<?=$i?>]"> 
- 
-<option  value="00">12 a.m.</option> 
-<option  value="1">1 a.m.</option> 
-<option  value="2">2 a.m.</option> 
-<option  value="3">3 a.m.</option> 
-<option  value="4">4 a.m.</option> 
-<option  value="5">5 a.m.</option> 
-<option  value="6">6 a.m.</option> 
-<option  value="7">7 a.m.</option> 
-<option  value="8">8 a.m.</option> 
-<option  value="9">9 a.m.</option> 
-<option  value="10">10 a.m.</option> 
-<option  value="11">11 a.m.</option> 
-<option  value="12">12 p.m.</option> 
-<option  value="13">1 p.m.</option> 
-<option  value="14">2 p.m.</option> 
-<option  value="15">3 p.m.</option> 
-<option  value="16">4 p.m.</option> 
-<option  value="17">5 p.m.</option> 
-<option  value="18">6 p.m.</option> 
-<option  selected = "selected"  value="19">7 p.m.</option> 
-<option  value="20">8 p.m.</option> 
-<option  value="21">9 p.m.</option> 
-<option  value="22">10 p.m.</option> 
-<option  value="23">11 p.m.</option></select> 
- 
-Minutes: <select name="recur_minutes[<?=$i?>]"> 
-<option value="00">00</option> 
-<option value="00">00</option> 
-<option value="15">15</option> 
-<option value="30">30</option> 
-<option value="45">45</option> 
-</select>
-
 </div>
+
 <?php
 } // end for loop
+
+
+?>
+<p><?=__('Hour:','rsvpmaker')?> <select name="event_hour"> 
+<?=$houropt?>
+</select> 
+ 
+<?=__('Minutes:','rsvpmaker')?> <select name="event_minutes"> 
+<?=$minopt?>
+</select> -
+
+<?=__('Duration','rsvpmaker')?> <select name="event_duration">
+<option value=""><?=__('Not set (optional)','rsvpmaker')?></option>
+<option value="allday"><?=__("All day/don't show time in headline",'rsvpmaker')?></option>
+<?php for($h = 1; $h < 24; $h++) { ?>
+<option value="<?=$h?>"><?=$h?> hours</option>
+<option value="<?=$h?>:15"><?=$h?>:15</option>
+<option value="<?=$h?>:30"><?=$h?>:30</option>
+<option value="<?=$h?>:45"><?=$h?>:45</option>
+<?php 
+}
+?>
+</select>
+</p>
+<?php
+
+
+echo GetRSVPAdminForm(0);
+
 ?>
 
 <input type="submit" name="button" id="button" value="Submit" />
 </form>
+
+</div><!-- wrap -->
 
 <?php
 }
