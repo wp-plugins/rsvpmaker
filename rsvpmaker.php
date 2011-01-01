@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Editor built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>
 Author: David F. Carr
-Version: 0.7.5
+Version: 0.7.6
 Author URI: http://www.carrcommunications.com
 */
 
@@ -27,12 +27,25 @@ if(($_GET["post_type"] == 'rsvpmaker') || ($post->post_type == 'rsvpmaker') || (
 $rsvp_options = get_option('RSVPMAKER_Options');
 
 //defaults
-if(!$rsvp_options)
-	$rsvp_options = array('rsvp_to' => get_bloginfo('admin_email'), 'rsvp_confirm' => __('Thank you!','rsvpmaker'),'default_content' =>'', 'dates_style' => 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;','rsvplink' => '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">'. __('RSVP Now!','rsvpmaker').'</a></p>','rsvp_on' => 0, 'time_format' => 'g:i A', 'long_date' => 'l F jS, Y', 'short_date' => 'F jS', 'defaulthour' => 19, 'defaultmin' => 0);
+if(!$rsvp_options["rsvp_to"])
+	$rsvp_options["rsvp_to"] = get_bloginfo('admin_email');
+if(!$rsvp_options["rsvp_confirm"])
+	$rsvp_options["rsvp_confirm"] = __('Thank you!','rsvpmaker');
+if(!$rsvp_options['dates_style'])
+	$rsvp_options['dates_style'] = 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;';
+if(!$rsvp_options['rsvplink'])
+	$rsvp_options['rsvplink'] = '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">'. __('RSVP Now!','rsvpmaker').'</a></p>';
+if(!$rsvp_options['defaulthour'])
+	{
+	$rsvp_options['defaulthour'] = 19;
+	$rsvp_options['defaultmin'] = 0;
+	}
 if(!$rsvp_options["long_date"])
 	$rsvp_options["long_date"] = 'l F jS, Y';
 if(!$rsvp_options["short_date"])
 	$rsvp_options["short_date"] = 'F jS';
+if(!$rsvp_options["time_format"])
+	$rsvp_options["time_format"] = 'g:i A';
 
 if(file_exists(WP_PLUGIN_DIR."/rsvpmaker-custom.php") )
 	include WP_PLUGIN_DIR."/rsvpmaker-custom.php";
