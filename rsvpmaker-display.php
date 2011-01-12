@@ -270,9 +270,7 @@ function rsvpmaker_join($join) {
 
 function rsvpmaker_where($where) {
 
-global $wpdb;
-
-return " AND $wpdb->posts.post_type = 'rsvpmaker' AND ($wpdb->posts.post_status = 'publish' OR $wpdb->posts.post_status = 'private') AND datetime > CURDATE( )";
+return $where . " AND datetime > CURDATE( )";
 
 }
 
@@ -309,6 +307,9 @@ add_filter('posts_distinct', 'rsvpmaker_distinct' );
 $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
 $querystring = "post_type=rsvpmaker&paged=$paged";
+if($atts["type"])
+	$querystring .= "&rsvpmaker-type=".$atts["type"];
+
 $wpdb->show_errors();
 query_posts($querystring);
 

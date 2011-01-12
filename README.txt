@@ -3,8 +3,8 @@ Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
-Tested up to: 3.03
-Stable tag: 0.7.6
+Tested up to: 3.1
+Stable tag: 0.8
 
 Event scheduling and RSVP tracking.
 
@@ -58,6 +58,15 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 0.8 =
+
+* Added type parameter for shortcode so you can display only events tagged with "featured" or another event type using `[rsvpmaker_upcoming type="featured"]`
+* Added ability to set RSVP start date as well as deadline for RSVPs
+* If signing up workers or volunteers for specific timeslots, you can now specify the duration of the timeslots in one-hour increments
+* Cleaned up Event Dates, RSVP Options box in editor, moving less commonly used parameters to the bottom.
+* Added a Tweak Permalinks setting (a hack for a few users who have reported "page not found" errors, possibly because some other plugin is overwriting the RSVPmaker rewrite rules).
+* Tested with WP 3.1 release candidate
 
 = 0.7.6 =
 

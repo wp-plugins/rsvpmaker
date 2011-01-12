@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Editor built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>
 Author: David F. Carr
-Version: 0.7.6
+Version: 0.8
 Author URI: http://www.carrcommunications.com
 */
 
@@ -72,7 +72,7 @@ function create_post_type() {
     'publicly_queryable' => true,
     'show_ui' => true, 
     'query_var' => true,
-    'rewrite' => false, 
+    'rewrite' => array( 'slug' => 'rsvpmaker','with_front' => FALSE), 
     'capability_type' => 'post',
     'hierarchical' => false,
     'menu_position' => 5,
@@ -80,12 +80,6 @@ function create_post_type() {
 	'taxonomies' => array('rsvpmaker-type')
     )
   );
-
-// explicit rewrite function seems to work better than letting WP do it automatically
-global $wp_rewrite;
-$rsvpmaker_structure = '/rsvpmaker/%rsvpmaker%';
-$wp_rewrite->add_rewrite_tag("%rsvpmaker%", '([^/]+)', "rsvpmaker=");
-$wp_rewrite->add_permastruct('rsvpmaker', $rsvpmaker_structure, false);
 
   // Add new taxonomy, make it hierarchical (like categories)
   $labels = array(
@@ -110,26 +104,16 @@ $wp_rewrite->add_permastruct('rsvpmaker', $rsvpmaker_structure, false);
     'rewrite' => array( 'slug' => 'rsvpmaker-type' ),
   ));
 
-//make sure new rules will be generated for custom post type
-if($wp_rewrite->extra_permastructs["rsvpmaker"][0] != '/rsvpmaker/%rsvpmaker%')
+//tweak for users who report "page not found" errors - flush rules on every init
+global $rsvp_options;
+if($rsvp_options["flush"])
 	flush_rewrite_rules();
 
-global $wpdb;
-$sql = "SELECT slug FROM ".$wpdb->prefix."terms JOIN `".$wpdb->prefix."term_taxonomy` on ".$wpdb->prefix."term_taxonomy.term_id= ".$wpdb->prefix."terms.term_id WHERE taxonomy='rsvpmaker-type' AND slug='featured'";
-
-if(! $wpdb->get_var($sql) )
-	{
-	wp_insert_term(
-  'Featured', // the term 
-  'rsvpmaker-type', // the taxonomy
-  array(
-    'description'=> 'Featured event. Can be used to put selected events in a listing, for example on the home page',
-    'slug' => 'featured'
-  )
-);
-	}
-
 }
+
+//make sure new rules will be generated for custom post type - flush for admin but not for regular site visitors
+if(!$rsvp_options["flush"])
+	add_action('admin_init','flush_rewrite_rules');
 
 function cpevent_activate() {
 global $wpdb;
@@ -177,6 +161,21 @@ dbDelta($sql);
 
 $rsvp_options["dbversion"] = 2;
 update_option('RSVPMAKER_Options',$rsvp_options);
+
+global $wpdb;
+$sql = "SELECT slug FROM ".$wpdb->prefix."terms JOIN `".$wpdb->prefix."term_taxonomy` on ".$wpdb->prefix."term_taxonomy.term_id= ".$wpdb->prefix."terms.term_id WHERE taxonomy='rsvpmaker-type' AND slug='featured'";
+
+if(! $wpdb->get_var($sql) )
+	{
+	wp_insert_term(
+  'Featured', // the term 
+  'rsvpmaker-type', // the taxonomy
+  array(
+    'description'=> 'Featured event. Can be used to put selected events in a listing, for example on the home page',
+    'slug' => 'featured'
+  )
+);
+	}
 
 }
 

@@ -22,6 +22,14 @@ if($custom_fields["_rsvp_deadline"][0])
 	$deadday = date('d',$t);
 	}
 
+if($custom_fields["_rsvp_start"][0])
+	{
+	$t = (int) $custom_fields["_rsvp_start"][0];
+	$startyear = date('Y',$t);
+	$startmonth = date('m',$t);
+	$startday = date('d',$t);
+	}
+
 global $rsvp_options;
 
 if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
@@ -38,12 +46,6 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 <p>
   <input type="checkbox" name="setrsvp[on]" id="setrsvp[on]" value="1" <?php if( $rsvp_on ) echo 'checked="checked" '; ?> />
 <?=__('Collect RSVPs','rsvpmaker')?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> '; ?>
-<br /><?=__('Deadline (optional)','rsvpmaker').' '.__('Month','rsvpmaker')?>: <input type="text" name="deadmonth" id="deadmonth" value="<?=$deadmonth?>" size="2" /> <?=__('Day','rsvpmaker')?>: <input type="text" name="deadday" id="deadday" value="<?=$deadday?>" size="2" /> <?=__('Year','rsvpmaker')?>: 
-<input type="text" name="deadyear" id="deadyear" value="<?=$deadyear?>" size="4" /> (<?=__('stop collecting RSVPs at midnight','rsvpmaker')?>)
-<br /><?=__('Maximum participants','rsvpmaker')?> <input type="text" name="setrsvp[max]" id="setrsvp[max]" value="<?=$rsvp_max?>" size="4" /> (<?=__('0 for none specified','rsvpmaker')?>)
-<br /><?=__('One-hour timeslots','rsvpmaker')?>: <input type="radio" name="setrsvp[timeslots]" id="setrsvp[timeslots]" value="1" <?php if( $custom_fields["_rsvp_timeslots"][0] ) echo 'checked="checked" '; ?> /> <?=__('Yes','rsvpmaker')?>
-<input type="radio" name="setrsvp[timeslots]" id="setrsvp[timeslots]" value="0" <?php if( !$custom_fields["_rsvp_timeslots"][0] ) echo 'checked="checked" '; ?> /> <?=__('No','rsvpmaker')?>
-<br /><em><?=__('Used for volunteer shift signups. Duration must also be set.','rsvpmaker')?></em>
 </p>
 
 <div id="rsvpoptions">
@@ -52,7 +54,32 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 <textarea id="rsvp[instructions]" name="setrsvp[instructions]" cols="80"><?=$rsvp_instructions?></textarea>
 <br /><?=__('Confirmation Message','rsvpmaker')?>:<br />
 <textarea id="rsvp[confirm]" name="setrsvp[confirm]" cols="80"><?=$rsvp_confirm?></textarea>
+
+<br /><strong>Special Options</strong>
+
+<table><tr><td><?=__('Deadline (optional)','rsvpmaker').'</td><td> '.__('Month','rsvpmaker')?>: <input type="text" name="deadmonth" id="deadmonth" value="<?=$deadmonth?>" size="2" /> <?=__('Day','rsvpmaker')?>: <input type="text" name="deadday" id="deadday" value="<?=$deadday?>" size="2" /> <?=__('Year','rsvpmaker')?>: 
+<input type="text" name="deadyear" id="deadyear" value="<?=$deadyear?>" size="4" /> (<?=__('stop collecting RSVPs at midnight','rsvpmaker')?>)</td></tr>
+
+<tr><td><?=__('Start Date (optional)','rsvpmaker').'</td><td>'.__('Month','rsvpmaker')?>: <input type="text" name="startmonth" id="startmonth" value="<?=$startmonth?>" size="2" /> <?=__('Day','rsvpmaker')?>: <input type="text" name="startday" id="startday" value="<?=$startday?>" size="2" /> <?=__('Year','rsvpmaker')?>: 
+<input type="text" name="startyear" id="startyear" value="<?=$startyear?>" size="4" /> (<?=__('start collecting RSVPs','rsvpmaker')?>)</td></tr></table>
+
+<br /><?=__('Maximum participants','rsvpmaker')?> <input type="text" name="setrsvp[max]" id="setrsvp[max]" value="<?=$rsvp_max?>" size="4" /> (<?=__('0 for none specified','rsvpmaker')?>)
+<br /><?=__('Time Slots','rsvpmaker')?>:
+
+<select name="setrsvp[timeslots]" id="setrsvp[timeslots]">
+<option value="0">None</option>
+<?php
+$tslots = (int) $custom_fields["_rsvp_timeslots"][0];
+for($i = 1; $i < 13; $i++)
+	{
+	$selected = ($i == $tslots) ? ' selected = "selected" ' : '';
+	echo '<option value="'.$i.'" '.$selected.">$i-hour slots</option>";
+	}
+?>
+</select>
+<br /><em><?=__('Used for volunteer shift signups. Duration must also be set.','rsvpmaker')?></em>
 <br />
+
 <?php
 if($rsvp_options["paypal_config"])
 {
@@ -642,6 +669,8 @@ $rsvp_to = $custom_fields["_rsvp_to"][0];
 $rsvp_max = $custom_fields["_rsvp_max"][0];
 if($custom_fields["_rsvp_deadline"][0])
 	$deadline = (int) $custom_fields["_rsvp_deadline"][0];
+if($custom_fields["_rsvp_start"][0])
+	$rsvpstart = (int) $custom_fields["_rsvp_start"][0];
 $rsvp_instructions = $custom_fields["_rsvp_instructions"][0];
 $rsvp_confirm = $custom_fields["_rsvp_confirm"][0];
 $e = $_GET["e"];
@@ -742,6 +771,8 @@ if($rsvp_max)
 
 if($deadline && ( mktime() > $deadline  ) )
 	$content .= '<p><em>'.__('RSVP deadline is past','rsvpmaker').'</em></p>';
+elseif($rsvpstart && ( mktime() < $rsvpstart  ) )
+	$content .= '<p><em>'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</em></p>';
 elseif($too_many)
 	$content .= '<p><em>'.__('RSVPs are closed','rsvpmaker').'</em></p>';
 elseif(($rsvp_on && is_admin()) ||  ($rsvp_on && $_GET["load"]) ||  ($rsvp_on && !is_single()) ) // when loaded into editor
@@ -768,7 +799,7 @@ elseif($rsvp_on && is_single() )
 
 wp_nonce_field('rsvp','rsvp_nonce');
 
-if($custom_fields["_rsvp_timeslots"][0])
+if($slotlength = $custom_fields["_rsvp_timeslots"][0])
 {
 ?>
 
@@ -794,7 +825,7 @@ $month = date('n',$t);
 $year = date('Y',$t);
 $hour = date('G',$t);
 $minutes = date('i',$t);
-for($i=0; ($slot = mktime( ($hour+$i) ,$minutes,0,$month,$day,$year)) < $dur; $i++)
+for($i=0; ($slot = mktime( ($hour+($i * $slotlength) ) ,$minutes,0,$month,$day,$year)) < $dur; $i++)
 {
 $sql = "SELECT SUM(participants) FROM ".$wpdb->prefix."rsvp_volunteer_time WHERE time=$slot AND event = $post->ID";
 $signups = ($signups = $wpdb->get_var($sql)) ? $signups : 0;

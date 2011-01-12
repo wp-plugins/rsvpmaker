@@ -245,6 +245,10 @@ $setrsvp = $_POST["setrsvp"];
 
 if($_POST["deadyear"] && $_POST["deadmonth"] && $_POST["deadday"])
 	$setrsvp["deadline"] = strtotime($_POST["deadyear"].'-'.$_POST["deadmonth"].'-'.$_POST["deadday"].' 23:59:59');
+
+if($_POST["startyear"] && $_POST["startmonth"] && $_POST["startday"])
+	$setrsvp["start"] = strtotime($_POST["startyear"].'-'.$_POST["startmonth"].'-'.$_POST["startday"].' 00:00:00');
+
 foreach($setrsvp as $name => $value)
 	{
 	$field = '_rsvp_'.$name;
@@ -327,22 +331,7 @@ add_action('save_post','save_calendar_data');
           function get_options()
           {
               global $rsvp_options;
-			  $options = $rsvp_options;            
-              // get saved options
-              $saved = get_option($this->db_option);
-              
-              // assign them
-              if (!empty($saved)) {
-                  foreach ($saved as $key => $option)
-                      $options[$key] = $option;
-              }
-              
-              // update the options if necessary
-              if ($saved != $options)
-                  update_option($this->db_option, $options);
-              
-              //return the options  
-              return $options;
+              return $rsvp_options;
           }
           
           // Set up everything
@@ -429,7 +418,7 @@ for($i=0; $i < 60; $i += 5)
 					<?php wp_nonce_field('calendar-nonce'); ?>
 
 					<h3>Default Content for Events (such as standard meeting location):</h3>
-  <textarea name="option[default_content]"  rows="5" cols="80" id="default_content"><?=$options["default_content"]?></textarea>
+  <textarea name="option[default_content]"  rows="5" cols="80" id="default_content"><?=$rsvp_options["default_content"]?></textarea>
 	<br />
 Hour: <select name="option[defaulthour]"> 
 <?=$houropt?>
@@ -486,6 +475,9 @@ else
     <br />
 <h3>PEAR Spredsheet Writer:</h3>
   <input type="checkbox" name="option[pear_spreadsheet]" value="1" <?php if($options["pear_spreadsheet"]) echo ' checked="checked" '; ?> /> Enable spreadsheet downloads of RSVP Reports. You must manually install the <a href="http://pear.php.net/package/Spreadsheet_Excel_Writer">PEAR Spreadsheet Writer</a> 
+	<br />
+<h3>Tweak Permalinks:</h3>
+  <input type="checkbox" name="option[flush]" value="1" <?php if($options["flush"]) echo ' checked="checked" '; ?> /> Check here if you are getting &quot;page not found&quot; errors for event content (should not be necessary for most users). 
 	<br />
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
@@ -1041,6 +1033,7 @@ function rsvpmaker_doc () {
 		    <p>[event_listing format=&quot;calendar&quot;] OR [event_listing calendar=&quot;1&quot;] displays the calendar</p>
 		    <p>[rsvpmaker_upcoming] displays the index of upcoming events. If an RSVP is requested, the event includes the RSVP button link to the single post view, which will include your RSVP form.</p>
 		    <p>[rsvpmaker_upcoming calendar=&quot;1&quot;] displays the calendar, followed by the index of upcoming events.</p>
+		    <p>[rsvpmaker_upcoming type=&quot;featured&quot;] Displays only the events of the specified type (&quot;featured&quot; type available by default).</p>
             <p>[rsvpmaker_upcoming no_event="We're working on it. Check back soon"] specifies a custom message to display if there are no upcoming events in the database.</p>
             <div style="background-color: #FFFFFF; padding: 15px; text-align: center;">
             <img src="<?=plugins_url()?>/rsvpmaker/shortcode.png" width="535" height="412" />
