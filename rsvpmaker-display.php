@@ -48,6 +48,9 @@ foreach($eventlist as $event)
 	$listings .= sprintf('<li><a href="%s">%s</a> %s</li>'."\n",$permalink,$event["post_title"],$dateline[$event["postID"]]);
 	}	
 
+	if($atts["limit"] && $rsvp_options["eventpage"])
+		$listings .= '<li><a href="'.$rsvp_options["eventpage"].'">'.__("Go to Events Page",'rsvpmaker')."</a></li>";
+
 	if($atts["title"])
 		$listings = "<p><strong>".$atts["title"]."</strong></p>\n<ul id=\"eventheadlines\">\n$listings</ul>\n";
 	else
@@ -180,7 +183,8 @@ class CPEventsWidget extends WP_Widget {
         $title = apply_filters('widget_title', $instance['title']);
 		$limit = ($instance["limit"]) ? $instance["limit"] : 10;
 		$dateformat = ($instance["dateformat"]) ? $instance["dateformat"] : 'M. j';
-        ?>
+        global $rsvp_options;
+		?>
               <?php echo $before_widget; ?>
                   <?php if ( $title )
                         echo $before_title . $title . $after_title; ?>
@@ -213,17 +217,10 @@ ORDER BY datetime LIMIT 0, $limit";
 			
 			  foreach($ev as $id => $e)
 			  	echo "<li>".widgetlink($e,$plink[$id],$evtitle[$id])."</li>";
-
-/*			  foreach($results as $row)
-			  	{
-				if($ev[$row["postID"]])
-					$ev[$row["postID"]] .= ", ".date('M. j',strtotime($row["datetime"]) );
-				else
-					$ev[$row["postID"]] = '<a href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a> ".date('M. j',strtotime($row["datetime"]) );
-				}
-			  foreach($ev as $e)
-			  	echo "<li>$e</li>";
-*/
+				
+			if($rsvp_options["eventpage"])
+			  	echo '<li><a href="'.$rsvp_options["eventpage"].'">'.__("Go to Events Page",'rsvpmaker')."</a></li>";
+			
 			  echo "\n</ul>\n";
 			  }
 			  

@@ -452,7 +452,7 @@ $nvpstr='&TOKEN='.$token.'&PAYERID='.$payerID.'&PAYMENTACTION='.$paymentType.'&A
  /* Make the call to PayPal to finalize payment
     If an error occured, show the resulting errors
     */
-$resArray=hash_call("DoExpressCheckoutPayment",$nvpstr);
+$_SESSION['reshash'] = $resArray = hash_call("DoExpressCheckoutPayment",$nvpstr);
 
 /* Display the API response back to the browser.
    If the response from PayPal was a success, display the response parameters'
@@ -462,7 +462,6 @@ $ack = strtoupper($resArray["ACK"]);
 
 if($ack!="SUCCESS"){
 // second test fails
-	$_SESSION['reshash']=$resArray;
 	$showerror = true;
 			   }
 		   

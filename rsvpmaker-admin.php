@@ -49,11 +49,25 @@ foreach($results as $row)
 	if(is_numeric($dur) )
 		echo " to ".date ($rsvp_options["time_format"],$dur);
 	echo sprintf(' <input type="checkbox" name="delete_date[]" value="%d" /> Delete',$row["id"]);
+	
+	$dateparts = split('[-: ]',$row["datetime"]);
+
+	if(is_numeric($dur) )
+		$diff = ( (((int) $dur) - $t) / 3600);
+	else
+		$diff = $row["duration"];
+	
+	
+	echo sprintf('<br />Year: <input type="text" size="6" name="edit_year[%d]" value="%s" /> Month: <input type="text" size="4" name="edit_month[%d]" value="%s" /> Day: <input type="text" size="4" name="edit_day[%d]" value="%s" /> Hour: <input size="4" type="text" name="edit_hour[%d]" value="%s" /> Minutes: <input type="text" size="4" name="edit_minutes[%d]" value="%s" /> Duration: <input type="text" size="4" name="edit_duration[%d]" value="%s" />',$row["id"],$dateparts[0],$row["id"],$dateparts[1],$row["id"],$dateparts[2],$row["id"],$dateparts[3],$row["id"],$dateparts[4],$row["id"],$diff);
+	
 	echo "</div>\n";
 	}
-}
 
-echo '<p><em>'.__('Enter one or more dates. For an event starting at 1:30 p.m., you would select 1 p.m. (or 13: for 24-hour format) and then 30 minutes. Specifying the duration is optional.','rsvpmaker').'</em> </p>';
+	echo '<p><em>'.__('You can check &quot;delete&quot; to remove dates or edit date parameters. Time must be specified in military format (13:00 for 1 p.m.). Leave duration blank, or enter it as a number of hours (&quot;allday&quot; in duration field means time of day will not be displayed)','rsvpmaker').'</em> </p>';
+
+}
+else
+	echo '<p><em>'.__('Enter one or more dates. For an event starting at 1:30 p.m., you would select 1 p.m. (or 13: for 24-hour format) and then 30 minutes. Specifying the duration is optional.','rsvpmaker').'</em> </p>';
 
 if(!$start)
 	$start = 1;
@@ -180,13 +194,16 @@ add_meta_box( 'EventDatesBox', __('Event Dates, RSVP Options','rsvpmaker'), 'dra
 }
 
 function save_calendar_data($postID) {
+
+global $wpdb;
+
+if($parent_id = wp_is_post_revision($postID))
+	{
+	$postID = $parent_id;
+	}
+
 if($_POST["event_month"])
 	{
-	global $wpdb;
-	if($parent_id = wp_is_post_revision($postID))
-		{
-		$postID = $parent_id;
-		}
 
 	foreach($_POST["event_year"] as $index => $year)
 		{
@@ -237,6 +254,29 @@ if($_POST["event_month"])
 	
 	
 	}
+
+
+if($_POST["edit_month"])
+	{
+//print_r($_POST);
+	foreach($_POST["edit_year"] as $index => $year)
+		{
+			$cddate = $year . "-" . $_POST["edit_month"][$index]  . "-" . $_POST["edit_day"][$index] . " " . $_POST["edit_hour"][$index] . ":" . $_POST["edit_minutes"][$index] . ":00";
+			
+			if( is_numeric($_POST["edit_duration"][$index]) )
+				{
+				$minutes = $_POST["edit_minutes"][$index] + (60*$_POST["edit_duration"][$index]);
+				$duration = mktime( $_POST["edit_hour"][$index], $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year);
+				}
+			else
+				$duration = $_POST["edit_duration"][$index]; // empty or all day
+				
+			$sql = "UPDATE ".$wpdb->prefix."rsvp_dates  SET datetime='$cddate',duration='$duration'  WHERE id=$index"; 
+			//echo $sql;
+			$wpdb->query($sql);
+			}
+		}
+	
 }
 
 function save_rsvp_meta($postID)
@@ -354,6 +394,8 @@ add_action('save_post','save_calendar_data');
                   $newoptions = stripslashes_deep($_POST["option"]);
                   $newoptions["rsvp_on"] = ($_POST["option"]["rsvp_on"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
+				  $newoptions["posttypecheck"] = $options["posttypecheck"];
+				$newoptions["noeventpageok"] = $options["noeventpageok"];
 				  $options = $newoptions;
 				  
                   update_option($this->db_option, $options);
@@ -391,6 +433,13 @@ for($i=0; $i < 60; $i += 5)
 	$minopt .= sprintf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
 	}
 
+if($_GET["noeventpageok"])
+	{
+	$options["noeventpageok"] = 1;
+	update_option('RSVPMAKER_Options',$options);
+	}
+if($_GET["test"])
+	print_r($options);
 
 ?>
 
@@ -418,7 +467,7 @@ for($i=0; $i < 60; $i += 5)
 					<?php wp_nonce_field('calendar-nonce'); ?>
 
 					<h3>Default Content for Events (such as standard meeting location):</h3>
-  <textarea name="option[default_content]"  rows="5" cols="80" id="default_content"><?=$rsvp_options["default_content"]?></textarea>
+  <textarea name="option[default_content]"  rows="5" cols="80" id="default_content"><?=$options["default_content"]?></textarea>
 	<br />
 Hour: <select name="option[defaulthour]"> 
 <?=$houropt?>
@@ -460,7 +509,9 @@ Minutes: <select name="option[defaultmin]">
 <input type="radio" name="option[time_format]" value="H:i" <?php if($options["time_format"] == "H:i") echo ' checked="checked"'; ?> /> 24 hour 
 
 <br />
-					<h3>PayPal Configuration File:</h3>
+					<h3>Event Page:</h3>
+  <input type="text" name="option[eventpage]" value="<?=$options["eventpage"]?>" size="80" />
+<br />					<h3>PayPal Configuration File:</h3>
   <input type="text" name="option[paypal_config]" value="<?=$options["paypal_config"]?>" size="80" />
 <?php
 if($config = $options["paypal_config"])
@@ -1086,24 +1137,34 @@ echo $dateline;
 
 function rsvpmaker_admin_notice() {
 global $wpdb;
+global $rsvp_options;
+
 
 if($_GET["update"] == "eventslug")
 	{
 	$wpdb->query("UPDATE $wpdb->posts SET post_type='rsvpmaker' WHERE post_type='event' OR post_type='rsvp-event' ");
 	}
-$sql = "SELECT ID from $wpdb->posts WHERE post_status='publish' AND post_content LIKE '%[rsvpmaker_upcoming%' ";
-if($id =$wpdb->get_var($sql))
+
+if(!$rsvp_options["eventpage"] && !$rsvp_options["noeventpageok"])
 	{
-	$permalink = get_permalink($id);
-	update_option('rsvpmaker_permalink',$permalink);
+	$sql = "SELECT ID from $wpdb->posts WHERE post_status='publish' AND post_content LIKE '%[rsvpmaker_upcoming%' ";
+	if($id =$wpdb->get_var($sql))
+		{
+		$rsvp_options["eventpage"] = get_permalink($id);
+		update_option('RSVPMAKER_Options',$rsvp_options);
+		}
+	else
+		echo '<div class="updated" style="background-color:#fee;"><p>RSVPMaker needs you to create a page with the [rsvpmaker_upcoming] shortcode to display event listings. (<a href="options-general.php?page=rsvpmaker-admin.php&noeventpageok=1">Turn off this warning</a>)</p></div>';
 	}
-else
-	echo '<div class="updated" style="background-color:#fee;"><p>RSVPMaker needs you to create a page with the [rsvpmaker_upcoming] shortcode to display event listings.</p></div>';
-
-$sql = "SELECT count(*) from $wpdb->posts WHERE post_type='event' OR post_type='rsvp-event' ";
-if($count =$wpdb->get_var($sql))
-	echo '<div class="updated" style="background-color:#fee;"><p>RSVPMaker has detected '.$count.' posts that appear to have been created with an earlier release. You need to update them to reflect the new permalink naming. Update now? <a href="./index.php?post_type=rsvpmaker&update=eventslug" style="font-weight: bold;">Yes</a> (The post_type field will be changed from &quot;event&quot; to &quot;rsvpmaker&quot; also changing the permalink structure).</p></div>';
-
+	
+if(!$rsvp_options["posttypecheck"])
+	{	
+	$sql = "SELECT count(*) from $wpdb->posts WHERE post_type='event' OR post_type='rsvp-event' ";
+	if($count =$wpdb->get_var($sql))
+		echo '<div class="updated" style="background-color:#fee;"><p>RSVPMaker has detected '.$count.' posts that appear to have been created with an earlier release. You need to update them to reflect the new permalink naming. Update now? <a href="./index.php?post_type=rsvpmaker&update=eventslug" style="font-weight: bold;">Yes</a> (The post_type field will be changed from &quot;event&quot; to &quot;rsvpmaker&quot; also changing the permalink structure).</p></div>';
+	$rsvp_options["posttypecheck"] = 1;
+	update_option('RSVPMAKER_Options',$rsvp_options);	
+	}
 }
 
 add_action('admin_notices', 'rsvpmaker_admin_notice');
