@@ -953,6 +953,47 @@ if($delete = $_GET["delete"])
 	}
 
 
+if($eventid = (int) $_GET["event"])
+	{
+	
+$sql = "SELECT *
+FROM `".$wpdb->prefix."rsvp_dates`
+JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."posts.ID WHERE ".$wpdb->prefix."posts.ID = $eventid";
+	$row = $wpdb->get_row($sql);
+	$title = $row->post_title;
+	$t = strtotime($row->datetime);
+	$title .= " ".date('F jS',$t);
+	
+	echo "<h2>".__("RSVPs for",'rsvpmaker')." ".$title."</h2>\n";
+	if(!$_GET["rsvp_print"])
+		{
+		echo '<div style="float: right; margin-left: 15px; margin-bottom: 15px;"><a href="edit.php?post_type=rsvpmaker&page=rsvp">Show Events List</a></div>';
+		echo '<p><a href="'.$_SERVER['REQUEST_URI'].'&rsvp_print='.wp_create_nonce('rsvp_print').'" target="_blank" >Format for printing</a></p>';	
+		}
+if($rsvp_options["pear_spreadsheet"])
+{
+$excel_url = plugins_url().'/rsvpmaker/excel_rsvp.php?event='.$eventid;
+	
+	echo '<p><a href="'.$excel_url.'">Download to Excel</a></p>';
+
+}
+	$sql = "SELECT id, yesno,first,last,email, details, guestof, note FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid ORDER BY yesno DESC, last, first";
+	$wpdb->show_errors();
+	$results = $wpdb->get_results($sql, ARRAY_A);
+	
+	if($rsvp_options["debug"])
+		{
+		echo "<p>$sql</p>";
+		echo "<pre>Results:\n";
+		print_r($results);
+		echo "</pre>";
+		}
+
+	format_rsvp_details($results);
+	}
+else
+{// show events list
+
 $sql = "SELECT *
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."posts.ID ";
@@ -963,7 +1004,17 @@ if(!$_GET["show"])
 	}
 $sql .= " ORDER BY datetime";
 
+$wpdb->show_errors();
 $results = $wpdb->get_results($sql);
+
+	if($rsvp_options["debug"])
+		{
+		echo "<p>$sql</p>";
+		echo "<pre>Results:\n";
+		print_r($results);
+		echo "</pre>";
+		}
+
 
 if($results)
 {
@@ -986,29 +1037,10 @@ foreach($events as $postID => $event)
 		$eventlist .= '<p><a href="'.admin_url().'edit.php?post_type=rsvpmaker&page=rsvp&event='.$postID.'">'. __('RSVP','rsvpmaker'). ' '.__('Yes','rsvpmaker').': '.$rsvpcount."</a></p>";
 	}
 
-if($eventid = (int) $_GET["event"])
-	{
-	echo "<h2>".__("RSVPs for",'rsvpmaker')." ".$events[$eventid]."</h2>\n";
-	if(!$_GET["rsvp_print"])
-		{
-
-		echo '<p><a href="'.$_SERVER['REQUEST_URI'].'&rsvp_print='.wp_create_nonce('rsvp_print').'" target="_blank" >Format for printing</a></p>';	
-		}
-if($rsvp_options["pear_spreadsheet"])
-{
-$excel_url = plugins_url().'/rsvpmaker/excel_rsvp.php?event='.$eventid;
-	
-	echo '<p><a href="'.$excel_url.'">Download to Excel</a></p>';
-
-}
-	$sql = "SELECT id, yesno,first,last,email, details, guestof, note FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid ORDER BY yesno DESC, last, first";
-	$results = $wpdb->get_results($sql, ARRAY_A);
-
-	format_rsvp_details($results);
-	}
-
 if($eventlist && !$_GET["rsvp_print"])
 	echo "<h2>Events</h2>\n".$eventlist;
+}
+
 
 } } // end rsvp report
 

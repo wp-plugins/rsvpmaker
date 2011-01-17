@@ -433,11 +433,6 @@ for($i=0; $i < 60; $i += 5)
 	$minopt .= sprintf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
 	}
 
-if($_GET["noeventpageok"])
-	{
-	$options["noeventpageok"] = 1;
-	update_option('RSVPMAKER_Options',$options);
-	}
 if($_GET["test"])
 	print_r($options);
 
@@ -529,6 +524,9 @@ else
 	<br />
 <h3>Tweak Permalinks:</h3>
   <input type="checkbox" name="option[flush]" value="1" <?php if($options["flush"]) echo ' checked="checked" '; ?> /> Check here if you are getting &quot;page not found&quot; errors for event content (should not be necessary for most users). 
+	<br />
+<h3>Debug:</h3>
+  <input type="checkbox" name="option[debug]" value="1" <?php if($options["debug"]) echo ' checked="checked" '; ?> /> Check here to display debugging variables. 
 	<br />
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
@@ -1095,12 +1093,93 @@ function rsvpmaker_doc () {
 
 }
 
+function rsvpmaker_debug () {
+global $wpdb;
+global $rsvp_options;
+
+ob_start();
+if($_GET["rsvp"])
+	{
+	
+$sql = "SELECT ".$wpdb->prefix."rsvpmaker.*, ".$wpdb->prefix."posts.post_title FROM ".$wpdb->prefix."rsvpmaker JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvpmaker.event = ".$wpdb->prefix."posts.ID ORDER BY ".$wpdb->prefix."rsvpmaker.id DESC LIMIT 0, 10";
+
+$wpdb->show_errors();
+$results = $wpdb->get_results($sql);
+echo "RSVP RECORDS\n";
+echo $sql . "\n";
+print_r($results);
+
+	}
+if($_GET["options"])
+	{
+echo "\n\nOPTIONS\n";
+print_r($rsvp_options);	
+	}
+if($_GET["rewrite"])
+	{
+	global $wp_rewrite;
+	echo "\n\nREWRITE\n";
+	print_r($wp_rewrite);
+	}
+if($_GET["globals"])
+	{
+	echo "\n\nGLOBALS\n";
+	print_r($GLOBALS);
+	}
+$output = ob_get_clean();
+
+$output = "Version: ".get_bloginfo('version')."\n".$output;
+
+if(MULTISITE)
+	$output .= "Multisite: YES\n";
+else
+	$output .= "Multisite: NO\n";
+
+if($_GET["author"])
+	{
+	$url = get_bloginfo('url');
+	$email = get_bloginfo('admin_email');
+	mail("david@carrcommunications.com","RSVPMAKER DEBUG: $url", $output);
+	}
+
+?>
+<h2>Debug</h2>
+<p>Use this screen to verify that RSVPMaker is recording data correctly or to share debugging information with the plugin author. If you send debugging info, follow up with a note to <a href="mailto:david@carrcommunications.com">david@carrcommunications.com</a> and explain what you need help with.</p>
+<form action="http://www.rsvpmaker.com/wp-admin/edit.php" method="get">
+<input type="hidden" name="post_type" value="rsvpmaker" />
+<input name="page" type="hidden" value="rsvpmaker_debug" />
+  <label>
+  <input type="checkbox" name="rsvp" id="rsvp"  value="1" />
+  RSVP Records</label>
+ <label>
+ <input type="checkbox" name="options" id="options"  value="1" />
+ Options</label>
+    <label>
+    <input type="checkbox" name="rewrite" id="rewrite"  value="1" />
+    Rewrite Rules
+</label>
+<label>
+<input type="checkbox" name="globals" id="globals" value="1" />
+Globals</label>
+<label>
+    <input type="checkbox" name="author" id="author"  value="1"  />
+   Send to Plugin Author</label>
+   <input type="submit" value="Show" />
+</form>
+<pre>
+<?=$output?>
+</pre>
+<?php
+}
 
 function my_rsvp_menu() {
+global $rsvp_options;
 add_submenu_page('edit.php?post_type=rsvpmaker', "RSVP Report", "RSVP Report", 2, "rsvp", "rsvp_report", $icon, $position );
 add_submenu_page('edit.php?post_type=rsvpmaker', "Recurring Event", "Recurring Event", 8, "add_dates", "add_dates", $icon, $position );
 add_submenu_page('edit.php?post_type=rsvpmaker', "Multiple Events", "Multiple Events", 8, "multiple", "multiple", $icon, $position );
 add_submenu_page('edit.php?post_type=rsvpmaker', "Documentation", "Documentation", 8, "rsvpmaker_doc", "rsvpmaker_doc", $icon, $position );
+if($rsvp_options["debug"])
+	add_submenu_page('edit.php?post_type=rsvpmaker', "Debug", "Debug", 8, "rsvpmaker_debug", "rsvpmaker_debug", $icon, $position );
 }
 
 add_action('admin_menu', 'my_rsvp_menu');
@@ -1145,7 +1224,12 @@ if($_GET["update"] == "eventslug")
 	$wpdb->query("UPDATE $wpdb->posts SET post_type='rsvpmaker' WHERE post_type='event' OR post_type='rsvp-event' ");
 	}
 
-if(!$rsvp_options["eventpage"] && !$rsvp_options["noeventpageok"])
+if($_GET["noeventpageok"])
+	{
+	$options["noeventpageok"] = 1;
+	update_option('RSVPMAKER_Options',$options);
+	}
+elseif(!$rsvp_options["eventpage"] && !$rsvp_options["noeventpageok"])
 	{
 	$sql = "SELECT ID from $wpdb->posts WHERE post_status='publish' AND post_content LIKE '%[rsvpmaker_upcoming%' ";
 	if($id =$wpdb->get_var($sql))
