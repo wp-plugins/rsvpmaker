@@ -1145,7 +1145,7 @@ if($_GET["author"])
 ?>
 <h2>Debug</h2>
 <p>Use this screen to verify that RSVPMaker is recording data correctly or to share debugging information with the plugin author. If you send debugging info, follow up with a note to <a href="mailto:david@carrcommunications.com">david@carrcommunications.com</a> and explain what you need help with.</p>
-<form action="http://www.rsvpmaker.com/wp-admin/edit.php" method="get">
+<form action="./edit.php" method="get">
 <input type="hidden" name="post_type" value="rsvpmaker" />
 <input name="page" type="hidden" value="rsvpmaker_debug" />
   <label>
