@@ -852,6 +852,9 @@ foreach($results as $row)
 
 $content = '<div class="dateblock">'.$dateblock."\n</div>\n".$rsvpconfirm.$content;
 
+if(!$rsvp_on)
+	return $content;
+
 //check for responses so far
 $sql = "SELECT first,last,note FROM ".$wpdb->prefix."rsvpmaker WHERE event=$post->ID AND yesno=1 ORDER BY id DESC";
 $attendees = $wpdb->get_results($sql);
