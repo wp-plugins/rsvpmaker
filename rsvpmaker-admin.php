@@ -393,6 +393,7 @@ add_action('save_post','save_calendar_data');
               		
                   $newoptions = stripslashes_deep($_POST["option"]);
                   $newoptions["rsvp_on"] = ($_POST["option"]["rsvp_on"]) ? 1 : 0;
+                  $newoptions["show_attendees"] = ($_POST["option"]["show_attendees"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
 				  $newoptions["posttypecheck"] = $options["posttypecheck"];
 				$newoptions["noeventpageok"] = $options["noeventpageok"];
@@ -480,6 +481,9 @@ Minutes: <select name="option[defaultmin]">
 					<h3>RSVP TO:</h3> 
 					  <textarea rows="2" cols="80" name="option[rsvp_to]" id="rsvp_to"><?=$options["rsvp_to"]?></textarea>
 					<br />
+					<h3>RSVPs Attendees List Public:</h3>
+  <input type="checkbox" name="option[show_attendees]" value="1" <?php if($options["show_attendees"]) echo ' checked="checked" '; ?> /> check to turn on by default
+	<br />
 					<h3>Instructions for Form:</h3>
   <textarea name="option[rsvp_instructions]"  rows="5" cols="80" id="rsvp_instructions"><?=$options["rsvp_instructions"]?></textarea>
 	<br />
@@ -488,9 +492,6 @@ Minutes: <select name="option[defaultmin]">
 	<br />
 					<h3>RSVP Link:</h3>
   <textarea name="option[rsvplink]"  rows="5" cols="80" id="rsvplink"><?=$options["rsvplink"]?></textarea>
-	<br />
-					<h3>Dates Style:</h3>
-  <textarea name="option[dates_style]"  rows="2" cols="80" id="dates_style"><?=$options["dates_style"]?></textarea>
 	<br />
 					<h3>Date Format (long):</h3>
   <input type="text" name="option[long_date]"  id="long_date" value="<?=$options["long_date"]?>" /> (used in event display, PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date format string</a>)
@@ -506,6 +507,28 @@ Minutes: <select name="option[defaultmin]">
 <br />
 					<h3>Event Page:</h3>
   <input type="text" name="option[eventpage]" value="<?=$options["eventpage"]?>" size="80" />
+
+<br /><h3>Custom CSS:</h3>
+  <input type="text" name="option[custom_css]" value="<?=$options["custom_css"]?>" size="80" />
+<?php
+if($options["custom_css"])
+	{
+
+		$file_headers = @get_headers($options["custom_css"]);
+		if($file_headers[0] == 'HTTP/1.1 404 Not Found') {
+			echo ' <span style="color: red;">Error: CSS not found</span>';
+		}
+		else {
+			echo ' <span style="color: green;">OK</span>';
+		}
+
+	}
+$dstyle = WP_PLUGIN_URL . '/rsvpmaker/style.css';
+?>
+
+    <br /><em>Allows you to override the standard styles from <br /><a href="<?=$dstyle?>"><?=$dstyle?></a></em>
+
+
 <br />					<h3>PayPal Configuration File:</h3>
   <input type="text" name="option[paypal_config]" value="<?=$options["paypal_config"]?>" size="80" />
 <?php

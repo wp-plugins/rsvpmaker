@@ -30,7 +30,7 @@ foreach($results as $row)
 	$dateline[$row["postID"]] .= date($rsvp_options["short_date"],$t);
 	if(!$eventlist[$row["postID"]])
 		$eventlist[$row["postID"]] = $row;
-	$cal[date('Y-m-d',$t)] .= '<div><a style="font-size: x-small;  line-height: 1;" href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
+	$cal[date('Y-m-d',$t)] .= '<div><a class="calendar_item" href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
 	}
 
 if($atts["calendar"] || $atts["format"] == 'calendar')
@@ -174,7 +174,7 @@ return $content;
 class CPEventsWidget extends WP_Widget {
     /** constructor */
     function CPEventsWidget() {
-        parent::WP_Widget(false, $name = 'CPEventsWidget');	
+        parent::WP_Widget(false, $name = 'RSVPMaker Events');	
     }
 
     /** @see WP_Widget::widget */

@@ -13,6 +13,7 @@ $rsvp_to = $custom_fields["_rsvp_to"][0];
 $rsvp_instructions = $custom_fields["_rsvp_instructions"][0];
 $rsvp_confirm = $custom_fields["_rsvp_confirm"][0];
 $rsvp_max = $custom_fields["_rsvp_max"][0];
+$rsvp_show_attendees = $custom_fields["_rsvp_show_attendees"][0];
 
 if($custom_fields["_rsvp_deadline"][0])
 	{
@@ -40,12 +41,17 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 	$rsvp_confirm = $rsvp_options["rsvp_confirm"];
 	$rsvp_on = $rsvp_options["rsvp_on"];
 	$rsvp_max = 0;
+	$rsvp_show_attendees = $rsvp_options["show_attendees"];
 	}
 //get_post_meta($post->ID, '_rsvp_on', true)
 ?>
 <p>
   <input type="checkbox" name="setrsvp[on]" id="setrsvp[on]" value="1" <?php if( $rsvp_on ) echo 'checked="checked" '; ?> />
 <?=__('Collect RSVPs','rsvpmaker')?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> '; ?>
+
+  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" '; ?> />
+<?=__(' Display attendee names and content of note field publicly','rsvpmaker')?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> '; ?>
+
 </p>
 
 <div id="rsvpoptions">
@@ -68,6 +74,7 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 
 <select name="setrsvp[timeslots]" id="setrsvp[timeslots]">
 <option value="0">None</option>
+<option value="0:30" <?php if($custom_fields["_rsvp_timeslots"][0] == '0:30') echo ' selected = "selected" '; ?> >30 minutes</option>
 <?php
 $tslots = (int) $custom_fields["_rsvp_timeslots"][0];
 for($i = 1; $i < 13; $i++)
@@ -136,24 +143,47 @@ $event = (int) $_POST["event"];
 // page hasn't loaded yet, so retrieve post variables based on event
 $post = get_post($event);
 
-if( ereg("//",implode(' ',$rsvp)) )
+//if permalinks are not turned on, we need to append to query string not add our own ?
+$req_uri = $_SERVER['REQUEST_URI'];
+$req_uri .= (strpos($req_uri,'?') ) ? '&' : '?';
+
+if( preg_match_all('/http/',$_POST["note"],$matches) > 2 )
 	{
-	header('Location: '.$_SERVER['REQUEST_URI'].'?error=Invalid input');
+	header('Location: '.$req_uri.'err=Invalid input');
 	exit();
 	}
 
-if($rsvp["email"])
+if( ereg("//",implode(' ',$rsvp)) )
+	{
+	header('Location: '.$req_uri.'err=Invalid input');
+	exit();
+	}
+
+if(isset($rsvp["email"]))
 	{
 	// assuming the form includes email, test to make sure it's a valid one
 	if(!filter_var($rsvp["email"], FILTER_VALIDATE_EMAIL))
 		{
-		header('Location: '.$_SERVER['REDIRECT_URL'].'?error=Email not valid');
+		header('Location: '.$_SERVER['REDIRECT_URL'].'?err=invalid email');
 		exit();
 		}
 	
 	//see if we have a previous rsvp for this event, associated with this email
 	$sql = "SELECT id FROM ".$wpdb->prefix."rsvpmaker WHERE event='$event' AND email='".$rsvp["email"]."' ";
 	$rsvp_id = $wpdb->get_var($sql);
+	}
+
+// test for artificially random input
+$rtxt = implode('',$rsvp);
+$uppercount = preg_match_all('/[A-Z]/',$rtxt,$upper);
+$lowercount = preg_match_all('/[a-z]/',$rtxt,$lower);
+$diff = abs($uppercount - $lowercount);
+$diff = ($diff) ? $diff : 1;
+$diffratio = $diff / ($lowercount + $uppercount);
+if($diffratio < .75)
+	{
+	header('Location: '.$req_uri.'&err=Invalid input');
+	exit();
 	}
 
 if($_POST["onfile"])
@@ -174,7 +204,7 @@ if($_POST["onfile"])
 		}
 	}
 
-if($_POST["payingfor"])
+if(is_array($_POST["payingfor"]) )
 	{
 	foreach($_POST["payingfor"] as $index => $value)
 		{
@@ -189,7 +219,7 @@ if($_POST["payingfor"])
 		}
 	}
 
-if($_POST["timeslot"])
+if( is_array($_POST["timeslot"]) )
 	{
 	$participants = $rsvp["participants"] = (int) $_POST["participants"];
 	$rsvp["timeslots"] = ""; // ignore anything retrieved from prev rsvps
@@ -283,7 +313,7 @@ foreach($_POST["guestfirst"] as $index => $first) {
 $subject = "RSVP $answer for ".$post->post_title." $date";
 rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage);
 
-	header('Location: '.$_SERVER['REQUEST_URI'].'?rsvp='.$rsvp_id.'&e='.$rsvp["email"]);
+	header('Location: '.$req_uri.'rsvp='.$rsvp_id.'&e='.$rsvp["email"]);
 	exit();
 	}
 } } // end save rsvp
@@ -592,15 +622,75 @@ if(!function_exists('event_scripts'))
 {
 function event_scripts() {
 global $post;
-//Need Jquery for RSVP Form
-if( ($post->post_type == 'rsvpmaker') )
+global $rsvpmaker_options;
+
+if( ($post->post_type == 'rsvpmaker') || strstr($post->post_content,'[rsvpmaker_') )
+	{
 	wp_enqueue_script('jquery');
+	$myStyleUrl = ($rsvp_options["custom_css"]) ? $rsvp_options["custom_css"] : WP_PLUGIN_URL . '/rsvpmaker/style.css';
+	wp_register_style('rsvp_style', $myStyleUrl);
+	wp_enqueue_style( 'rsvp_style');
+	}
 } } // end event scripts
 
 add_action('wp','event_scripts');
 
-// customize the fields to be included with the RSVP form (in addition to name and email)
+if(!function_exists('basic_form') ) {
+function basic_form($profile, $guestedit = '')
+{
+//be cautious if you override this function. RSVPMaker expects tog get at least name and email address as identifiers for people who respond, and the first and last name fields are also used for alphabetical sorting and searching of RSVP records
+?>
+        <table border="0" cellspacing="0" cellpadding="0"> 
+          <tr> 
+            <td><?=__('First Name','rsvpmaker')?>:</td> 
+            <td> 
+              <input name="profile[first]" type="text" id="first" size="60"  value="<?=$profile["first"]?>"  /> 
+            </td> 
+          </tr> 
+          <tr> 
+            <td><?=__('Last Name','rsvpmaker')?>:</td> 
+            <td> 
+              <input name="profile[last]" type="text" id="last" size="60"  value="<?=$profile["last"]?>"  /> 
+            </td> 
+          </tr> 
+          <tr> 
+            <td width="100"><?=__('Email','rsvpmaker')?>:</td>
+            <td><input name="profile[email]" type="text" id="rsvp[email]" size="60" value="<?=$profile["email"]?>" /></td> 
+          </tr> 
+  </table> 
 
+<?php
+//by default, this displays the phone # field or a message saying this is already on file
+//can also be customized to request more extensive contact info
+rsvp_profile($profile);
+?>
+
+<!-- end of profile section-->      
+
+<!-- guest section -->
+        <p id="guest_section"><strong><?=__('Guests','rsvpmaker')?>:</strong> <?=__('If you are bringing guests, please enter their names here','rsvpmaker')?></p>
+        <?=$guestedit?>
+        <div class="guest_blank"><?=__('First Name','rsvpmaker')?>: <input type="text" name="guestfirst[]" /> <?=__('Last Name','rsvpmaker')?>: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>
+        <a href="#guest_section" id="add_guests" name="add_guests">(+) <?=__('Add more guests','rsvpmaker')?></a></p>
+<script>
+jQuery(document).ready(function($) {
+
+$('#add_guests').click(function(){
+	$('.guest_blank').append('<div class="guest_blank">First: <input type="text" name="guestfirst[]" /> Last: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>');
+	});
+});
+</script>
+<!-- end of guest section-->              
+        
+<p><?=__('Note','rsvpmaker')?>:<br /> 
+<textarea name="note" cols="60" rows="2" id="note"></textarea> 
+</p> 
+
+<?php
+
+} }
+
+// customize the fields to be included with the RSVP form (in addition to name and email)
 if(!function_exists('rsvp_profile') ) {
 function rsvp_profile($profile) {
 
@@ -666,6 +756,7 @@ $permalink = get_permalink($post->ID);
 $rsvp_on = $custom_fields["_rsvp_on"][0];
 $rsvp_to = $custom_fields["_rsvp_to"][0];
 $rsvp_max = $custom_fields["_rsvp_max"][0];
+$rsvp_show_attendees = $custom_fields["_rsvp_show_attendees"][0];
 if($custom_fields["_rsvp_deadline"][0])
 	$deadline = (int) $custom_fields["_rsvp_deadline"][0];
 if($custom_fields["_rsvp_start"][0])
@@ -678,7 +769,7 @@ if ( !filter_var($e, FILTER_VALIDATE_EMAIL) )
 
 if($_GET["rsvp"])
 	{
-	$rsvpconfirm = '<div id="rsvpconfirm" style="padding: 10px; margin-bottom: 10px; border: medium solid #EEE;">
+	$rsvpconfirm = '<div id="rsvpconfirm" >
 <h3>RSVP Recorded</h3>	
 <p>'.nl2br($rsvp_confirm).'</p></div>
 ';
@@ -688,6 +779,7 @@ if($e)
 	{
 	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=".$post->ID." AND email='".$e."'";
 	$rsvprow = $wpdb->get_row($sql, ARRAY_A);
+
 	if($rsvprow)
 		{
 		$answer = ($rsvprow["yesno"]) ? __("Yes",'rsvpmaker') : __("No",'rsvpmaker');
@@ -716,11 +808,12 @@ if($e)
 		$guestsql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE master_rsvp=".$rsvprow["id"];
 		if($results = $wpdb->get_results($guestsql, ARRAY_A) )
 			{
+			//print_r($results);
 			$rsvpconfirm .=  "<p>Guests:</p>";
 			foreach($results as $row)
 				{
 				$rsvpconfirm .= $row["first"]." ".$row["last"]."<br />";
-				$guestedit .= sprintf('<div class="guest_exist">First: <input type="text" name="guestfirst[]" value="%s" /> Last: <input type="text" name="guestlast[]" value="%s" /><input type="hidden" name="guestid[]" value="%d" /> <input type="checkbox" name="guestdelete[%d]" value="1" /> Remove</div>',$row["first"], $row["last"], $row["id"], $row["id"]);
+				$guestedit .= sprintf('<div class="guest_exist">First Name: <input type="text" name="guestfirst[]" value="%s" /> Last Name: <input type="text" name="guestlast[]" value="%s" /><input type="hidden" name="guestid[]" value="%d" /><br /><input type="checkbox" name="guestdelete[%d]" value="1" /> Remove %s %s</div>',$row["first"], $row["last"], $row["id"], $row["id"],$row["first"], $row["last"]);
 				}
 			}
 
@@ -746,7 +839,7 @@ foreach($results as $row)
 	if(!$firstrow)
 		$firstrow = $row;
 	$dateblock .= '<div>';
-	$t = strtotime($row["datetime"]);
+	$last_time = $t = strtotime($row["datetime"]);
 	$dateblock .= date($rsvp_options["long_date"],$t);
 	$dur = $row["duration"];
 	if($dur != 'allday')
@@ -757,23 +850,32 @@ foreach($results as $row)
 	}
 }
 
-$content = '<div style="'.$rsvp_options["dates_style"].'">'.$dateblock."\n</div>\n".$rsvpconfirm.$content;
+$content = '<div class="dateblock">'.$dateblock."\n</div>\n".$rsvpconfirm.$content;
+
+//check for responses so far
+$sql = "SELECT first,last,note FROM ".$wpdb->prefix."rsvpmaker WHERE event=$post->ID AND yesno=1 ORDER BY id DESC";
+$attendees = $wpdb->get_results($sql);
+	$total = sizeof($attendees); //(int) $wpdb->get_var($sql);
 
 if($rsvp_max)
 	{
-	$sql = "SELECT SUM(participants) FROM ".$wpdb->prefix."rsvpmaker WHERE event=$post->ID";
-	$total = (int) $wpdb->get_var($sql);
-	$content .= "<p>$total participants signed up out of $rsvp_max allowed.</p>\n";
+	$content .= '<p class="signed_up">'.$total.' '.__('signed up so far. Limit: ','rsvpmaker'). "$rsvp_max.</p>\n";
 	if($total >= $rsvp_max)
 		$too_many = true;
 	}
+else
+	$content .= '<p class="signed_up">'.$total.' '. __('signed up so far.','rsvpmaker').'</p>';
 
-if($deadline && ( mktime() > $deadline  ) )
-	$content .= '<p><em>'.__('RSVP deadline is past','rsvpmaker').'</em></p>';
-elseif($rsvpstart && ( mktime() < $rsvpstart  ) )
-	$content .= '<p><em>'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</em></p>';
+$now = mktime();
+
+if($deadline && ($now  > $deadline  ) )
+	$content .= '<p class="rsvp_status">'.__('RSVP deadline is past','rsvpmaker').'</p>';
+elseif( ( $now > $last_time  ) )
+	$content .= '<p class="rsvp_status">'.__('Event date is past','rsvpmaker').'</p>';
+elseif($rsvpstart && ( $now < $rsvpstart  ) )
+	$content .= '<p> class="rsvp_status">'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</p>';
 elseif($too_many)
-	$content .= '<p><em>'.__('RSVPs are closed','rsvpmaker').'</em></p>';
+	$content .= '<p class="rsvp_status">'.__('RSVPs are closed','rsvpmaker').'</p>';
 elseif(($rsvp_on && is_admin()) ||  ($rsvp_on && $_GET["load"]) ||  ($rsvp_on && !is_single()) ) // when loaded into editor
 	$content .= sprintf($rsvp_options["rsvplink"],get_permalink( $post->ID ) );
 elseif($rsvp_on && is_single() )
@@ -788,6 +890,8 @@ elseif($rsvp_on && is_single() )
 <h3 id="rsvpnow"><?=__('RSVP Now!','rsvpmaker')?></h3> 
 
   <?php if($rsvp_instructions) echo '<p>'.nl2br($rsvp_instructions).'</p>'; ?>
+
+  <?php if($rsvp_show_attendees) echo '<p class="rsvp_status">'.__('Names of attendees will be displayed publicly, along with the contents of the notes field.','rsvpmaker').'</p>'; ?>
    
   <p><?=__('Your Answer','rsvpmaker')?>:
             <input name="yesno" type="radio" value="1" <?=($rsvprow["yesno"] || !$rsvprow) ? 'checked="checked"' : ''?> /> 
@@ -798,7 +902,7 @@ elseif($rsvp_on && is_single() )
 
 wp_nonce_field('rsvp','rsvp_nonce');
 
-if($slotlength = $custom_fields["_rsvp_timeslots"][0])
+if($dur && ( $slotlength = $custom_fields["_rsvp_timeslots"][0] ))
 {
 ?>
 
@@ -824,13 +928,16 @@ $month = date('n',$t);
 $year = date('Y',$t);
 $hour = date('G',$t);
 $minutes = date('i',$t);
-for($i=0; ($slot = mktime( ($hour+($i * $slotlength) ) ,$minutes,0,$month,$day,$year)) < $dur; $i++)
-{
-$sql = "SELECT SUM(participants) FROM ".$wpdb->prefix."rsvp_volunteer_time WHERE time=$slot AND event = $post->ID";
-$signups = ($signups = $wpdb->get_var($sql)) ? $signups : 0;
-echo '<div><input type="checkbox" name="timeslot[]" value="'.$slot.'" /> '.date(' '.$rsvp_options["time_format"],$slot)." $signups participants signed up</div>";
-}
+$slotlength = explode(":",$slotlength);
+$min_add = $slotlength[0]*60;
+$min_add = $min_add + $slotlength[1];
 
+for($i=0; ($slot = mktime($hour ,$minutes + ($i * $min_add),0,$month,$day,$year)) < $dur; $i++)
+	{
+	$sql = "SELECT SUM(participants) FROM ".$wpdb->prefix."rsvp_volunteer_time WHERE time=$slot AND event = $post->ID";
+	$signups = ($signups = $wpdb->get_var($sql)) ? $signups : 0;
+	echo '<div><input type="checkbox" name="timeslot[]" value="'.$slot.'" /> '.date(' '.$rsvp_options["time_format"],$slot)." $signups participants signed up</div>";
+	}
 }
 
 
@@ -858,59 +965,49 @@ foreach($per["unit"] as $index => $value)
 	}
 echo "</p>\n";
 }
+
+basic_form($profile, $guestedit);
+
 ?>
-        <table border="0" cellspacing="0" cellpadding="0"> 
-          <tr> 
-            <td><?=__('First Name','rsvpmaker')?>:</td> 
-            <td> 
-              <input name="profile[first]" type="text" id="first" size="60"  value="<?=$profile["first"]?>"  /> 
-            </td> 
-          </tr> 
-          <tr> 
-            <td><?=__('Last Name','rsvpmaker')?>:</td> 
-            <td> 
-              <input name="profile[last]" type="text" id="last" size="60"  value="<?=$profile["last"]?>"  /> 
-            </td> 
-          </tr> 
-          <tr> 
-            <td width="100"><?=__('Email','rsvpmaker')?>:</td>
-            <td><input name="profile[email]" type="text" id="rsvp[email]" size="60" value="<?=$profile["email"]?>" /></td> 
-          </tr> 
-  </table> 
 
-<?php rsvp_profile($profile); ?>
-
- <!-- end of profile section-->      
-        <p id="guest_section"><strong><?=__('Guests','rsvpmaker')?>:</strong> <?=__('If you are bringing guests, please enter their names here','rsvpmaker')?></p>
-        <?=$guestedit?>
-        <div class="guest_blank"><?=__('First Name','rsvpmaker')?>: <input type="text" name="guestfirst[]" /> <?=__('Last Name','rsvpmaker')?>: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>
-        <a href="#guest_section" id="add_guests" name="add_guests">(+) <?=__('Add more guests','rsvpmaker')?></a>
-        <br /><?=__('Note','rsvpmaker')?>:<br /> 
-    <textarea name="note" cols="60" rows="2" id="note"></textarea> 
-  </p> 
         <p> 
 		  <input type="hidden" name="event" value="<?=$post->ID?>" /> 
-          <input type="submit" name="Submit" value="Submit" /> 
+          <input type="submit" id="rsvpsubmit" name="Submit" value="Submit" /> 
         </p> 
 
 </form>	
 
 </div>
-<script>
-jQuery(document).ready(function($) {
-
-$('#add_guests').click(function(){
-	$('.guest_blank').append('<div class="guest_blank">First: <input type="text" name="guestfirst[]" /> Last: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>');
-	});
-});
-</script>
-<?php	
-
+<?php
 	$content .= ob_get_clean();
+	}
+
+if($error = $_GET["err"])
+	{
+	if(strpos($error,'email') != false)
+		$content = '<div id="rsvpconfirm" >
+<h3 class="rsvperror">Error: Invalid Email</h3>
+<p>Please correct your submission.</p>
+</div>
+'.$content;
+	else
+		$content = '<div id="rsvpconfirm" >
+<h3 class="rsvperror">Error: Invalid Input</h3>
+<p>Please correct your submission.</p>
+</div>
+'.$content;
+	}
+
+if($rsvp_show_attendees && $total && !$_GET["load"] )
+	{
+$content .= '<p><button class="rsvpmaker_show_attendees" onclick="'."jQuery.get('http://www.rsvpmaker.com/?ajax_guest_lookup=196', function(data) { jQuery('#attendees-".$post->ID."').html(data); } );". '">Show Attendees</button></p>
+<div id="attendees-'.$post->ID.'"></div>';
 	}
 
 return $content;
 } } // end event content
+
+
 
 if(!function_exists('rsvp_report') )
 {
@@ -967,7 +1064,9 @@ JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->pre
 	echo "<h2>".__("RSVPs for",'rsvpmaker')." ".$title."</h2>\n";
 	if(!$_GET["rsvp_print"])
 		{
-		echo '<div style="float: right; margin-left: 15px; margin-bottom: 15px;"><a href="edit.php?post_type=rsvpmaker&page=rsvp">Show Events List</a></div>';
+		echo '<div style="float: right; margin-left: 15px; margin-bottom: 15px;"><a href="edit.php?post_type=rsvpmaker&page=rsvp">Show Events List</a>
+<a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=alpha">Alpha Order</a> <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=timestamp">Most Recent First</a>		
+		</div>';
 		echo '<p><a href="'.$_SERVER['REQUEST_URI'].'&rsvp_print='.wp_create_nonce('rsvp_print').'" target="_blank" >Format for printing</a></p>';	
 		}
 if($rsvp_options["pear_spreadsheet"])
@@ -977,19 +1076,22 @@ $excel_url = plugins_url().'/rsvpmaker/excel_rsvp.php?event='.$eventid;
 	echo '<p><a href="'.$excel_url.'">Download to Excel</a></p>';
 
 }
-	$sql = "SELECT id, yesno,first,last,email, details, guestof, note FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid ORDER BY yesno DESC, last, first";
+
+	$rsvp_order = ($_GET["rsvp_order"] == 'alpha') ? ' ORDER BY yesno DESC, last, first' : ' ORDER BY yesno DESC, timestamp DESC';
+	$sql = "SELECT id, yesno,first,last,email, details, guestof, note,timestamp FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid $rsvp_order";
 	$wpdb->show_errors();
 	$results = $wpdb->get_results($sql, ARRAY_A);
 	
+	format_rsvp_details($results);
+
 	if($rsvp_options["debug"])
 		{
-		echo "<p>$sql</p>";
+		echo "<p>DEBUG: $sql</p>";
 		echo "<pre>Results:\n";
 		print_r($results);
 		echo "</pre>";
 		}
 
-	format_rsvp_details($results);
 	}
 else
 {// show events list
@@ -1047,6 +1149,9 @@ if($eventlist && !$_GET["rsvp_print"])
 if(!function_exists('format_rsvp_details') )
 {
 function format_rsvp_details($results) {
+	
+	global $rsvp_options;
+	
 	if($results)
 	foreach($results as $index => $row)
 		{
@@ -1065,7 +1170,9 @@ function format_rsvp_details($results) {
 					echo "$name: $value<br />";
 			}
 		if($row["note"])
-			echo "note: " . nl2br($row["note"]);
+			echo "note: " . nl2br($row["note"])."<br />";
+		$t = strtotime($row["timestamp"]);
+		echo 'posted: '.date($rsvp_options["short_date"],$t);
 		echo "</p>";
 		
 		if(!$_GET["rsvp_print"])
@@ -1134,5 +1241,30 @@ function rsvpmaker_profile_lookup($email) {
 // placeholder - override to implement alternate profile lookup based on login, membership, email list, etc.
 return;
 } }
+
+if(!function_exists('ajax_guest_lookup') )
+{
+function ajax_guest_lookup() {
+if(! ($event = $_GET["ajax_guest_lookup"] ) )
+	return;
+
+global $wpdb;
+
+$sql = "SELECT first,last,note FROM ".$wpdb->prefix."rsvpmaker WHERE event=$event AND yesno=1 ORDER BY id DESC";
+$attendees = $wpdb->get_results($sql);
+echo '<div class="attendee_list">';
+foreach($attendees as $row)
+	{
+?>
+<h3 class="attendee"><?=$row->first?> <?=$row->last?></h3>
+<?php	
+if($row->note);
+echo wpautop($row->note);
+	}
+echo '</div>';
+exit();
+} }
+
+add_action('init','ajax_guest_lookup');
 
 ?>

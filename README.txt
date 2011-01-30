@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 0.9.2
+Stable tag: 1.0
 
 Event scheduling and RSVP tracking.
 
@@ -29,6 +29,16 @@ Also available at [__RSVPmaker.com__](http://www.rsvpmaker.com/): a prototype of
 1. OPTIONAL: Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
 1. OPTIONAL: To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
 1. OPTIONAL: You can override any of the functions in rsvpmaker-pluggable.php by creating your own rsvpmaker-custom.php file and adding it to the plugins directory (the directory above the rsvpmaker folder). You can, for example, override the function that displays the RSVP form to include more, fewer, or different fields.
+
+For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
+
+== Frequently Asked Questions ==
+
+= Why am I getting a "page not found" error? =
+
+A minority of users report that the RSVPMaker permalinks don't function properly in the default configuration. Go to the RSVPMaker options settings screen and check the box for "Tweak Permalinks." This should clear up the problem by making WordPress reset the permalinks.
+
+= Where can I get more information about using RSVPMaker? =
 
 For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
 
@@ -58,6 +68,17 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 1.0 =
+
+* Added a `basic_form` function that you can override to change the basic fields of the RSVP form. For example, you can change it to omit the section that asks for the names of guests. This is in addition to the `rsvp_profile` function, which is used to collect additional contact details such as phone # or mailing address. See the instructions for [__adding custom functions__](http://www.rsvpmaker.com/2010/12/changing-the-rsvp-form-other-customizations/).
+* You have the option of allowing the names of attendees and the contents of the notes field to be displayed publicly. To avoid encouraging spam entries, this content is loaded via AJAX and only when the user clicks the Show Attendees button
+* Moved most of the default formatting into a CSS file that is queued up on pages that show event content. There is in option on the settings page for specifying your own css file to use instead.  Most inline styles have been replaced by class selectors. However, the styling of the RSVP Now button is still set on the RSVPMaker settings screen. Works better for email distribution of events.
+* RSVP Report now lists timestamp on reply and lets you sort by either alphabetical order or most recent.
+* If you're signing up employees or workers for specific timeslots, you can now set that to half-hour increments
+* Tweaked redirection code to handle confirmation and error messages on sites that don't have permalinks enabled
+* Changed label for RSVPMaker widget as it shows up on the administrator's screen under Appearance.
+* Added an uninstall script for removing custom tables and database entries.
 
 = 0.9.2 =
 
@@ -127,4 +148,7 @@ Bug fix, tweak to register post type configuration
 
 * First public release November 2010.
 
-[Releases](http://www.rsvpmaker.com/release/)
+== Upgrade Notice ==
+
+= 1.0 =
+Final cleanup to qualify for version 1.0 status.

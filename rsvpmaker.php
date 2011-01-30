@@ -3,9 +3,9 @@
 /*
 Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
-Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>
+Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. If you wish to delete RSVPMaker, use the <a href="/wp-content/plugins/rsvpmaker/uninstall.php">uninstall script</a> in the plugin directory to remove database entries and custom tables.
 Author: David F. Carr
-Version: 0.9.2
+Version: 1.0
 Author URI: http://www.carrcommunications.com
 */
 
@@ -31,8 +31,6 @@ if(!$rsvp_options["rsvp_to"])
 	$rsvp_options["rsvp_to"] = get_bloginfo('admin_email');
 if(!$rsvp_options["rsvp_confirm"])
 	$rsvp_options["rsvp_confirm"] = __('Thank you!','rsvpmaker');
-if(!$rsvp_options['dates_style'])
-	$rsvp_options['dates_style'] = 'padding-top: 1em; padding-bottom: 1em; font-weight: bold;';
 if(!$rsvp_options['rsvplink'])
 	$rsvp_options['rsvplink'] = '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">'. __('RSVP Now!','rsvpmaker').'</a></p>';
 if(!$rsvp_options['defaulthour'])
@@ -184,4 +182,5 @@ register_activation_hook( __FILE__, 'cpevent_activate' );
 //upgrade database if necessary
 if($rsvp_options["dbversion"] < 2)
 	cpevent_activate();
+
 ?>
