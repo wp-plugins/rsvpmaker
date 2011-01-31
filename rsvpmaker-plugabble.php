@@ -49,7 +49,7 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
   <input type="checkbox" name="setrsvp[on]" id="setrsvp[on]" value="1" <?php if( $rsvp_on ) echo 'checked="checked" '; ?> />
 <?=__('Collect RSVPs','rsvpmaker')?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> '; ?>
 
-  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" '; ?> />
+<br />  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" '; ?> />
 <?=__(' Display attendee names and content of note field publicly','rsvpmaker')?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> '; ?>
 
 </p>
@@ -824,10 +824,11 @@ if($e)
 	$sql = "SELECT details FROM ".$wpdb->prefix."rsvpmaker WHERE email='".$e."' ORDER BY id DESC";
 	if($details = $wpdb->get_var($sql) )
 		$profile = unserialize($details);
-	else
-		$profile = rsvpmaker_profile_lookup($e);
-	
 	}
+
+	if(!$profile)
+		$profile = rsvpmaker_profile_lookup($e);
+
 
 $sql = "SELECT * FROM ".$wpdb->prefix."rsvp_dates WHERE postID=".$post->ID.' ORDER BY datetime';
 $results = $wpdb->get_results($sql,ARRAY_A);
@@ -1025,7 +1026,7 @@ $wpdb->show_errors();
 <h2>RSVP Report</h2> 
 <?php
 
-if($deletenow = $_POST["deletenow"])
+if($deletenow = $_POST["deletenow"] && current_user_can('edit_others_posts'))
 	{
 	
 	if(!wp_verify_nonce($_POST["deletenonce"],'rsvpdelete') )
@@ -1034,7 +1035,7 @@ if($deletenow = $_POST["deletenow"])
 		$wpdb->query("DELETE FROM ".$wpdb->prefix."rsvpmaker where id=$d");
 	}
 
-if($delete = $_GET["delete"])
+if($delete = $_GET["delete"] && current_user_can('edit_others_posts'))
 	{
 	$row = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE id=$delete");
 
@@ -1178,7 +1179,7 @@ function format_rsvp_details($results) {
 		echo 'posted: '.date($rsvp_options["short_date"],$t);
 		echo "</p>";
 		
-		if(!$_GET["rsvp_print"])
+		if(!$_GET["rsvp_print"] && current_user_can('edit_others_posts'))
 			echo sprintf('<p><a href="%s&delete=%d">Delete record for: %s %s</a></p>',admin_url().'edit.php?post_type=rsvpmaker&page=rsvp',$row["id"],$row["first"],$row["last"]);
 		}
 
@@ -1240,9 +1241,21 @@ function widgetlink($evdates,$plink,$evtitle) {
 } } // end widgetlink
 
 if(!function_exists('rsvpmaker_profile_lookup') ) {
-function rsvpmaker_profile_lookup($email) {
+function rsvpmaker_profile_lookup($email = '') {
+
 // placeholder - override to implement alternate profile lookup based on login, membership, email list, etc.
-return;
+if(!$email)
+	{
+	// if members are registered and logged in, retrieve basic info for profile
+	if(is_user_logged_in() )
+		{
+		global $current_user;
+		$profile["email"] = $current_user->user_email;
+		$profile["first"] = $current_user->first_name;
+		$profile["last"] = $current_user->last_name;		
+		}
+	}
+return $profile;
 } }
 
 if(!function_exists('ajax_guest_lookup') )

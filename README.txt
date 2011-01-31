@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 1.1
+Stable tag: 1.2
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 1.2 =
+
+* Update to pluggable function rsvpmaker_profile_lookup - will now look up profile details of users who are logged in. Override to retrieve profile details from a member database or any other source.
+* Customizable security settings for RSVP Report.
 
 = 1.1 =
 

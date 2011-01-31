@@ -551,6 +551,13 @@ else
 <h3>Debug:</h3>
   <input type="checkbox" name="option[debug]" value="1" <?php if($options["debug"]) echo ' checked="checked" '; ?> /> Check here to display debugging variables. 
 	<br />
+<h3>Menu Security:</h3>
+  <select name="option[menu_security]" id="menu_security">
+  <option value="manage_options" <?php if($options["menu_security"] == 'manage_options') echo ' selected="selected" '; ?> >Administrator</option>
+  <option value="edit_others_posts" <?php if($options["menu_security"] == 'edit_others_posts') echo ' selected="selected" '; ?> >Editor</option>
+  <option value="edit_posts" <?php if($options["menu_security"] == 'edit_posts') echo ' selected="selected" '; ?> >Contributor</option>
+  </select> Security level required to access custom menus (RSVP Report, Documentation)
+<br />
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
 	    </div>
@@ -1197,12 +1204,12 @@ Globals</label>
 
 function my_rsvp_menu() {
 global $rsvp_options;
-add_submenu_page('edit.php?post_type=rsvpmaker', "RSVP Report", "RSVP Report", 2, "rsvp", "rsvp_report", $icon, $position );
-add_submenu_page('edit.php?post_type=rsvpmaker', "Recurring Event", "Recurring Event", 8, "add_dates", "add_dates", $icon, $position );
-add_submenu_page('edit.php?post_type=rsvpmaker', "Multiple Events", "Multiple Events", 8, "multiple", "multiple", $icon, $position );
-add_submenu_page('edit.php?post_type=rsvpmaker', "Documentation", "Documentation", 8, "rsvpmaker_doc", "rsvpmaker_doc", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "RSVP Report", "RSVP Report", $rsvp_options["menu_security"], "rsvp", "rsvp_report", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "Recurring Event", "Recurring Event", 'manage_options', "add_dates", "add_dates", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "Multiple Events", "Multiple Events", 'manage_options', "multiple", "multiple", $icon, $position );
+add_submenu_page('edit.php?post_type=rsvpmaker', "Documentation", "Documentation", $rsvp_options["menu_security"], "rsvpmaker_doc", "rsvpmaker_doc", $icon, $position );
 if($rsvp_options["debug"])
-	add_submenu_page('edit.php?post_type=rsvpmaker', "Debug", "Debug", 8, "rsvpmaker_debug", "rsvpmaker_debug", $icon, $position );
+	add_submenu_page('edit.php?post_type=rsvpmaker', "Debug", "Debug", 'manage_options', "rsvpmaker_debug", "rsvpmaker_debug", $icon, $position );
 }
 
 add_action('admin_menu', 'my_rsvp_menu');
