@@ -1004,7 +1004,7 @@ if($error = $_GET["err"])
 
 if($rsvp_show_attendees && $total && !$_GET["load"] )
 	{
-$content .= '<p><button class="rsvpmaker_show_attendees" onclick="'."jQuery.get('http://www.rsvpmaker.com/?ajax_guest_lookup=196', function(data) { jQuery('#attendees-".$post->ID."').html(data); } );". '">Show Attendees</button></p>
+$content .= '<p><button class="rsvpmaker_show_attendees" onclick="'."jQuery.get('".site_url()."/?ajax_guest_lookup=196', function(data) { jQuery('#attendees-".$post->ID."').html(data); } );". '">'. __('Show Attendees','rsvpmaker') .'</button></p>
 <div id="attendees-'.$post->ID.'"></div>';
 	}
 

@@ -13,6 +13,6 @@ font-style: italic;
 .dateblock{
 padding-top: 1em; padding-bottom: 1em; font-weight: bold;
 }
-.calendar_item {
-style="font-size: x-small;  line-height: 1;
+a.calendar_item {
+font-size: x-small;  line-height: 1;
 }
