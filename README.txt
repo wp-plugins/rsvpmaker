@@ -1,0 +1,168 @@
+=== RSVPmaker ===
+Contributors: davidfcarr
+Donate: http://www.rsvpmaker.com
+Tags: event, calendar, rsvp, custom post type, paypal
+Requires at least: 3.0
+Tested up to: 3.1
+Stable tag: 1.4
+
+Event scheduling and RSVP tracking.
+
+== Description ==
+
+RSVPmaker is an event scheduling and RSVP tracking plugin for WordPress, using the custom post types feature introduced in WP3.0 to track events as an alternate post type with associated dates.
+
+Site editors and administrators have the option to request RSVPs for any given event and specify an email address for notifications when someone responds. RSVP Reports can also be run from the administrator's dashboard.
+
+If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials).
+
+[__RSVPmaker.com__](http://www.rsvpmaker.com/)
+
+Also available at [__RSVPmaker.com__](http://www.rsvpmaker.com/): a prototype of ChimpBlast plugin for sending event invites and other email broadcasts through the MailChimp broadcast email service.
+
+== Installation ==
+
+1. Upload the entire `rsvpmaker` folder to the `/wp-content/plugins/` directory.
+1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. Visit the RSVPmaker options page to configure default values for RSVP email notifications, etc.
+1. See the documentation for shortcodes you can use to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget if you would like to add an events listing to your WordPress sidebar.
+1. OPTIONAL: Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
+1. OPTIONAL: To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
+1. OPTIONAL: You can override any of the functions in rsvpmaker-pluggable.php by creating your own rsvpmaker-custom.php file and adding it to the plugins directory (the directory above the rsvpmaker folder). You can, for example, override the function that displays the RSVP form to include more, fewer, or different fields.
+
+For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
+
+== Frequently Asked Questions ==
+
+= Why am I getting a "page not found" error? =
+
+A minority of users report that the RSVPMaker permalinks don't function properly in the default configuration. Go to the RSVPMaker options settings screen and check the box for "Tweak Permalinks." This should clear up the problem by making WordPress reset the permalinks.
+
+= Where can I get more information about using RSVPMaker? =
+
+For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
+
+== Screenshots ==
+
+1. screenshot-1.png
+1. screenshot-2.png
+
+== Credits ==
+
+    RSVPmaker
+    Copyright (C) 2010 David F. Carr
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    See the GNU General Public License at <http://www.gnu.org/licenses/>.
+	
+	RSVPMaker also includes code derived from the PayPal NVP API software
+	development kit for PHP.
+
+== Changelog ==
+
+= 1.3 and 1.4 =
+
+Bug fixes
+
+= 1.2 =
+
+* Update to pluggable function rsvpmaker_profile_lookup - will now look up profile details of users who are logged in. Override to retrieve profile details from a member database or any other source.
+* Customizable security settings for RSVP Report.
+
+= 1.1 =
+
+* Bug fix for uninstall.php file.
+* Fixed display of events with no RSVP set.
+
+= 1.0 =
+
+* Added a `basic_form` function that you can override to change the basic fields of the RSVP form. For example, you can change it to omit the section that asks for the names of guests. This is in addition to the `rsvp_profile` function, which is used to collect additional contact details such as phone # or mailing address. See the instructions for [__adding custom functions__](http://www.rsvpmaker.com/2010/12/changing-the-rsvp-form-other-customizations/).
+* You have the option of allowing the names of attendees and the contents of the notes field to be displayed publicly. To avoid encouraging spam entries, this content is loaded via AJAX and only when the user clicks the Show Attendees button
+* Moved most of the default formatting into a CSS file that is queued up on pages that show event content. There is in option on the settings page for specifying your own css file to use instead.  Most inline styles have been replaced by class selectors. However, the styling of the RSVP Now button is still set on the RSVPMaker settings screen. Works better for email distribution of events.
+* RSVP Report now lists timestamp on reply and lets you sort by either alphabetical order or most recent.
+* If you're signing up employees or workers for specific timeslots, you can now set that to half-hour increments
+* Tweaked redirection code to handle confirmation and error messages on sites that don't have permalinks enabled
+* Changed label for RSVPMaker widget as it shows up on the administrator's screen under Appearance.
+* Added an uninstall script for removing custom tables and database entries.
+
+= 0.9.2 =
+
+Bug fix
+
+= 0.9.1 =
+
+Added debug checkbox in options. When this is turned on, it creates an additional admin screen for checking that RSVPs are recorded properly, displaying system variables.
+
+= 0.9 =
+
+* Made it easier to edit dates for events previously entered in system.
+* Widget and headlines listing shortcode output now include a link to your event listing page.
+* Cleanup on options handling.
+
+= 0.8 =
+
+* Added type parameter for shortcode so you can display only events tagged with "featured" or another event type using `[rsvpmaker_upcoming type="featured"]`
+* Added ability to set RSVP start date as well as deadline for RSVPs
+* If signing up workers or volunteers for specific timeslots, you can now specify the duration of the timeslots in one-hour increments
+* Cleaned up Event Dates, RSVP Options box in editor, moving less commonly used parameters to the bottom.
+* Added a Tweak Permalinks setting (a hack for a few users who have reported "page not found" errors, possibly because some other plugin is overwriting the RSVPmaker rewrite rules).
+* Tested with WP 3.1 release candidate
+
+= 0.7.6 =
+
+Fixed issue with setting default options.
+
+= 0.7.5 =
+
+Improved ability to add a series of recuring events, including ability for software to calculate the dates based on a schedule like "Second Tuesday of the month"
+
+= 0.7.4 =
+
+Bug fix to prevent customizations from being overwritten. Custom functions should be placed in rsvpmaker-custom.php and the file must be installed in the plugins directory above the rsvpmaker folder: wp-content/plugins/ instead of wp-content/plugins/rsvpmaker/
+
+= 0.7.3 =
+
+* Updated code for displaying RSVP Reports. Added functionality for deleting entries.
+* Beginning to introduce translation support. See translations directory for rsvp.pot file to be used by translators.
+
+= 0.7.2 =
+
+Bug fix, RSVP Reports
+
+= 0.7.1 =
+
+Bug fix, tweak to register post type configuration
+
+= 0.7 =
+
+* Custom post type slug changed from 'event' to 'rsvpmaker' in an attempt to avoid name conflicts, permalink issues.
+* Widget now lets you set the # of posts to display and date format string
+
+= 0.6.2 =
+
+* Updated to WP 3.03
+* Addition of event type taxonomy
+
+= 0.6.1 =
+
+* Fixed errors in database code for recording guests and payments
+* Added option to switch between 12-hour and 24-hour time formats
+* Added ability to set maximum participants per event.
+
+= 0.6 =
+
+* First public release November 2010.
+
+== Upgrade Notice ==
+
+= 1.0 =
+Final cleanup to qualify for version 1.0 status.
