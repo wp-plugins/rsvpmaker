@@ -527,6 +527,7 @@ $resArray = $_SESSION["reshash"];
 
 	if($id = $_SESSION["invoice"])
 	{
+	global $wpdb;
 	$sql = $wpdb->prepare("update ".$wpdb->prefix."rsvpmaker set amountpaid=%s where id=%d",$resArray['AMT'], $id);
 	$wpdb->query($sql);
 	}
@@ -1026,17 +1027,19 @@ $wpdb->show_errors();
 <h2>RSVP Report</h2> 
 <?php
 
-if($deletenow = $_POST["deletenow"] && current_user_can('edit_others_posts'))
+if($_POST["deletenow"] && current_user_can('edit_others_posts'))
 	{
 	
 	if(!wp_verify_nonce($_POST["deletenonce"],'rsvpdelete') )
 		die("failed security check");
-	foreach($deletenow as $d)
+	
+	foreach($_POST["deletenow"] as $d)
 		$wpdb->query("DELETE FROM ".$wpdb->prefix."rsvpmaker where id=$d");
 	}
 
-if($delete = $_GET["delete"] && current_user_can('edit_others_posts'))
+if($_GET["delete"] && current_user_can('edit_others_posts'))
 	{
+	$delete = $_GET["delete"];
 	$row = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE id=$delete");
 
 	$guests = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE master_rsvp=$delete");
