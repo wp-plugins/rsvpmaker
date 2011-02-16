@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 1.5
+Stable tag: 1.6
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 1.6 =
+
+Added by request: support for custom-fields and post_tag in the rsvpmaker content type. I understand this helps with WooThemes integratiton?
 
 = 1.3, 1.4, 1.5 =
 
