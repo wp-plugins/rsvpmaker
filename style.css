@@ -1,0 +1,18 @@
+#rsvpconfirm {
+padding: 10px; margin-bottom: 10px; border: medium solid #EEE;
+}
+.attendee_list {
+padding: 10px; margin-bottom: 10px; border: medium solid #EEE;
+}
+.rsvperror {
+color: #FF0000;
+}
+.signed_up, .rsvp_status {
+font-style: italic;
+}
+.dateblock{
+padding-top: 1em; padding-bottom: 1em; font-weight: bold;
+}
+a.calendar_item {
+font-size: x-small;  line-height: 1;
+}
