@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 1.6
+Stable tag: 1.7
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 1.7 =
+
+Bug fixes: display glitch, form spam filtering
 
 = 1.6 =
 

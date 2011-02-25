@@ -180,7 +180,7 @@ $lowercount = preg_match_all('/[a-z]/',$rtxt,$lower);
 $diff = abs($uppercount - $lowercount);
 $diff = ($diff) ? $diff : 1;
 $diffratio = $diff / ($lowercount + $uppercount);
-if($diffratio < .75)
+if($diffratio < .5)
 	{
 	header('Location: '.$req_uri.'&err=Invalid input');
 	exit();
@@ -311,6 +311,8 @@ foreach($_POST["guestfirst"] as $index => $first) {
 }
 
 $subject = "RSVP $answer for ".$post->post_title." $date";
+if($_POST["note"])
+	$cleanmessage .= 'Note: '.stripslashes($_POST["note"]);
 rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage);
 
 	header('Location: '.$req_uri.'rsvp='.$rsvp_id.'&e='.$rsvp["email"]);
@@ -878,7 +880,7 @@ if($deadline && ($now  > $deadline  ) )
 elseif( ( $now > $last_time  ) )
 	$content .= '<p class="rsvp_status">'.__('Event date is past','rsvpmaker').'</p>';
 elseif($rsvpstart && ( $now < $rsvpstart  ) )
-	$content .= '<p> class="rsvp_status">'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</p>';
+	$content .= '<p class="rsvp_status">'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</p>';
 elseif($too_many)
 	$content .= '<p class="rsvp_status">'.__('RSVPs are closed','rsvpmaker').'</p>';
 elseif(($rsvp_on && is_admin()) ||  ($rsvp_on && $_GET["load"]) ||  ($rsvp_on && !is_single()) ) // when loaded into editor
