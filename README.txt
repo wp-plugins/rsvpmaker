@@ -4,12 +4,12 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 1.7
+Stable tag: 1.8
 
 Event scheduling and RSVP tracking.
 
 == Description ==
-
+<a href="README.txt">README.txt</a>
 RSVPmaker is an event scheduling and RSVP tracking plugin for WordPress, using the custom post types feature introduced in WP3.0 to track events as an alternate post type with associated dates.
 
 Site editors and administrators have the option to request RSVPs for any given event and specify an email address for notifications when someone responds. RSVP Reports can also be run from the administrator's dashboard.
@@ -68,6 +68,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 1.8 =
+
+Fixing translation files that were missing from svn
 
 = 1.7 =
 
