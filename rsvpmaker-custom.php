@@ -21,10 +21,10 @@ function rsvp_profile($profile) {
 
 if($profile["city"])
 	{
-?>
+;?>
 <div id="profiledetails">Profile details on file.<br />To update profile, 
 
-or RSVP for someone else <a href="<?=the_permalink()?>">fetch a blank 
+or RSVP for someone else <a href="<?php echo the_permalink();?>">fetch a blank 
 
 form</a></div>
 <input type="hidden" name="onfile" value="1" />
@@ -32,7 +32,7 @@ form</a></div>
 	}
 else
 	{
-?>
+;?>
 <table border="0" cellspacing="0" cellpadding="0"> 
   <tr> 
 	<td width="100">Occupation:</td> 
@@ -173,6 +173,5 @@ $mail->send($rsvp["email"], $hdrs, $body);
 function widgetlink($evdates,$plink,$evtitle) {
 	return sprintf('%s <a href="%s">%s</a> ',$evdates,$plink,$evtitle);
 }
-
 
 ?>

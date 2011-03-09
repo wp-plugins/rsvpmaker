@@ -1,8 +1,5 @@
 <?php
 
-if(!current_user_can('edit_posts') )
-	die("This function is only available to editors and administrators");
-
 if($eventid = (int) $_GET["event"])
 {
 $config = $_SERVER['DOCUMENT_ROOT'].'/wp-config.php';
@@ -14,7 +11,10 @@ else
 	require_once($config); 
 	}
 
-include_once 'Spreadsheet/Excel/Writer.php';
+if(!current_user_can('edit_posts') )
+	die("This function is only available to editors and administrators");
+
+include WP_PLUGIN_DIR.'/rsvpmaker/excel.php';
 	
 	$sql = "SELECT post_title FROM ".$wpdb->posts." WHERE ID = $eventid";
 	$title = $wpdb->get_var($sql);
@@ -93,4 +93,4 @@ $workbook->close();
 else
 	die("No event selected");
 	
-?>
+;?>

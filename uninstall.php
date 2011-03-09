@@ -9,4 +9,4 @@ foreach($tables as $slug)
 $sql = "DELETE FROM  ".$wpdb->posts." WHERE post_type='rsvpmaker' ";
 $wpdb->query($sql);
 delete_option('RSVPMAKER_Options');
-?>
+;?>

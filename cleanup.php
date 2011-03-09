@@ -53,7 +53,7 @@ if($_POST)
 		echo "deleting options<br />";
 		}
 	}
-?>
+;?>
 <p>This will help you clean up database tables and entries created with RSVPMaker. Note that these operations cannot be undone.</p>
 <form id="form1" name="form1" method="post" action="uninstall.php">
   <input type="checkbox" name="tables[rsvpmaker]" id="rsvpmaker" value="rsvpmaker" checked="checked" />
@@ -80,9 +80,9 @@ foreach($results as $row)
 $options = (get_option('RSVPMAKER_Options')) ? ' options set ':' NO options set';
 $events = $wpdb->get_var("SELECT count(*) FROM $wpdb->posts WHERE post_type='rsvpmaker' ");
 ?>
-<p>Tables: <?=$tables?></p>
-<p>Events: <?=$events?></p>
-<p>Settings: <?=$options?></p>
-<p>See the <a href="<?=get_admin_url()?>plugins.php">Plugins Control Panel</a> | <a href="<?=get_admin_url()?>">Administratior Dashboard</a>.</p>
+<p>Tables: <?php echo $tables;?></p>
+<p>Events: <?php echo $events;?></p>
+<p>Settings: <?php echo $options;?></p>
+<p>See the <a href="<?php echo get_admin_url();?>plugins.php">Plugins Control Panel</a> | <a href="<?php echo get_admin_url();?>">Administratior Dashboard</a>.</p>
 </body>
 </html>

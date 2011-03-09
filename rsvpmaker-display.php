@@ -184,10 +184,10 @@ class CPEventsWidget extends WP_Widget {
 		$limit = ($instance["limit"]) ? $instance["limit"] : 10;
 		$dateformat = ($instance["dateformat"]) ? $instance["dateformat"] : 'M. j';
         global $rsvp_options;
-		?>
-              <?php echo $before_widget; ?>
+		;?>
+              <?php echo $before_widget;?>
                   <?php if ( $title )
-                        echo $before_title . $title . $after_title; ?>
+                        echo $before_title . $title . $after_title;?>
               <?php 
 			  
 			  global $wpdb;
@@ -225,7 +225,7 @@ ORDER BY datetime LIMIT 0, $limit";
 			  }
 			  
 			  
-			  echo $after_widget; ?>
+			  echo $after_widget;?>
         <?php
     }
 
@@ -243,11 +243,11 @@ ORDER BY datetime LIMIT 0, $limit";
         $title = esc_attr($instance['title']);
 		$limit = ($instance["limit"]) ? $instance["limit"] : 10;
 		$dateformat = ($instance["dateformat"]) ? $instance["dateformat"] : 'M. j';
-        ?>
-            <p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?> <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" /></label></p>
-            <p><label for="<?php echo $this->get_field_id('limit'); ?>"><?php _e('Number to Show:'); ?> <input class="widefat" id="<?php echo $this->get_field_id('limit'); ?>" name="<?php echo $this->get_field_name('limit'); ?>" type="text" value="<?php echo $limit; ?>" /></label></p>
+        ;?>
+            <p><label for="<?php echo $this->get_field_id('title');?>"><?php _e('Title:');?> <input class="widefat" id="<?php echo $this->get_field_id('title');?>" name="<?php echo $this->get_field_name('title');?>" type="text" value="<?php echo $title;?>" /></label></p>
+            <p><label for="<?php echo $this->get_field_id('limit');?>"><?php _e('Number to Show:');?> <input class="widefat" id="<?php echo $this->get_field_id('limit');?>" name="<?php echo $this->get_field_name('limit');?>" type="text" value="<?php echo $limit;?>" /></label></p>
 
-            <p><label for="<?php echo $this->get_field_id('dateformat'); ?>"><?php _e('Date Format:'); ?> <input class="widefat" id="<?php echo $this->get_field_id('dateformat'); ?>" name="<?php echo $this->get_field_name('dateformat'); ?>" type="text" value="<?php echo $dateformat; ?>" /></label> (PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date</a> format string)</p>
+            <p><label for="<?php echo $this->get_field_id('dateformat');?>"><?php _e('Date Format:');?> <input class="widefat" id="<?php echo $this->get_field_id('dateformat');?>" name="<?php echo $this->get_field_name('dateformat');?>" type="text" value="<?php echo $dateformat;?>" /></label> (PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date</a> format string)</p>
 
         <?php 
     }
@@ -319,9 +319,9 @@ if($atts["calendar"] || ($atts["format"] == "calendar") )
 	}
 	
 if ( have_posts() ) {
-while ( have_posts() ) : the_post(); ?>
+while ( have_posts() ) : the_post();?>
 
-<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+<div id="post-<?php the_ID();?>" <?php post_class(); ?>>
 <h1 class="entry-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h1>
 <div class="entry-content">
 
@@ -332,7 +332,7 @@ while ( have_posts() ) : the_post(); ?>
 <?php 
 endwhile;
 ?>
-<p><?php posts_nav_link(' &#8212; ', __('&laquo; Previous Page'), __('Next Page &raquo;')); ?></p>
+<p><?php posts_nav_link(' &#8212; ', __('&laquo; Previous Page'), __('Next Page &raquo;'));?></p>
 <?php
 } 
 else

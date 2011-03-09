@@ -77,4 +77,4 @@ define('PAYPAL_URL', 'https://www.paypal.com/webscr&cmd=_express-checkout&userac
 
 define('VERSION', '3.0');
 
-?>
+;?>

@@ -92,13 +92,13 @@ $m = date('n');
 $y = date('Y');
 $y2 = $y+1;
 
-?>
-<div id="event_date<?=$i?>" style="border-bottom: thin solid #888;">
+;?>
+<div id="event_date<?php echo $i;?>" style="border-bottom: thin solid #888;">
 <table width="100%">
 <tr>
-            <td width="*"><div id="date_block"><?=__('Month:','rsvpmaker')?> 
-              <select name="event_month[<?=$i?>]"> 
-              <option value="<?=$m?>"><?=$m?></option> 
+            <td width="*"><div id="date_block"><?php echo __('Month:','rsvpmaker');?> 
+              <select name="event_month[<?php echo $i;?>]"> 
+              <option value="<?php echo $m;?>"><?php echo $m;?></option> 
               <option value="1">1</option> 
               <option value="2">2</option> 
               <option value="3">3</option> 
@@ -112,9 +112,9 @@ $y2 = $y+1;
               <option value="11">11</option> 
               <option value="12">12</option> 
               </select> 
-            <?=__('Day:','rsvpmaker')?> 
-            <select name="event_day[<?=$i?>]"> 
-              <?=$today?> 
+            <?php echo __('Day:','rsvpmaker');?> 
+            <select name="event_day[<?php echo $i;?>]"> 
+              <?php echo $today;?>
               <option value="1">1</option> 
               <option value="2">2</option> 
               <option value="3">3</option> 
@@ -147,32 +147,32 @@ $y2 = $y+1;
               <option value="30">30</option> 
               <option value="31">31</option> 
             </select> 
-            <?=__('Year','rsvpmaker')?>
-            <select name="event_year[<?=$i?>]"> 
-              <option value="<?=$y?>"><?=$y?></option> 
-              <option value="<?=$y2?>"><?=$y2?></option> 
+            <?php echo __('Year','rsvpmaker');?>
+            <select name="event_year[<?php echo $i ;?>]"> 
+              <option value="<?php echo $y;?>"><?php echo $y;?></option> 
+              <option value="<?php echo $y2;?>"><?php echo $y2;?></option> 
             </select> 
 </div> 
             </td> 
           </tr> 
 <tr> 
-<td><?=__('Hour:','rsvpmaker')?> <select name="event_hour[<?=$i?>]"> 
-<?=$houropt?>
+<td><?php echo __('Hour:','rsvpmaker');?> <select name="event_hour[<?php echo $i;?>]"> 
+<?php echo $houropt;?>
 </select> 
  
-<?=__('Minutes:','rsvpmaker')?> <select name="event_minutes[<?=$i?>]"> 
-<?=$minopt?>
+<?php echo __('Minutes:','rsvpmaker');?> <select name="event_minutes[<?php echo $i;?>]"> 
+<?php echo $minopt;?>
 </select> -
 
-<?=__('Duration','rsvpmaker')?> <select name="event_duration[<?=$i?>]">
-<option value=""><?=__('Not set (optional)','rsvpmaker')?></option>
-<option value="allday"><?=__("All day/don't show time in headline",'rsvpmaker')?></option>
-<?php for($h = 1; $h < 24; $h++) { ?>
-<option value="<?=$h?>"><?=$h?> hours</option>
-<option value="<?=$h?>:15"><?=$h?>:15</option>
-<option value="<?=$h?>:30"><?=$h?>:30</option>
-<option value="<?=$h?>:45"><?=$h?>:45</option>
-<?php } ?>
+<?php echo __('Duration','rsvpmaker');?> <select name="event_duration[<?php echo $i;?>]">
+<option value=""><?php echo __('Not set (optional)','rsvpmaker');?></option>
+<option value="allday"><?php echo __("All day/don't show time in headline",'rsvpmaker');?></option>
+<?php for($h = 1; $h < 24; $h++) { ;?>
+<option value="<?php echo $h;?>"><?php echo $h;?> hours</option>
+<option value="<?php echo $h;?>:15"><?php echo $h;?>:15</option>
+<option value="<?php echo $h;?>:30"><?php echo $h;?>:30</option>
+<option value="<?php echo $h;?>:45"><?php echo $h;?>:45</option>
+<?php } ;?>
 </select>
 <br /> 
 </td> 
@@ -437,7 +437,7 @@ for($i=0; $i < 60; $i += 5)
 if($_GET["test"])
 	print_r($options);
 
-?>
+;?>
 
 <div class="wrap" style="max-width:950px !important;">
 
@@ -457,59 +457,59 @@ if($_GET["test"])
 	 <div id="mainblock" style="width:710px">
 	 
 		<div class="dbx-content">
-		 	<form name="caldendar_options" action="<?php echo $action_url ?>" method="post">
+		 	<form name="caldendar_options" action="<?php echo $action_url ;?>" method="post">
 					
                     <input type="hidden" name="submitted" value="1" /> 
-					<?php wp_nonce_field('calendar-nonce'); ?>
+					<?php wp_nonce_field('calendar-nonce');?>
 
 					<h3>Default Content for Events (such as standard meeting location):</h3>
-  <textarea name="option[default_content]"  rows="5" cols="80" id="default_content"><?=$options["default_content"]?></textarea>
+  <textarea name="option[default_content]"  rows="5" cols="80" id="default_content"><?php echo $options["default_content"];?></textarea>
 	<br />
 Hour: <select name="option[defaulthour]"> 
-<?=$houropt?>
+<?php echo $houropt;?>
 </select> 
  
 Minutes: <select name="option[defaultmin]"> 
-<?=$minopt?>
+<?php echo $minopt;?>
 </select>
 <br />
 
 					
 					<h3>RSVP On:</h3>
-  <input type="checkbox" name="option[rsvp_on]" value="1" <?php if($options["rsvp_on"]) echo ' checked="checked" '; ?> /> check to turn on by default
+  <input type="checkbox" name="option[rsvp_on]" value="1" <?php if($options["rsvp_on"]) echo ' checked="checked" ';?> /> check to turn on by default
 	<br />
 					<h3>RSVP TO:</h3> 
-					  <textarea rows="2" cols="80" name="option[rsvp_to]" id="rsvp_to"><?=$options["rsvp_to"]?></textarea>
+					  <textarea rows="2" cols="80" name="option[rsvp_to]" id="rsvp_to"><?php echo $options["rsvp_to"];?></textarea>
 					<br />
 					<h3>RSVPs Attendees List Public:</h3>
-  <input type="checkbox" name="option[show_attendees]" value="1" <?php if($options["show_attendees"]) echo ' checked="checked" '; ?> /> check to turn on by default
+  <input type="checkbox" name="option[show_attendees]" value="1" <?php if($options["show_attendees"]) echo ' checked="checked" ';?> /> check to turn on by default
 	<br />
 					<h3>Instructions for Form:</h3>
-  <textarea name="option[rsvp_instructions]"  rows="5" cols="80" id="rsvp_instructions"><?=$options["rsvp_instructions"]?></textarea>
+  <textarea name="option[rsvp_instructions]"  rows="5" cols="80" id="rsvp_instructions"><?php echo $options["rsvp_instructions"];?></textarea>
 	<br />
 					<h3>Confirmation Message:</h3>
-  <textarea name="option[rsvp_confirm]"  rows="5" cols="80" id="rsvp_confirm"><?=$options["rsvp_confirm"]?></textarea>
+  <textarea name="option[rsvp_confirm]"  rows="5" cols="80" id="rsvp_confirm"><?php echo $options["rsvp_confirm"];?></textarea>
 	<br />
 					<h3>RSVP Link:</h3>
-  <textarea name="option[rsvplink]"  rows="5" cols="80" id="rsvplink"><?=$options["rsvplink"]?></textarea>
+  <textarea name="option[rsvplink]"  rows="5" cols="80" id="rsvplink"><?php echo $options["rsvplink"];?></textarea>
 	<br />
 					<h3>Date Format (long):</h3>
-  <input type="text" name="option[long_date]"  id="long_date" value="<?=$options["long_date"]?>" /> (used in event display, PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date format string</a>)
+  <input type="text" name="option[long_date]"  id="long_date" value="<?php echo $options["long_date"];?>" /> (used in event display, PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date format string</a>)
 	<br />
 					<h3>Date Format (short):</h3>
-  <input type="text" name="option[short_date]"  id="short_date" value="<?=$options["short_date"]?>" /> (used in headlines for event_listing shortcode)
+  <input type="text" name="option[short_date]"  id="short_date" value="<?php echo $options["short_date"];?>" /> (used in headlines for event_listing shortcode)
 	<br />
 <h3>Time Format:</h3>
 <p>
-<input type="radio" name="option[time_format]" value="g:i A" <?php if($options["time_format"] == "g:i A") echo ' checked="checked"'; ?> /> 12 hour AM/PM 
-<input type="radio" name="option[time_format]" value="H:i" <?php if($options["time_format"] == "H:i") echo ' checked="checked"'; ?> /> 24 hour 
+<input type="radio" name="option[time_format]" value="g:i A" <?php if($options["time_format"] == "g:i A") echo ' checked="checked"';?> /> 12 hour AM/PM 
+<input type="radio" name="option[time_format]" value="H:i" <?php if($options["time_format"] == "H:i") echo ' checked="checked"';?> /> 24 hour 
 
 <br />
 					<h3>Event Page:</h3>
-  <input type="text" name="option[eventpage]" value="<?=$options["eventpage"]?>" size="80" />
+  <input type="text" name="option[eventpage]" value="<?php echo $options["eventpage"];?>" size="80" />
 
 <br /><h3>Custom CSS:</h3>
-  <input type="text" name="option[custom_css]" value="<?=$options["custom_css"]?>" size="80" />
+  <input type="text" name="option[custom_css]" value="<?php echo $options["custom_css"];?>" size="80" />
 <?php
 if($options["custom_css"])
 	{
@@ -526,11 +526,11 @@ if($options["custom_css"])
 $dstyle = WP_PLUGIN_URL . '/rsvpmaker/style.css';
 ?>
 
-    <br /><em>Allows you to override the standard styles from <br /><a href="<?=$dstyle?>"><?=$dstyle?></a></em>
+    <br /><em>Allows you to override the standard styles from <br /><a href="<?php echo $dstyle;?>"><?php echo $dstyle;?></a></em>
 
 
 <br />					<h3>PayPal Configuration File:</h3>
-  <input type="text" name="option[paypal_config]" value="<?=$options["paypal_config"]?>" size="80" />
+  <input type="text" name="option[paypal_config]" value="<?php echo $options["paypal_config"];?>" size="80" />
 <?php
 if($config = $options["paypal_config"])
 if(file_exists($config) )
@@ -538,24 +538,24 @@ if(file_exists($config) )
 else
 	echo ' <span style="color: red;">error: file not found</span>';
 
-?>	
+;?>	
     <br /><em>To enable PayPal payments, you must manually create a configuration file. Sample config file included with distribution. Must be manually configured. For security reasons, we recommend storing the file outside of web root. For example, /home/account/paypal_config.php where web content is stored in /home/account/public_html/</em>
     
     <br />
 <h3>PEAR Spredsheet Writer:</h3>
-  <input type="checkbox" name="option[pear_spreadsheet]" value="1" <?php if($options["pear_spreadsheet"]) echo ' checked="checked" '; ?> /> Enable spreadsheet downloads of RSVP Reports. You must manually install the <a href="http://pear.php.net/package/Spreadsheet_Excel_Writer">PEAR Spreadsheet Writer</a> 
+  <input type="checkbox" name="option[pear_spreadsheet]" value="1" <?php if($options["pear_spreadsheet"]) echo ' checked="checked" ';?> /> Enable spreadsheet downloads of RSVP Reports. You must manually install the <a href="http://pear.php.net/package/Spreadsheet_Excel_Writer">PEAR Spreadsheet Writer</a> 
 	<br />
 <h3>Tweak Permalinks:</h3>
-  <input type="checkbox" name="option[flush]" value="1" <?php if($options["flush"]) echo ' checked="checked" '; ?> /> Check here if you are getting &quot;page not found&quot; errors for event content (should not be necessary for most users). 
+  <input type="checkbox" name="option[flush]" value="1" <?php if($options["flush"]) echo ' checked="checked" ';?> /> Check here if you are getting &quot;page not found&quot; errors for event content (should not be necessary for most users). 
 	<br />
 <h3>Debug:</h3>
-  <input type="checkbox" name="option[debug]" value="1" <?php if($options["debug"]) echo ' checked="checked" '; ?> /> Check here to display debugging variables. 
+  <input type="checkbox" name="option[debug]" value="1" <?php if($options["debug"]) echo ' checked="checked" ';?> /> Check here to display debugging variables. 
 	<br />
 <h3>Menu Security:</h3>
   <select name="option[menu_security]" id="menu_security">
-  <option value="manage_options" <?php if($options["menu_security"] == 'manage_options') echo ' selected="selected" '; ?> >Administrator</option>
-  <option value="edit_others_posts" <?php if($options["menu_security"] == 'edit_others_posts') echo ' selected="selected" '; ?> >Editor</option>
-  <option value="edit_posts" <?php if($options["menu_security"] == 'edit_posts') echo ' selected="selected" '; ?> >Contributor</option>
+  <option value="manage_options" <?php if($options["menu_security"] == 'manage_options') echo ' selected="selected" ';?> >Administrator</option>
+  <option value="edit_others_posts" <?php if($options["menu_security"] == 'edit_others_posts') echo ' selected="selected" ';?> >Editor</option>
+  <option value="edit_posts" <?php if($options["menu_security"] == 'edit_posts') echo ' selected="selected" ';?> >Contributor</option>
   </select> Security level required to access custom menus (RSVP Report, Documentation)
 <br />
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
@@ -670,14 +670,14 @@ if($_POST)
 
 global $rsvp_options;
 
-?>
+;?>
 <div class="wrap"> 
 	<div id="icon-edit" class="icon32"><br /></div> 
 <h2>Multiple Events</h2> 
 
 <p>Use this form to enter multiple events quickly with basic formatting.</p>
 
-<form id="form1" name="form1" method="post" action="<?=$_SERVER['REQUEST_URI']?>">
+<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
 <?php
 $today = '<option value="0">None</option>';
 for($i=0; $i < 10; $i++)
@@ -689,14 +689,14 @@ $y2 = $y+1;
 
 wp_nonce_field(-1,'add_date'.$i);
 ?>
-<p>Headline: <input type="text" name="title[<?=$i?>]" /></p>
-<p><textarea name="body[<?=$i?>]" rows="5" cols="80"><?=$rsvp_options["default_content"]?></textarea></p>
+<p>Headline: <input type="text" name="title[<?php echo $i;?>]" /></p>
+<p><textarea name="body[<?php echo $i;?>]" rows="5" cols="80"><?php echo $rsvp_options["default_content"];?></textarea></p>
 
-<div id="recur_date<?=$i?>" style="border-bottom: thin solid #888;">
+<div id="recur_date<?php echo $i;?>" style="border-bottom: thin solid #888;">
 
 Month: 
-              <select name="recur_month[<?=$i?>]"> 
-              <option value="<?=$m?>"><?=$m?></option> 
+              <select name="recur_month[<?php echo $i;?>]"> 
+              <option value="<?php echo $m;?>"><?php echo $m;?></option> 
               <option value="1">1</option> 
               <option value="2">2</option> 
               <option value="3">3</option> 
@@ -711,8 +711,8 @@ Month:
               <option value="12">12</option> 
               </select> 
             Day 
-            <select name="recur_day[<?=$i?>]"> 
-              <?=$today?> 
+            <select name="recur_day[<?php echo $i;?>]"> 
+              <?php echo $today;?> 
               <option value="1">1</option> 
               <option value="2">2</option> 
               <option value="3">3</option> 
@@ -746,12 +746,12 @@ Month:
               <option value="31">31</option> 
             </select> 
             Year
-            <select name="recur_year[<?=$i?>]"> 
-              <option value="<?=$y?>"><?=$y?></option> 
-              <option value="<?=$y2?>"><?=$y2?></option> 
+            <select name="recur_year[<?php echo $i;?>]"> 
+              <option value="<?php echo $y;?>"><?php echo $y;?></option> 
+              <option value="<?php echo $y2;?>"><?php echo $y2;?></option> 
             </select> 
 
-Hour: <select name="recur_hour[<?=$i?>]"> 
+Hour: <select name="recur_hour[<?php echo $i;?>]"> 
  
 <option  value="00">12 a.m.</option> 
 <option  value="1">1 a.m.</option> 
@@ -778,7 +778,7 @@ Hour: <select name="recur_hour[<?=$i?>]">
 <option  value="22">10 p.m.</option> 
 <option  value="23">11 p.m.</option></select> 
  
-Minutes: <select name="recur_minutes[<?=$i?>]"> 
+Minutes: <select name="recur_minutes[<?php echo $i;?>]"> 
 <option value="00">00</option> 
 <option value="00">00</option> 
 <option value="15">15</option> 
@@ -789,7 +789,7 @@ Minutes: <select name="recur_minutes[<?=$i?>]">
 </div>
 <?php
 } // end for loop
-?>
+;?>
 
 <input type="submit" name="button" id="button" value="Submit" />
 </form>
@@ -859,7 +859,7 @@ if($_POST["recur-title"])
 
 global $rsvp_options;
 
-?>
+;?>
 <div class="wrap"> 
 	<div id="icon-edit" class="icon32"><br /></div> 
 <h2>Recurring Event</h2> 
@@ -898,7 +898,7 @@ $y2 = $y+1;
 
 if(!$_GET["week"])
 {
-?>
+;?>
 
 <p>Use this form to create multiple events with the same headline, description, and RSVP paramaters. You can have the program automatically calculate dates for a regular montly schedule.</p>
 
@@ -934,11 +934,11 @@ if(!$_GET["week"])
 <tr><td> Time:</td>
 
 <td>Hour: <select name="hour" id="hour">
-<?=$houropt?>
+<?php echo $houropt;?>
 </select>
 
 Minutes: <select id="minutes" name="minutes">
-<?=$minopt?>
+<?php echo $minopt;?>
 </select> 
 
 <em>For an event starting at 12:30 p.m., you would select 12 p.m. and 30 minutes.</em>
@@ -975,13 +975,13 @@ else
 echo "<p>Loading recurring series of dates for $week $dow. To omit a date in the series, change the day field to &quot;Not Set&quot;</p>\n";
 }
 
-?>
+;?>
 
 <h3>Enter Recurring Events</h3>
 
-<form id="form1" name="form1" method="post" action="<?=$_SERVER['REQUEST_URI']?>">
-<p>Headline: <input type="text" name="recur-title" size="60" value="<?=stripslashes($_POST["recur-title"])?>" /></p>
-<p><textarea name="recur-body" rows="5" cols="80"><?=($_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"]?></textarea></p>
+<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
+<p>Headline: <input type="text" name="recur-title" size="60" value="<?php echo stripslashes($_POST["recur-title"]);?>" /></p>
+<p><textarea name="recur-body" rows="5" cols="80"><?php echo ($_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"];?></textarea></p>
 <?php
 wp_nonce_field('recur','add_recur');
 
@@ -994,12 +994,12 @@ $y = date('Y',$ts);
 
 $y2 = $y+1;
 
-?>
-<div id="recur_date<?=$i?>" style="margin-bottom: 5px;">
+;?>
+<div id="recur_date<?php echo $i;?>" style="margin-bottom: 5px;">
 
 Month: 
-              <select name="recur_month[<?=$i?>]"> 
-              <option value="<?=$cm?>"><?=$cm?></option> 
+              <select name="recur_month[<?php echo $i;?>]"> 
+              <option value="<?php echo $cm;?>"><?php echo $cm;?></option> 
               <option value="1">1</option> 
               <option value="2">2</option> 
               <option value="3">3</option> 
@@ -1014,7 +1014,7 @@ Month:
               <option value="12">12</option> 
               </select> 
             Day 
-            <select name="recur_day[<?=$i?>]"> 
+            <select name="recur_day[<?php echo $i;?>]"> 
 <?php
 if($week)
 	echo sprintf('<option value="%s">%s</option>',$today,$today);
@@ -1053,9 +1053,9 @@ if($week)
               <option value="31">31</option> 
             </select> 
             Year
-            <select name="recur_year[<?=$i?>]"> 
-              <option value="<?=$y?>"><?=$y?></option> 
-              <option value="<?=$y2?>"><?=$y2?></option> 
+            <select name="recur_year[<?php echo $i;?>]"> 
+              <option value="<?php echo $y;?>"><?php echo $y;?></option> 
+              <option value="<?php echo $y2;?>"><?php echo $y2;?></option> 
             </select> 
 
 </div>
@@ -1064,26 +1064,26 @@ if($week)
 } // end for loop
 
 
-?>
-<p><?=__('Hour:','rsvpmaker')?> <select name="event_hour"> 
-<?=$houropt?>
+;?>
+<p><?php echo __('Hour:','rsvpmaker');?> <select name="event_hour"> 
+<?php echo $houropt;?>
 </select> 
  
-<?=__('Minutes:','rsvpmaker')?> <select name="event_minutes"> 
-<?=$minopt?>
+<?php echo __('Minutes:','rsvpmaker');?> <select name="event_minutes"> 
+<?php echo $minopt;?>
 </select> -
 
-<?=__('Duration','rsvpmaker')?> <select name="event_duration">
-<option value=""><?=__('Not set (optional)','rsvpmaker')?></option>
-<option value="allday"><?=__("All day/don't show time in headline",'rsvpmaker')?></option>
-<?php for($h = 1; $h < 24; $h++) { ?>
-<option value="<?=$h?>"><?=$h?> hours</option>
-<option value="<?=$h?>:15"><?=$h?>:15</option>
-<option value="<?=$h?>:30"><?=$h?>:30</option>
-<option value="<?=$h?>:45"><?=$h?>:45</option>
+<?php echo __('Duration','rsvpmaker');?> <select name="event_duration">
+<option value=""><?php echo __('Not set (optional)','rsvpmaker');?></option>
+<option value="allday"><?php echo __("All day/don't show time in headline",'rsvpmaker');?></option>
+<?php for($h = 1; $h < 24; $h++) { ;?>
+<option value="<?php echo $h;?>"><?php echo $h;?> hours</option>
+<option value="<?php echo $h;?>:15"><?php echo $h;?>:15</option>
+<option value="<?php echo $h;?>:30"><?php echo $h;?>:30</option>
+<option value="<?php echo $h;?>:45"><?php echo $h;?>:45</option>
 <?php 
 }
-?>
+;?>
 </select>
 </p>
 <?php
@@ -1091,7 +1091,7 @@ if($week)
 
 echo GetRSVPAdminForm(0);
 
-?>
+;?>
 
 <input type="submit" name="button" id="button" value="Submit" />
 </form>
@@ -1103,7 +1103,7 @@ echo GetRSVPAdminForm(0);
 
 
 function rsvpmaker_doc () {
-?>
+;?>
 <h2>Documentation</h2>
 <p>More detailed documentation at <a href="http://www.rsvpmaker.com/documentation/">http://www.rsvpmaker.com/documentation/</a></p>
 		    <h3>Shortcodes and Event Listing / Calendar Views</strong></h3>
@@ -1115,7 +1115,7 @@ function rsvpmaker_doc () {
 		    <p>[rsvpmaker_upcoming type=&quot;featured&quot;] Displays only the events of the specified type (&quot;featured&quot; type available by default).</p>
             <p>[rsvpmaker_upcoming no_event="We're working on it. Check back soon"] specifies a custom message to display if there are no upcoming events in the database.</p>
             <div style="background-color: #FFFFFF; padding: 15px; text-align: center;">
-            <img src="<?=plugins_url()?>/rsvpmaker/shortcode.png" width="535" height="412" />
+            <img src="<?php echo plugins_url();?>/rsvpmaker/shortcode.png" width="535" height="412" />
 <br /><em>Contents for an events page.</em>
             </div>
             
@@ -1172,7 +1172,7 @@ if($_GET["author"])
 	mail("david@carrcommunications.com","RSVPMAKER DEBUG: $url", $output);
 	}
 
-?>
+;?>
 <h2>Debug</h2>
 <p>Use this screen to verify that RSVPMaker is recording data correctly or to share debugging information with the plugin author. If you send debugging info, follow up with a note to <a href="mailto:david@carrcommunications.com">david@carrcommunications.com</a> and explain what you need help with.</p>
 <form action="./edit.php" method="get">
@@ -1197,7 +1197,7 @@ Globals</label>
    <input type="submit" value="Show" />
 </form>
 <pre>
-<?=$output?>
+<?php echo $output;?>
 </pre>
 <?php
 }
@@ -1283,4 +1283,4 @@ if(!$rsvp_options["posttypecheck"])
 
 add_action('admin_notices', 'rsvpmaker_admin_notice');
 
-?>
+;?>

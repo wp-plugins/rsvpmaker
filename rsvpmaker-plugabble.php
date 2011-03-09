@@ -44,37 +44,37 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 	$rsvp_show_attendees = $rsvp_options["show_attendees"];
 	}
 //get_post_meta($post->ID, '_rsvp_on', true)
-?>
+;?>
 <p>
-  <input type="checkbox" name="setrsvp[on]" id="setrsvp[on]" value="1" <?php if( $rsvp_on ) echo 'checked="checked" '; ?> />
-<?=__('Collect RSVPs','rsvpmaker')?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> '; ?>
+  <input type="checkbox" name="setrsvp[on]" id="setrsvp[on]" value="1" <?php if( $rsvp_on ) echo 'checked="checked" ';?> />
+<?php echo __('Collect RSVPs','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
 
-<br />  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" '; ?> />
-<?=__(' Display attendee names and content of note field publicly','rsvpmaker')?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> '; ?>
+<br />  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" ';?> />
+<?php echo __(' Display attendee names and content of note field publicly','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
 
 </p>
 
 <div id="rsvpoptions">
-<?=__('Email Address for Notifications','rsvpmaker')?>: <input id="setrsvp[to]" name="setrsvp[to]" type="text" value="<?=$rsvp_to?>"><br />
-<br /><?=__('Instructions for User','rsvpmaker')?>:<br />
-<textarea id="rsvp[instructions]" name="setrsvp[instructions]" cols="80"><?=$rsvp_instructions?></textarea>
-<br /><?=__('Confirmation Message','rsvpmaker')?>:<br />
-<textarea id="rsvp[confirm]" name="setrsvp[confirm]" cols="80"><?=$rsvp_confirm?></textarea>
+<?php echo __('Email Address for Notifications','rsvpmaker');?>: <input id="setrsvp[to]" name="setrsvp[to]" type="text" value="<?php echo $rsvp_to;?>"><br />
+<br /><?php echo __('Instructions for User','rsvpmaker');?>:<br />
+<textarea id="rsvp[instructions]" name="setrsvp[instructions]" cols="80"><?php echo $rsvp_instructions;?></textarea>
+<br /><?php echo __('Confirmation Message','rsvpmaker');?>:<br />
+<textarea id="rsvp[confirm]" name="setrsvp[confirm]" cols="80"><?php echo $rsvp_confirm;?></textarea>
 
 <br /><strong>Special Options</strong>
 
-<table><tr><td><?=__('Deadline (optional)','rsvpmaker').'</td><td> '.__('Month','rsvpmaker')?>: <input type="text" name="deadmonth" id="deadmonth" value="<?=$deadmonth?>" size="2" /> <?=__('Day','rsvpmaker')?>: <input type="text" name="deadday" id="deadday" value="<?=$deadday?>" size="2" /> <?=__('Year','rsvpmaker')?>: 
-<input type="text" name="deadyear" id="deadyear" value="<?=$deadyear?>" size="4" /> (<?=__('stop collecting RSVPs at midnight','rsvpmaker')?>)</td></tr>
+<table><tr><td><?php echo __('Deadline (optional)','rsvpmaker').'</td><td> '.__('Month','rsvpmaker');?>: <input type="text" name="deadmonth" id="deadmonth" value="<?php echo $deadmonth;?>" size="2" /> <?php echo __('Day','rsvpmaker');?>: <input type="text" name="deadday" id="deadday" value="<?php echo $deadday;?>" size="2" /> <?php echo __('Year','rsvpmaker');?>: 
+<input type="text" name="deadyear" id="deadyear" value="<?php echo $deadyear;?>" size="4" /> (<?php echo __('stop collecting RSVPs at midnight','rsvpmaker');?>)</td></tr>
 
-<tr><td><?=__('Start Date (optional)','rsvpmaker').'</td><td>'.__('Month','rsvpmaker')?>: <input type="text" name="startmonth" id="startmonth" value="<?=$startmonth?>" size="2" /> <?=__('Day','rsvpmaker')?>: <input type="text" name="startday" id="startday" value="<?=$startday?>" size="2" /> <?=__('Year','rsvpmaker')?>: 
-<input type="text" name="startyear" id="startyear" value="<?=$startyear?>" size="4" /> (<?=__('start collecting RSVPs','rsvpmaker')?>)</td></tr></table>
+<tr><td><?php echo __('Start Date (optional)','rsvpmaker').'</td><td>'.__('Month','rsvpmaker');?>: <input type="text" name="startmonth" id="startmonth" value="<?php echo $startmonth;?>" size="2" /> <?php echo __('Day','rsvpmaker');?>: <input type="text" name="startday" id="startday" value="<?php echo $startday;?>" size="2" /> <?php echo __('Year','rsvpmaker');?>: 
+<input type="text" name="startyear" id="startyear" value="<?php echo $startyear;?>" size="4" /> (<?php echo __('start collecting RSVPs','rsvpmaker');?>)</td></tr></table>
 
-<br /><?=__('Maximum participants','rsvpmaker')?> <input type="text" name="setrsvp[max]" id="setrsvp[max]" value="<?=$rsvp_max?>" size="4" /> (<?=__('0 for none specified','rsvpmaker')?>)
-<br /><?=__('Time Slots','rsvpmaker')?>:
+<br /><?php echo __('Maximum participants','rsvpmaker');?> <input type="text" name="setrsvp[max]" id="setrsvp[max]" value="<?php echo $rsvp_max;?>" size="4" /> (<?php echo __('0 for none specified','rsvpmaker');?>)
+<br /><?php echo __('Time Slots','rsvpmaker');?>:
 
 <select name="setrsvp[timeslots]" id="setrsvp[timeslots]">
 <option value="0">None</option>
-<option value="0:30" <?php if($custom_fields["_rsvp_timeslots"][0] == '0:30') echo ' selected = "selected" '; ?> >30 minutes</option>
+<option value="0:30" <?php if($custom_fields["_rsvp_timeslots"][0] == '0:30') echo ' selected = "selected" ';?> >30 minutes</option>
 <?php
 $tslots = (int) $custom_fields["_rsvp_timeslots"][0];
 for($i = 1; $i < 13; $i++)
@@ -82,17 +82,17 @@ for($i = 1; $i < 13; $i++)
 	$selected = ($i == $tslots) ? ' selected = "selected" ' : '';
 	echo '<option value="'.$i.'" '.$selected.">$i-hour slots</option>";
 	}
-?>
+;?>
 </select>
-<br /><em><?=__('Used for volunteer shift signups. Duration must also be set.','rsvpmaker')?></em>
+<br /><em><?php echo __('Used for volunteer shift signups. Duration must also be set.','rsvpmaker');?></em>
 <br />
 
 <?php
 if($rsvp_options["paypal_config"])
 {
 ?>
-<p><strong><?=__('Pricing for Online Payments','rsvpmaker')?></strong></p>
-<p><?=__('You can set a different price for members vs. non-members, adults vs. children, etc.','rsvpmaker')?></p>
+<p><strong><?php echo __('Pricing for Online Payments','rsvpmaker');?></strong></p>
+<p><?php echo __('You can set a different price for members vs. non-members, adults vs. children, etc.','rsvpmaker');?></p>
 <?php
 
 if($custom_fields["_per"][0])
@@ -103,8 +103,8 @@ else
 for($i=0; $i < 5; $i++)
 {
 ?>
-Units: <input name="unit[<?=$i?>]" value="<?=$per["unit"][$i]?>" /> @
-Price: $<input name="price[<?=$i?>]" value="<?=$per["price"][$i]?>" />
+Units: <input name="unit[<?php echo $i;?>]" value="<?php echo $per["unit"][$i];?>" /> @
+Price: $<input name="price[<?php echo $i;?>]" value="<?php echo $per["price"][$i];?>" />
 <br />
 <?php
 }
@@ -180,7 +180,8 @@ $lowercount = preg_match_all('/[a-z]/',$rtxt,$lower);
 $diff = abs($uppercount - $lowercount);
 $diff = ($diff) ? $diff : 1;
 $diffratio = $diff / ($lowercount + $uppercount);
-if($diffratio < .5)
+
+if($diffratio < .6)
 	{
 	header('Location: '.$req_uri.'&err=Invalid input');
 	exit();
@@ -558,7 +559,7 @@ if(!function_exists('paypal_error'))
 function paypal_error() {
 
 $resArray=$_SESSION['reshash']; 
-?>
+;?>
 
 <h1>PayPal Error</h1>
 <p>
@@ -567,12 +568,12 @@ $resArray=$_SESSION['reshash'];
 			$errorCode= $_SESSION['curl_error_no'] ;
 			$errorMessage=$_SESSION['curl_error_msg'] ;	
 			session_unset();	
-?>
+;?>
 
    
-Error Number: <?= $errorCode ?><br />
+Error Number: <?php echo  $errorCode ;?><br />
 Error Message:
-		<?= $errorMessage ?>
+		<?php echo  $errorMessage ;?>
 	<br />
 	
 <?php } else {
@@ -580,18 +581,18 @@ Error Message:
 /* If there is no URL Errors, Construct the HTML page with 
    Response Error parameters.   
    */
-?>
+;?>
 
 		Ack:
-		<?= $resArray['ACK'] ?>
+		<?php echo  $resArray['ACK'] ;?>
 	<br />
 	
 		Correlation ID:
-		<?= $resArray['CORRELATIONID'] ?>
+		<?php echo  $resArray['CORRELATIONID'] ;?>
 	<br />
 	
 		Version:
-		<?= $resArray['VERSION']?>
+		<?php echo  $resArray['VERSION'];?>
 	<br />
 <?php
 	$count=0;
@@ -600,18 +601,18 @@ Error Message:
 		  $shortMessage = $resArray["L_SHORTMESSAGE".$count];
 		  $longMessage  = $resArray["L_LONGMESSAGE".$count]; 
 		  $count=$count+1; 
-?>
+;?>
 	
 		Error Number:
-		<?= $errorCode ?>
+		<?php echo  $errorCode ;?>
 	<br />
 	
 		Short Message:
-		<?= $shortMessage ?>
+		<?php echo  $shortMessage ;?>
 	<br />
 	
 		Long Message:
-		<?= $longMessage ?>
+		<?php echo  $longMessage ;?>
 	<br />
 	
 <?php }//end while
@@ -625,7 +626,7 @@ if(!function_exists('event_scripts'))
 {
 function event_scripts() {
 global $post;
-global $rsvpmaker_options;
+global $rsvp_options;
 
 if( ($post->post_type == 'rsvpmaker') || strstr($post->post_content,'[rsvpmaker_') )
 	{
@@ -642,23 +643,23 @@ if(!function_exists('basic_form') ) {
 function basic_form($profile, $guestedit = '')
 {
 //be cautious if you override this function. RSVPMaker expects tog get at least name and email address as identifiers for people who respond, and the first and last name fields are also used for alphabetical sorting and searching of RSVP records
-?>
+;?>
         <table border="0" cellspacing="0" cellpadding="0"> 
           <tr> 
-            <td><?=__('First Name','rsvpmaker')?>:</td> 
+            <td><?php echo __('First Name','rsvpmaker');?>:</td> 
             <td> 
-              <input name="profile[first]" type="text" id="first" size="60"  value="<?=$profile["first"]?>"  /> 
+              <input name="profile[first]" type="text" id="first" size="60"  value="<?php echo $profile["first"];?>"  /> 
             </td> 
           </tr> 
           <tr> 
-            <td><?=__('Last Name','rsvpmaker')?>:</td> 
+            <td><?php echo __('Last Name','rsvpmaker');?>:</td> 
             <td> 
-              <input name="profile[last]" type="text" id="last" size="60"  value="<?=$profile["last"]?>"  /> 
+              <input name="profile[last]" type="text" id="last" size="60"  value="<?php echo $profile["last"];?>"  /> 
             </td> 
           </tr> 
           <tr> 
-            <td width="100"><?=__('Email','rsvpmaker')?>:</td>
-            <td><input name="profile[email]" type="text" id="rsvp[email]" size="60" value="<?=$profile["email"]?>" /></td> 
+            <td width="100"><?php echo __('Email','rsvpmaker');?>:</td>
+            <td><input name="profile[email]" type="text" id="rsvp[email]" size="60" value="<?php echo $profile["email"];?>" /></td> 
           </tr> 
   </table> 
 
@@ -671,10 +672,10 @@ rsvp_profile($profile);
 <!-- end of profile section-->      
 
 <!-- guest section -->
-        <p id="guest_section"><strong><?=__('Guests','rsvpmaker')?>:</strong> <?=__('If you are bringing guests, please enter their names here','rsvpmaker')?></p>
-        <?=$guestedit?>
-        <div class="guest_blank"><?=__('First Name','rsvpmaker')?>: <input type="text" name="guestfirst[]" /> <?=__('Last Name','rsvpmaker')?>: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>
-        <a href="#guest_section" id="add_guests" name="add_guests">(+) <?=__('Add more guests','rsvpmaker')?></a></p>
+        <p id="guest_section"><strong><?php echo __('Guests','rsvpmaker');?>:</strong> <?php echo __('If you are bringing guests, please enter their names here','rsvpmaker');?></p>
+        <?php echo $guestedit;?>
+        <div class="guest_blank"><?php echo __('First Name','rsvpmaker');?>: <input type="text" name="guestfirst[]" /> <?php echo __('Last Name','rsvpmaker');?>: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>
+        <a href="#guest_section" id="add_guests" name="add_guests">(+) <?php echo __('Add more guests','rsvpmaker');?></a></p>
 <script>
 jQuery(document).ready(function($) {
 
@@ -685,7 +686,7 @@ $('#add_guests').click(function(){
 </script>
 <!-- end of guest section-->              
         
-<p><?=__('Note','rsvpmaker')?>:<br /> 
+<p><?php echo __('Note','rsvpmaker');?>:<br /> 
 <textarea name="note" cols="60" rows="2" id="note"></textarea> 
 </p> 
 
@@ -699,19 +700,19 @@ function rsvp_profile($profile) {
 
 if($profile["phone"])
 	{
-?>
+;?>
 <p id="profiledetails"><?php printf( __('Phone # on file.<br />To update profile, 
 or RSVP for someone else <a href="%s">fetch a blank 
-form</a>','rsvpmaker'),get_permalink() ); ?></p>
+form</a>','rsvpmaker'),get_permalink() );?></p>
 <input type="hidden" name="onfile" value="1" />
 <?php
 	}
 else
 	{
-?>
+;?>
 <table border="0" cellspacing="0" cellpadding="0"> 
   <tr> 
-	<td width="100"><?=__('Phone','rsvpmaker')?>:</td> 
+	<td width="100"><?php echo __('Phone','rsvpmaker');?>:</td> 
 	<td>
 		<input name="profile[phone]" type="text" id="phone" 
 
@@ -719,14 +720,14 @@ size="20" value="" />
 	</td> 
   </tr> 
   <tr> 
-	<td><?=__('Phone Type','rsvpmaker')?>:</td> 
+	<td><?php echo __('Phone Type','rsvpmaker');?>:</td> 
 	<td> 
 	  <select name="profile[phonetype]" id="phonetype"> 
 		<option> 
 		</option> 
-		<option><?=__('Work Phone','rsvpmaker')?></option> 
-		<option><?=__('Mobile Phone','rsvpmaker')?></option> 
-		<option><?=__('Home Phone','rsvpmaker')?></option> 
+		<option><?php echo __('Work Phone','rsvpmaker');?></option> 
+		<option><?php echo __('Mobile Phone','rsvpmaker');?></option> 
+		<option><?php echo __('Home Phone','rsvpmaker');?></option> 
 	  </select></td> 
   </tr> 
 </table>
@@ -890,30 +891,30 @@ elseif($rsvp_on && is_single() )
 	ob_start();
 	echo '<div id="rsvpsection">';
 
-?>
+;?>
 
-<form id="rsvpform" action="<?=$permalink?>" method="post">
+<form id="rsvpform" action="<?php echo $permalink;?>" method="post">
 
-<h3 id="rsvpnow"><?=__('RSVP Now!','rsvpmaker')?></h3> 
+<h3 id="rsvpnow"><?php echo __('RSVP Now!','rsvpmaker');?></h3> 
 
-  <?php if($rsvp_instructions) echo '<p>'.nl2br($rsvp_instructions).'</p>'; ?>
+  <?php if($rsvp_instructions) echo '<p>'.nl2br($rsvp_instructions).'</p>';?>
 
-  <?php if($rsvp_show_attendees) echo '<p class="rsvp_status">'.__('Names of attendees will be displayed publicly, along with the contents of the notes field.','rsvpmaker').'</p>'; ?>
+  <?php if($rsvp_show_attendees) echo '<p class="rsvp_status">'.__('Names of attendees will be displayed publicly, along with the contents of the notes field.','rsvpmaker').'</p>';?>
    
-  <p><?=__('Your Answer','rsvpmaker')?>:
-            <input name="yesno" type="radio" value="1" <?=($rsvprow["yesno"] || !$rsvprow) ? 'checked="checked"' : ''?> /> 
-    <?=__('Yes','rsvpmaker')?>
+  <p><?php echo __('Your Answer','rsvpmaker');?>:
+            <input name="yesno" type="radio" value="1" <?php echo ($rsvprow["yesno"] || !$rsvprow) ? 'checked="checked"' : '';?> /> 
+    <?php echo __('Yes','rsvpmaker');?>
     <input name="yesno" type="radio" value="0" /> 
-    <?=__('No','rsvpmaker')?></p> 
+    <?php echo __('No','rsvpmaker');?></p> 
 <?php
 
 wp_nonce_field('rsvp','rsvp_nonce');
 
 if($dur && ( $slotlength = $custom_fields["_rsvp_timeslots"][0] ))
 {
-?>
+;?>
 
-<div><?=__('Number of Participants','rsvpmaker')?>: <select name="participants">
+<div><?php echo __('Number of Participants','rsvpmaker');?>: <select name="participants">
     <option value="1">1</option>
     <option value="2">2</option>
     <option value="3">3</option>
@@ -926,7 +927,7 @@ if($dur && ( $slotlength = $custom_fields["_rsvp_timeslots"][0] ))
     <option value="10">10</option>
   </select></div>
 
-<div><?=__('Choose timeslots','rsvpmaker')?></div>
+<div><?php echo __('Choose timeslots','rsvpmaker');?></div>
 <?php
 $t = strtotime($firstrow["datetime"]);
 $dur = $firstrow["duration"];
@@ -978,7 +979,7 @@ basic_form($profile, $guestedit);
 ?>
 
         <p> 
-		  <input type="hidden" name="event" value="<?=$post->ID?>" /> 
+		  <input type="hidden" name="event" value="<?php echo $post->ID;?>" /> 
           <input type="submit" id="rsvpsubmit" name="Submit" value="Submit" /> 
         </p> 
 
@@ -1077,17 +1078,11 @@ JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->pre
 <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=alpha">Alpha Order</a> <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=timestamp">Most Recent First</a>		
 		</div>';
 		echo '<p><a href="'.$_SERVER['REQUEST_URI'].'&rsvp_print='.wp_create_nonce('rsvp_print').'" target="_blank" >Format for printing</a></p>';	
+		echo '<p><a href="#excel">Download to Excel</a></p>';
 		}
-if($rsvp_options["pear_spreadsheet"])
-{
-$excel_url = plugins_url().'/rsvpmaker/excel_rsvp.php?event='.$eventid;
-	
-	echo '<p><a href="'.$excel_url.'">Download to Excel</a></p>';
-
-}
 
 	$rsvp_order = ($_GET["rsvp_order"] == 'alpha') ? ' ORDER BY yesno DESC, last, first' : ' ORDER BY yesno DESC, timestamp DESC';
-	$sql = "SELECT id, yesno,first,last,email, details, guestof, note,timestamp FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid $rsvp_order";
+	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid $rsvp_order";
 	$wpdb->show_errors();
 	$results = $wpdb->get_results($sql, ARRAY_A);
 	
@@ -1162,6 +1157,7 @@ function format_rsvp_details($results) {
 	global $rsvp_options;
 	
 	if($results)
+	$fields = array('yesno','first','last','email','guestof','amountpaid');
 	foreach($results as $index => $row)
 		{
 		$row["yesno"] = ($row["yesno"]) ? "YES" : "NO";
@@ -1175,8 +1171,11 @@ function format_rsvp_details($results) {
 			{
 			$details = unserialize($row["details"]);
 			foreach($details as $name => $value)
-				if($value)
+				if($value) {
 					echo "$name: $value<br />";
+					if(!in_array($name,$fields) )
+						$fields[] = $name;
+					}
 			}
 		if($row["note"])
 			echo "note: " . nl2br($row["note"])."<br />";
@@ -1188,8 +1187,125 @@ function format_rsvp_details($results) {
 			echo sprintf('<p><a href="%s&delete=%d">Delete record for: %s %s</a></p>',admin_url().'edit.php?post_type=rsvpmaker&page=rsvp',$row["id"],$row["first"],$row["last"]);
 		}
 
+if($fields && !$_GET["rsvp_print"])
+	{
+	$fields[]='note'; 
+;?>
+<div id="excel" name="excel" style="padding: 10px; border: thin dotted #333; width: 300px;margin-top: 30px;">
+<h3>Download to Excel</h3>
+<form method="get" action="edit.php">
+<?php
+foreach($_GET as $name => $value)
+	echo sprintf('<input type="hidden" name="%s" value="%s" />',$name,$value);
+
+foreach($fields as $field)
+	echo '<input type="checkbox" name="fields[]" value="'.$field.'" checked="checked" /> '.$field . "<br />\n";
+wp_nonce_field('rsvpexcel','rsvpexcel');
+?>
+<button>Get Spreadsheet</button>
+</form>
+</div>
+<?php
+	}
+
 echo "</div>\n";
 } } // end format_rsvp_details
+
+function rsvp_excel() {
+if(!$_GET["rsvpexcel"])
+	return;
+if ( !wp_verify_nonce($_GET['rsvpexcel'],'rsvpexcel') )
+{
+   print 'Sorry, your nonce did not verify.';
+   exit;
+}
+global $wpdb;
+$fields = $_GET["fields"];
+$eventid = (int) $_GET["event"];
+
+include WP_PLUGIN_DIR.'/rsvpmaker/excel.php';
+	
+	$sql = "SELECT post_title FROM ".$wpdb->posts." WHERE ID = $eventid";
+	$title = $wpdb->get_var($sql);
+
+$workbook = new Spreadsheet_Excel_Writer();
+// sending HTTP headers
+$workbook->send("event-$eventid-rsvp.xls");
+
+// set up formats
+$format_bold =& $workbook->addFormat();
+$format_bold->setBold();
+$format_bold->setSize(9);
+
+$format_title =& $workbook->addFormat();
+$format_title->setBold();
+$format_title->setSize(12);
+// let's merge
+$format_title->setAlign('merge');
+
+$format_wrap =& $workbook->addFormat();
+$format_wrap->setTextWrap();
+$format_wrap->setAlign('top');
+$format_wrap->setSize(9);
+$format_wrap->setBorder(1);
+
+$amt_format =& $workbook->addFormat();
+$amt_format->setNumFormat('0.00');
+$amt_format->setBold();
+$amt_format->setAlign('left');
+$amt_format->setAlign('top');
+$amt_format->setBorder(1);
+$amt_format->setSize(9);
+
+$format_border =& $workbook->addFormat();
+$format_border->setBorder(1);
+$format_border->setAlign('top');
+$format_border->setSize(9);
+
+// Creating a worksheet
+$worksheet =& $workbook->addWorksheet('RSVPs');
+$worksheet->setHeader('&R RSVPs for  ' . $title . ' Page &P of &N',0.5);
+
+// row headers 1
+$worksheet->setLandscape();
+$worksheet->setMargins(0.5);
+$worksheet->setMarginTop(1.0);
+$worksheet->repeatRows(0,0);
+
+$index = 0;
+foreach($fields as $column => $name )
+{
+$worksheet->write($index, $column, $name, $format_bold);
+if($name == "email")
+	$worksheet->setColumn($column,$column, 30);
+elseif($name == "answer")
+	$worksheet->setColumn($column,$column, 8);
+else
+	$worksheet->setColumn($column,$column, 20);
+}
+
+	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid ORDER BY yesno DESC, last, first";
+	$results = $wpdb->get_results($sql, ARRAY_A);
+	
+	foreach($results as $index => $row)
+		{
+		$index++;
+		$row["yesno"] = ($row["yesno"]) ? "YES" : "NO";
+		if($row["details"])
+			{
+			$details = unserialize($row["details"]);
+			$row = array_merge($row,$details);
+			}
+		foreach($fields as $column => $name )
+			$worksheet->write($index, $column, $row[$name], $format_wrap);
+		}
+$worksheet->write($index+3, 2, "RSVPs for ".$title, $format_title);
+
+$workbook->close();
+exit();
+}
+
+add_action('admin_init','rsvp_excel');
 
 if(!function_exists('rsvp_print') ) {
 function rsvp_print() {
@@ -1276,8 +1392,8 @@ $attendees = $wpdb->get_results($sql);
 echo '<div class="attendee_list">';
 foreach($attendees as $row)
 	{
-?>
-<h3 class="attendee"><?=$row->first?> <?=$row->last?></h3>
+;?>
+<h3 class="attendee"><?php echo $row->first;?> <?php echo $row->last;?></h3>
 <?php	
 if($row->note);
 echo wpautop($row->note);
