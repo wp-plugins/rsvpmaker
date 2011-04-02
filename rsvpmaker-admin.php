@@ -353,7 +353,7 @@ add_action('save_post','save_calendar_data');
           // Initialize the plugin
           function RSVPMAKER_Options()
           {
-              $this->plugin_url = trailingslashit( WP_PLUGIN_URL.'/'. dirname( plugin_basename(__FILE__) ) );
+              $this->plugin_url = plugins_url('',__FILE__).'/';
 
               // add options Page
               add_action('admin_menu', array(&$this, 'admin_menu'));
@@ -523,7 +523,7 @@ if($options["custom_css"])
 		}
 
 	}
-$dstyle = WP_PLUGIN_URL . '/rsvpmaker/style.css';
+$dstyle = plugins_url('/rsvpmaker/style.css',__FILE__);
 ?>
 
     <br /><em>Allows you to override the standard styles from <br /><a href="<?php echo $dstyle;?>"><?php echo $dstyle;?></a></em>
@@ -1115,7 +1115,7 @@ function rsvpmaker_doc () {
 		    <p>[rsvpmaker_upcoming type=&quot;featured&quot;] Displays only the events of the specified type (&quot;featured&quot; type available by default).</p>
             <p>[rsvpmaker_upcoming no_event="We're working on it. Check back soon"] specifies a custom message to display if there are no upcoming events in the database.</p>
             <div style="background-color: #FFFFFF; padding: 15px; text-align: center;">
-            <img src="<?php echo plugins_url();?>/rsvpmaker/shortcode.png" width="535" height="412" />
+            <img src="<?php echo plugins_url('/shortcode.png',__FILE__);?>" width="535" height="412" />
 <br /><em>Contents for an events page.</em>
             </div>
             
