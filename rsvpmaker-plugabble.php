@@ -680,7 +680,7 @@ rsvp_profile($profile);
 jQuery(document).ready(function($) {
 
 $('#add_guests').click(function(){
-	$('.guest_blank').append('<div class="guest_blank">First: <input type="text" name="guestfirst[]" /> Last: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>');
+	$('.guest_blank').append('<div class="guest_blank">First Name: <input type="text" name="guestfirst[]" /> Last Name: <input type="text" name="guestlast[]" /><input type="hidden" name="guestid[]" value="0" /></div>');
 	});
 });
 </script>

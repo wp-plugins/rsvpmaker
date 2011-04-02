@@ -308,7 +308,7 @@ if($atts["type"])
 	$querystring .= "&rsvpmaker-type=".$atts["type"];
 
 $wpdb->show_errors();
-query_posts($querystring);
+$rq = new WP_Query($querystring);
 
 ob_start();
 
@@ -318,8 +318,8 @@ if($atts["calendar"] || ($atts["format"] == "calendar") )
 	echo event_listing($atts);
 	}
 	
-if ( have_posts() ) {
-while ( have_posts() ) : the_post();?>
+if ( $rq->have_posts() ) {
+while ( $rq->have_posts() ) : $rq->the_post();?>
 
 <div id="post-<?php the_ID();?>" <?php post_class(); ?>>
 <h1 class="entry-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h1>
@@ -338,7 +338,7 @@ endwhile;
 else
 	echo "<p>$no_events</p>\n";
 
-wp_reset_query();
+wp_reset_postdata();
 
 return ob_get_clean();
 
