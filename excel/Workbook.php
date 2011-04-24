@@ -32,12 +32,13 @@
 *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+//modifications for RSVPMaker
 require_once WP_PLUGIN_DIR.'/rsvpmaker/excel/Format.php';
 require_once WP_PLUGIN_DIR.'/rsvpmaker/excel/BIFFwriter.php';
 require_once WP_PLUGIN_DIR.'/rsvpmaker/excel/Worksheet.php';
 require_once WP_PLUGIN_DIR.'/rsvpmaker/excel/Parser.php';
-require_once 'OLE/PPS/Root.php';
-require_once 'OLE/PPS/File.php';
+require_once WP_PLUGIN_DIR.'/rsvpmaker/excel/OLE/PPS/Root.php';
+require_once WP_PLUGIN_DIR.'/rsvpmaker/excel/OLE/PPS/File.php';
 
 /**
 * Class for generating Excel Spreadsheets

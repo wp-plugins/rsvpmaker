@@ -542,9 +542,6 @@ else
     <br /><em>To enable PayPal payments, you must manually create a configuration file. Sample config file included with distribution. Must be manually configured. For security reasons, we recommend storing the file outside of web root. For example, /home/account/paypal_config.php where web content is stored in /home/account/public_html/</em>
     
     <br />
-<h3>PEAR Spredsheet Writer:</h3>
-  <input type="checkbox" name="option[pear_spreadsheet]" value="1" <?php if($options["pear_spreadsheet"]) echo ' checked="checked" ';?> /> Enable spreadsheet downloads of RSVP Reports. You must manually install the <a href="http://pear.php.net/package/Spreadsheet_Excel_Writer">PEAR Spreadsheet Writer</a> 
-	<br />
 <h3>Tweak Permalinks:</h3>
   <input type="checkbox" name="option[flush]" value="1" <?php if($options["flush"]) echo ' checked="checked" ';?> /> Check here if you are getting &quot;page not found&quot; errors for event content (should not be necessary for most users). 
 	<br />

@@ -3,8 +3,8 @@ Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
-Tested up to: 3.1
-Stable tag: 1.9.2
+Tested up to: 3.1.1
+Stable tag: 1.9.3
 
 Event scheduling and RSVP tracking.
 
@@ -18,7 +18,7 @@ If a fee is to be charged for the event, RSVPMaker can collect payments online u
 
 [__RSVPmaker.com__](http://www.rsvpmaker.com/)
 
-Also available at [__RSVPmaker.com__](http://www.rsvpmaker.com/): a prototype of ChimpBlast plugin for sending event invites and other email broadcasts through the MailChimp broadcast email service.
+Related plugin: [__ChimpBlast__](http://wordpress.org/extend/plugins/chimpblast/) for sending event invites and other email broadcasts through the MailChimp broadcast email service.
 
 == Installation ==
 
@@ -68,6 +68,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 1.9.3 =
+
+* Fix to code for downloading reports to Excel (bundling of PEAR libraries)
+* Changed loading of translation domain.
 
 = 1.9.1 =
 
