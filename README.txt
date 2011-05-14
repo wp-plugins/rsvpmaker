@@ -3,8 +3,8 @@ Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
-Tested up to: 3.1.1
-Stable tag: 1.9.4
+Tested up to: 3.1.2
+Stable tag: 2.0
 
 Event scheduling and RSVP tracking.
 
@@ -14,7 +14,7 @@ RSVPmaker is an event scheduling and RSVP tracking plugin for WordPress, using t
 
 Site editors and administrators have the option to request RSVPs for any given event and specify an email address for notifications when someone responds. RSVP Reports can also be run from the administrator's dashboard.
 
-If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface or downloaded to Excel.
+If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface or downloaded to Excel. Download to Excel function now based on [PHPExcel](http://www.phpexcel.net/) library.
 
 [__RSVPmaker.com__](http://www.rsvpmaker.com/)
 
@@ -65,9 +65,13 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
     See the GNU General Public License at <http://www.gnu.org/licenses/>.
 	
 	RSVPMaker also includes code derived from the PayPal NVP API software
-	development kit for PHP.
+	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
 
 == Changelog ==
+
+= 2.0 =
+
+Fixed code for downloading reports to Excel (again), this time based on the [PHPExcel](http://www.phpexcel.net/) library
 
 = 1.9.3 =
 

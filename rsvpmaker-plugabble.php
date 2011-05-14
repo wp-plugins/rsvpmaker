@@ -1211,6 +1211,24 @@ wp_nonce_field('rsvpexcel','rsvpexcel');
 echo "</div>\n";
 } } // end format_rsvp_details
 
+// helper function for rsvp_excel
+function col2chr($a){ 
+$a++;
+        if($a<27){ 
+            return strtoupper(chr($a+96));    
+        }else{ 
+            while($a > 26){ 
+                $b++; 
+                $a = $a-26;                
+            }                   
+            $b = strtoupper(chr($b+96));    
+            $a = strtoupper(chr($a+96));                
+            return $b.$a; 
+        } 
+    }
+
+if(!function_exists('rsvp_excel')){
+
 function rsvp_excel() {
 if(!$_GET["rsvpexcel"])
 	return;
@@ -1222,74 +1240,72 @@ if ( !wp_verify_nonce($_GET['rsvpexcel'],'rsvpexcel') )
 global $wpdb;
 $fields = $_GET["fields"];
 $eventid = (int) $_GET["event"];
+$columnalpha = array('A',);
 
-include WP_PLUGIN_DIR.'/rsvpmaker/excel.php';
+include WP_PLUGIN_DIR.'/rsvpmaker/phpexcel/PHPExcel.php'; // include PHP Excel library
 	
 	$sql = "SELECT post_title FROM ".$wpdb->posts." WHERE ID = $eventid";
 	$title = $wpdb->get_var($sql);
 
-$workbook = new Spreadsheet_Excel_Writer();
-// sending HTTP headers
-$workbook->send("event-$eventid-rsvp.xls");
+// Create new PHPExcel object
+$objPHPExcel = new PHPExcel();
 
-// set up formats
-$format_bold =& $workbook->addFormat();
-$format_bold->setBold();
-$format_bold->setSize(9);
+// Set properties
+$objPHPExcel->getProperties()->setCreator("RSVPMaker")
+							 ->setLastModifiedBy("RSVPMaker")
+							 ->setTitle($title);
 
-$format_title =& $workbook->addFormat();
-$format_title->setBold();
-$format_title->setSize(12);
-// let's merge
-$format_title->setAlign('merge');
+$styleArray = array(
+	'font' => array(
+		'bold' => true,
+	)
+);
 
-$format_wrap =& $workbook->addFormat();
-$format_wrap->setTextWrap();
-$format_wrap->setAlign('top');
-$format_wrap->setSize(9);
-$format_wrap->setBorder(1);
-
-$amt_format =& $workbook->addFormat();
-$amt_format->setNumFormat('0.00');
-$amt_format->setBold();
-$amt_format->setAlign('left');
-$amt_format->setAlign('top');
-$amt_format->setBorder(1);
-$amt_format->setSize(9);
-
-$format_border =& $workbook->addFormat();
-$format_border->setBorder(1);
-$format_border->setAlign('top');
-$format_border->setSize(9);
-
-// Creating a worksheet
-$worksheet =& $workbook->addWorksheet('RSVPs');
-$worksheet->setHeader('&R RSVPs for  ' . $title . ' Page &P of &N',0.5);
-
-// row headers 1
-$worksheet->setLandscape();
-$worksheet->setMargins(0.5);
-$worksheet->setMarginTop(1.0);
-$worksheet->repeatRows(0,0);
-
-$index = 0;
+$index = 1;
 foreach($fields as $column => $name )
 {
-$worksheet->write($index, $column, $name, $format_bold);
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($column, $index, $name);
+
+$letter = col2chr($column);
+$objPHPExcel->getActiveSheet()->getStyle($letter.'1')->applyFromArray($styleArray);
+
 if($name == "email")
-	$worksheet->setColumn($column,$column, 30);
+	$objPHPExcel->getActiveSheet()->getColumnDimension( $letter )->setWidth(30);
 elseif($name == "answer")
-	$worksheet->setColumn($column,$column, 8);
+	$objPHPExcel->getActiveSheet()->getColumnDimension( $letter )->setWidth(8);
 else
-	$worksheet->setColumn($column,$column, 20);
+	$objPHPExcel->getActiveSheet()->getColumnDimension( $letter )->setWidth(20);
+
+if($name == 'phone')
+	$phonecol = $letter;
 }
 
 	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid ORDER BY yesno DESC, last, first";
 	$results = $wpdb->get_results($sql, ARRAY_A);
+	$rows = sizeof($results);
+	$maxcol = col2chr(sizeof($fields));
+	$phonecells = $phonecol.'1:'.$phonecol.($rows+1);
 	
-	foreach($results as $index => $row)
+$objPHPExcel->getActiveSheet()->getStyle($phonecells)->getNumberFormat()
+->setFormatCode('###-###-####');
+
+$bodyStyle = array(
+	'borders' => array(
+		'bottom' => array(
+			'style' => PHPExcel_Style_Border::BORDER_THIN,
+			'color' => array('argb' => '88888888'),
+		)
+	),
+	'alignment' => array(
+		'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_LEFT,
+	)
+);
+	
+	foreach($results as $row)
 		{
 		$index++;
+		$objPHPExcel->getActiveSheet()->getStyle('A'.$index.':'.$maxcol.$index)->applyFromArray($bodyStyle);
 		$row["yesno"] = ($row["yesno"]) ? "YES" : "NO";
 		if($row["details"])
 			{
@@ -1297,13 +1313,27 @@ else
 			$row = array_merge($row,$details);
 			}
 		foreach($fields as $column => $name )
-			$worksheet->write($index, $column, $row[$name], $format_wrap);
+			$objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($column, $index, $row[$name]);
+			 //$worksheet->write($index, $column, $row[$name], $format_wrap);
 		}
-$worksheet->write($index+3, 2, "RSVPs for ".$title, $format_title);
 
-$workbook->close();
+$objPHPExcel->getActiveSheet()->getStyle('A1:'.$maxcol.$rows)->getAlignment()->setWrapText(true)->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+$objPHPExcel->getActiveSheet()->getPageSetup()->setOrientation(PHPExcel_Worksheet_PageSetup::ORIENTATION_LANDSCAPE);
+$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+$objPHPExcel->getActiveSheet()->getPageSetup()->setFitToHeight(0);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2, $index+3, "RSVPs for ".$title);
+$objPHPExcel->getActiveSheet(0)->getHeaderFooter()->setOddHeader('&R RSVPs for  ' . $title . ' Page &P of &N');
+
+header('Content-Type: application/vnd.ms-excel');
+header('Content-Disposition: attachment;filename="rsvp'.$eventid.'-'.date('Y-m-d-H-i').'.xls"');
+header('Cache-Control: max-age=0');
+$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+$objWriter->save('php://output');
+
 exit();
 }
+
+} // end rsvp_excel
 
 add_action('admin_init','rsvp_excel');
 
