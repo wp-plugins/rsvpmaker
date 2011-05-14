@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.1.2
-Stable tag: 2.0
+Stable tag: 2.1
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
 
 == Changelog ==
+
+= 2.1 =
+
+* Fields for RSVP form can now be edited from the settings panel. Previously modifying the form required some PHP hacking.
+* You can now get a listing of past events with some attributes for the event_listings shortcode. Suggesting past="1" format="headline" date_format="F jS, Y"
 
 = 2.0 =
 

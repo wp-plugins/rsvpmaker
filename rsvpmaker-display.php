@@ -11,7 +11,16 @@ function event_listing($atts) {
 global $wpdb;
 global $rsvp_options;
 
-$sql = "SELECT *, $wpdb->posts.ID as postID
+$date_format = ($atts["date_format"]) ? $atts["date_format"] : $rsvp_options["short_date"];
+
+if($atts["past"])
+	$sql = "SELECT *, $wpdb->posts.ID as postID
+FROM `".$wpdb->prefix."rsvp_dates`
+JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
+WHERE datetime < CURDATE( ) AND $wpdb->posts.post_status = 'publish'
+ORDER BY datetime DESC";
+else
+	$sql = "SELECT *, $wpdb->posts.ID as postID
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
 WHERE datetime > CURDATE( ) AND $wpdb->posts.post_status = 'publish'
@@ -27,7 +36,7 @@ foreach($results as $row)
 	$t = strtotime($row["datetime"]);
 	if($dateline[$row["postID"]])
 		$dateline[$row["postID"]] .= ", ";
-	$dateline[$row["postID"]] .= date($rsvp_options["short_date"],$t);
+	$dateline[$row["postID"]] .= date($date_format,$t);
 	if(!$eventlist[$row["postID"]])
 		$eventlist[$row["postID"]] = $row;
 	$cal[date('Y-m-d',$t)] .= '<div><a class="calendar_item" href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
@@ -165,7 +174,6 @@ $content .= "</tr>\n</table>\n";
 
 return $content;
 }
-
 
 
 /**

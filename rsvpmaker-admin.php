@@ -490,6 +490,10 @@ Minutes: <select name="option[defaultmin]">
 					<h3>Confirmation Message:</h3>
   <textarea name="option[rsvp_confirm]"  rows="5" cols="80" id="rsvp_confirm"><?php echo $options["rsvp_confirm"];?></textarea>
 	<br />
+					<h3>Profile Table:</h3>
+  <textarea name="option[profile_table]"  rows="5" cols="80" id="profile_table"><?php echo $options["profile_table"];?></textarea>
+<br />This is the section of the RSVP form that asks for additional details, beyond name and email. You can add additional fields in HTML and they will be recorded as long as you follow the name=&quot;profile[fieldname]&quot; convention. The standard text field length is size=&quot;60&quot;
+	<br />
 					<h3>RSVP Link:</h3>
   <textarea name="option[rsvplink]"  rows="5" cols="80" id="rsvplink"><?php echo $options["rsvplink"];?></textarea>
 	<br />
@@ -565,7 +569,9 @@ else
 	
 </div>
 
+
 <?php              
+
           }
       }
   

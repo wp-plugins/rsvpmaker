@@ -709,6 +709,10 @@ form</a>','rsvpmaker'),get_permalink() );?></p>
 	}
 else
 	{
+
+global $rsvp_options;
+echo $rsvp_options["profile_table"];
+/*
 ;?>
 <table border="0" cellspacing="0" cellpadding="0"> 
   <tr> 
@@ -732,6 +736,7 @@ size="20" value="" />
   </tr> 
 </table>
 <?php
+*/
 	}
 
 } } // end rsvp_profile
