@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.1.2
-Stable tag: 2.1
+Stable tag: 2.2.1
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
 
 == Changelog ==
+
+= 2.2 =
+
+Added option to require people to decode the secret message in a CAPTCHA image when completing the RSVP form. Useful if you're getting spam bot submissions.
 
 = 2.1 =
 

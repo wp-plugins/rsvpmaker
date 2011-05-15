@@ -900,7 +900,7 @@ $now = current_time('timestamp');
 if($deadline && ($now  > $deadline  ) )
 	$content .= '<p class="rsvp_status">'.__('RSVP deadline is past','rsvpmaker').'</p>';
 elseif( ( $now > $last_time  ) )
-	$content .= '<p class="rsvp_status">'.__('Event date is past','rsvpmaker') . date($rsvp_options["time_format"],$now).date($rsvp_options["time_format"],$last_time) .'</p>';
+	$content .= '<p class="rsvp_status">'.__('Event date is past','rsvpmaker').'</p>';
 elseif($rsvpstart && ( $now < $rsvpstart  ) )
 	$content .= '<p class="rsvp_status">'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</p>';
 elseif($too_many)
