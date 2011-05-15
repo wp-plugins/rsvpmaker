@@ -393,6 +393,7 @@ add_action('save_post','save_calendar_data');
               		
                   $newoptions = stripslashes_deep($_POST["option"]);
                   $newoptions["rsvp_on"] = ($_POST["option"]["rsvp_on"]) ? 1 : 0;
+                  $newoptions["rsvp_captcha"] = ($_POST["option"]["rsvp_captcha"]) ? 1 : 0;
                   $newoptions["show_attendees"] = ($_POST["option"]["show_attendees"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
 				  $newoptions["posttypecheck"] = $options["posttypecheck"];
@@ -483,6 +484,9 @@ Minutes: <select name="option[defaultmin]">
 					<br />
 					<h3>RSVPs Attendees List Public:</h3>
   <input type="checkbox" name="option[show_attendees]" value="1" <?php if($options["show_attendees"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
+					<h3>RSVP CAPTCHA On:</h3>
+  <input type="checkbox" name="option[rsvp_captcha]" value="1" <?php if($options["rsvp_captcha"]) echo ' checked="checked" ';?> /> check to turn on by default
 	<br />
 					<h3>Instructions for Form:</h3>
   <textarea name="option[rsvp_instructions]"  rows="5" cols="80" id="rsvp_instructions"><?php echo $options["rsvp_instructions"];?></textarea>

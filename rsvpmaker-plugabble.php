@@ -7,13 +7,13 @@ if(! function_exists('GetRSVPAdminForm') )
 function GetRSVPAdminForm($postID)
 {
 $custom_fields = get_post_custom($postID);
-//print_r($custom_fields);
 $rsvp_on = $custom_fields["_rsvp_on"][0];
 $rsvp_to = $custom_fields["_rsvp_to"][0];
 $rsvp_instructions = $custom_fields["_rsvp_instructions"][0];
 $rsvp_confirm = $custom_fields["_rsvp_confirm"][0];
 $rsvp_max = $custom_fields["_rsvp_max"][0];
 $rsvp_show_attendees = $custom_fields["_rsvp_show_attendees"][0];
+$rsvp_captcha = $custom_fields["_rsvp_captcha"][0];
 
 if($custom_fields["_rsvp_deadline"][0])
 	{
@@ -40,6 +40,7 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 	$rsvp_instructions = $rsvp_options["rsvp_instructions"];
 	$rsvp_confirm = $rsvp_options["rsvp_confirm"];
 	$rsvp_on = $rsvp_options["rsvp_on"];
+	$rsvp_captcha = $rsvp_options["rsvp_captcha"];
 	$rsvp_max = 0;
 	$rsvp_show_attendees = $rsvp_options["show_attendees"];
 	}
@@ -50,7 +51,10 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 <?php echo __('Collect RSVPs','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
 
 <br />  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" ';?> />
-<?php echo __(' Display attendee names and content of note field publicly','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
+<?php echo __(' Display attendee names and content of note field publicly','rsvpmaker');?> <?php if( !$rsvp_show_attendees ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
+
+<br />  <input type="checkbox" name="setrsvp[captcha]" id="setrsvp[captcha]" value="1" <?php if( $rsvp_captcha ) echo 'checked="checked" ';?> />
+<?php echo __(' Include CAPTCHA challenge','rsvpmaker');?> <?php if( !$rsvp_captcha ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
 
 </p>
 
@@ -142,10 +146,25 @@ $answer = ($yesno) ? "YES" : "NO";
 $event = (int) $_POST["event"];
 // page hasn't loaded yet, so retrieve post variables based on event
 $post = get_post($event);
+//get rsvp_to
+$custom_fields = get_post_custom($post->ID);
+$rsvp_to = $custom_fields["_rsvp_to"][0];
 
 //if permalinks are not turned on, we need to append to query string not add our own ?
 $req_uri = $_SERVER['REQUEST_URI'];
 $req_uri .= (strpos($req_uri,'?') ) ? '&' : '?';
+
+if($custom_fields["_rsvp_captcha"][0])
+	{
+	if(!$_SESSION["captcha_key"])
+		session_start();
+	if($_SESSION["captcha_key"] != md5($_POST['captcha']) )	
+		{
+		header('Location: '.$req_uri.'err='.urlencode('Error - security code not entered correctly! Please try again.'));
+		exit();
+		}
+	}
+
 
 if( preg_match_all('/http/',$_POST["note"],$matches) > 2 )
 	{
@@ -164,7 +183,7 @@ if(isset($rsvp["email"]))
 	// assuming the form includes email, test to make sure it's a valid one
 	if(!filter_var($rsvp["email"], FILTER_VALIDATE_EMAIL))
 		{
-		header('Location: '.$_SERVER['REDIRECT_URL'].'?err=invalid email');
+		header('Location: '.$_SERVER['REDIRECT_URL'].'?err='.urlencode('Error - Invalid input.') );
 		exit();
 		}
 	
@@ -281,9 +300,6 @@ $sql = "SELECT * FROM ".$wpdb->prefix."rsvp_dates WHERE postID=".$post->ID.' ORD
 $row = $wpdb->get_row($sql,ARRAY_A);
 $t = strtotime($row["datetime"]);
 $date = date('M j',$t);
-//get rsvp_to
-$custom_fields = get_post_custom($post->ID);
-$rsvp_to = $custom_fields["_rsvp_to"][0];
 
 foreach($rsvp as $name => $value)
 	$cleanmessage .= $name.": ".$value."\n";
@@ -879,12 +895,12 @@ if($rsvp_max)
 else
 	$content .= '<p class="signed_up">'.$total.' '. __('signed up so far.','rsvpmaker').'</p>';
 
-$now = mktime();
+$now = current_time('timestamp');
 
 if($deadline && ($now  > $deadline  ) )
 	$content .= '<p class="rsvp_status">'.__('RSVP deadline is past','rsvpmaker').'</p>';
 elseif( ( $now > $last_time  ) )
-	$content .= '<p class="rsvp_status">'.__('Event date is past','rsvpmaker').'</p>';
+	$content .= '<p class="rsvp_status">'.__('Event date is past','rsvpmaker') . date($rsvp_options["time_format"],$now).date($rsvp_options["time_format"],$last_time) .'</p>';
 elseif($rsvpstart && ( $now < $rsvpstart  ) )
 	$content .= '<p class="rsvp_status">'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</p>';
 elseif($too_many)
@@ -981,8 +997,18 @@ echo "</p>\n";
 
 basic_form($profile, $guestedit);
 
+if($custom_fields["_rsvp_captcha"][0])
+{
 ?>
-
+<p>          <img src="<?php echo plugins_url('/captcha/captcha_ttf.php',__FILE__);  ?>"
+                    alt="CAPTCHA image">
+<br />
+		Type the hidden security message:<br />                    
+<input maxlength="10" size="10" name="captcha" type="text" />
+</p>
+<?php
+}
+?>
         <p> 
 		  <input type="hidden" name="event" value="<?php echo $post->ID;?>" /> 
           <input type="submit" id="rsvpsubmit" name="Submit" value="Submit" /> 
@@ -1000,6 +1026,12 @@ if($error = $_GET["err"])
 	if(strpos($error,'email') != false)
 		$content = '<div id="rsvpconfirm" >
 <h3 class="rsvperror">Error: Invalid Email</h3>
+<p>Please correct your submission.</p>
+</div>
+'.$content;
+	elseif(strpos($error,'code') != false)
+		$content = '<div id="rsvpconfirm" >
+<h3 class="rsvperror">Error: Security code not entered correctly</h3>
 <p>Please correct your submission.</p>
 </div>
 '.$content;
