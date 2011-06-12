@@ -311,7 +311,7 @@ add_filter('posts_distinct', 'rsvpmaker_distinct' );
 
 $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
-$querystring = "post_type=rsvpmaker&paged=$paged";
+$querystring = "post_type=rsvpmaker&post_status=publish&paged=$paged";
 if($atts["type"])
 	$querystring .= "&rsvpmaker-type=".$atts["type"];
 

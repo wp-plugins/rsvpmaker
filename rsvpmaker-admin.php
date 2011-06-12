@@ -548,6 +548,9 @@ else
 
 ;?>	
     <br /><em>To enable PayPal payments, you must manually create a configuration file. Sample config file included with distribution. Must be manually configured. For security reasons, we recommend storing the file outside of web root. For example, /home/account/paypal_config.php where web content is stored in /home/account/public_html/</em>
+
+<br /><h3>PayPal Currency:</h3>
+<input type="text" name="option[paypal_currency]" value="<?php echo $options["paypal_currency"];?>" size="5" /> <a href="https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_nvp_currency_codes">(list of codes)</a>
     
     <br />
 <h3>Tweak Permalinks:</h3>

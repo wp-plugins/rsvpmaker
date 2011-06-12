@@ -108,7 +108,7 @@ for($i=0; $i < 5; $i++)
 {
 ?>
 Units: <input name="unit[<?php echo $i;?>]" value="<?php echo $per["unit"][$i];?>" /> @
-Price: $<input name="price[<?php echo $i;?>]" value="<?php echo $per["price"][$i];?>" />
+Price: <input name="price[<?php echo $i;?>]" value="<?php echo $per["price"][$i];?>" /> <?php echo $rsvp_options["paypal_currency"]; ?>
 <br />
 <?php
 }
@@ -233,7 +233,7 @@ if(is_array($_POST["payingfor"]) )
 		$cost = $value * $price;
 		if($rsvp["payingfor"])
 			$rsvp["payingfor"] .= ", ";
-		$rsvp["payingfor"] .= "$value $unit @ \$".number_format($price,2);
+		$rsvp["payingfor"] .= "$value $unit @ ".number_format($price,2) . ' '.$rsvp_options["paypal_currency"];
 		$rsvp["total"] += $cost;
 		$participants += $value;
 		}
@@ -407,7 +407,7 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 		else
 			$paymentAmount = $_POST["price"]*$_POST["unit"];
 		   $_SESSION["paymentAmount"] = $paymentAmount;//=$_REQUEST['paymentAmount'];
-		   $_SESSION["currencyCodeType"] = $currencyCodeType='USD';//$_REQUEST['currencyCodeType'];
+		   $_SESSION["currencyCodeType"] = $currencyCodeType=$rsvp_options["paypal_currency"];
 		   $_SESSION["paymentType"] = $paymentType='Sale'; //$_REQUEST['paymentType'];
 		   if(!$invoice)
 		   	$invoice=$_REQUEST['invoice'];
@@ -814,10 +814,10 @@ if($e)
 		if($details["total"])
 			{
 			$nonce= wp_create_nonce('pp-nonce');
-			$rsvpconfirm .= "<p><strong>".__('Pay by PayPal for','rsvpmaker')." ".$details["payingfor"].' = $'.number_format($details["total"],2)."</strong></p>".
+			$rsvpconfirm .= "<p><strong>".__('Pay by PayPal for','rsvpmaker')." ".$details["payingfor"].' = '.number_format($details["total"],2).' ' . $rsvp_options["paypal_currency"]."</strong></p>".
 			'<form method="post" name="donationform" id="donationform" action="'.$permalink.'">
 <input type="hidden" name="paypal" value="payment" /> 
-<p>Amount: $'.$details["total"].'<input name="paymentAmount" type="hidden" id="paymentAmount" size="10" value="'.$details["total"].'">
+<p>Amount: '.$details["total"].'<input name="paymentAmount" type="hidden" id="paymentAmount" size="10" value="'.$details["total"].'"> '.$rsvp_options["paypal_currency"].'
     </p>
   <p>Email: <input name="email" type="text" id="email" size="40"  value="'.$e.'" >
     </p>
