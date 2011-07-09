@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 2.3
+Version: 2.3.2
 Author URI: http://www.carrcommunications.com
 */
 
@@ -143,26 +143,26 @@ $sql = "CREATE TABLE `".$wpdb->prefix."rsvp_dates` (
   `datetime` datetime default NULL,
   `duration` varchar(255) default '',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
 dbDelta($sql);
 
 $sql = "CREATE TABLE `".$wpdb->prefix."rsvpmaker` (
   `id` int(11) NOT NULL auto_increment,
-  `email` varchar(255) default NULL,
+  `email` varchar(255)   CHARACTER SET utf8 COLLATE utf8_general_ci  default NULL,
   `yesno` tinyint(4) NOT NULL default '0',
-  `first` varchar(255) NOT NULL default '',
-  `last` varchar(255) NOT NULL default '',
-  `details` text NOT NULL,
+  `first` varchar(255)  CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL default '',
+  `last` varchar(255)  CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL default '',
+  `details` text  CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `event` int(11) NOT NULL default '0',
   `owed` float(6,2) NOT NULL default '0.00',
   `amountpaid` float(6,2) NOT NULL default '0.00',
   `master_rsvp` int(11) NOT NULL default '0',
-  `guestof` varchar(255) default NULL,
-  `note` text NOT NULL,
+  `guestof` varchar(255)   CHARACTER SET utf8 COLLATE utf8_general_ci  default NULL,
+  `note` text   CHARACTER SET  utf8 COLLATE utf8_general_ci NOT NULL,
   `participants` INT NOT NULL DEFAULT '0',
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
 dbDelta($sql);
 
 $sql = "CREATE TABLE `".$wpdb->prefix."rsvp_volunteer_time` (
@@ -172,10 +172,10 @@ $sql = "CREATE TABLE `".$wpdb->prefix."rsvp_volunteer_time` (
   `time` int(11) default '0',
   `participants` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;";
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
 dbDelta($sql);
 
-$rsvp_options["dbversion"] = 2;
+$rsvp_options["dbversion"] = 4;
 update_option('RSVPMAKER_Options',$rsvp_options);
 
 global $wpdb;
@@ -198,7 +198,17 @@ if(! $wpdb->get_var($sql) )
 register_activation_hook( __FILE__, 'cpevent_activate' );
 
 //upgrade database if necessary
-if($rsvp_options["dbversion"] < 2)
+if($rsvp_options["dbversion"] < 4)
+	{
 	cpevent_activate();
+	//correct character encoding error in early releases
+	global $wpdb;
+	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `first` `first` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");
+	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `last` `last` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");
+	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `email` `email` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");	
+	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `guestof` `guestof` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");	
+	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `details` `details` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ");	
+	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `note` `note` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ");
+	}
 
 ?>

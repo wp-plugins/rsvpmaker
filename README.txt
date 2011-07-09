@@ -3,8 +3,8 @@ Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
-Tested up to: 3.1.3
-Stable tag: 2.3
+Tested up to: 3.2
+Stable tag: 2.3.2
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,15 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
 
 == Changelog ==
+
+= 2.3.2 =
+
+* Fixing character encoding issue with database table for RSVP responses (setting to utf-8 for better multi-language compatibility).
+* Fixed typographical error on calendar display (comma between month and year)
+
+= 2.3.1 =
+
+More changes for use with ChimpBlast
 
 = 2.3 =
 

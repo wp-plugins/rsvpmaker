@@ -864,8 +864,8 @@ foreach($results as $row)
 	{
 	if(!$firstrow)
 		$firstrow = $row;
-	$dateblock .= '<div>';
 	$last_time = $t = strtotime($row["datetime"]);
+	$dateblock .= '<div itemprop="startDate" datetime="'.date('c',$t).'">';
 	$dateblock .= date($rsvp_options["long_date"],$t);
 	$dur = $row["duration"];
 	if($dur != 'allday')
@@ -1207,6 +1207,9 @@ function format_rsvp_details($results) {
 		if($row["details"])
 			{
 			$details = unserialize($row["details"]);
+			echo '<br />'.$row["details"].'<br />';
+			print_r($details);
+			echo '<br />';
 			foreach($details as $name => $value)
 				if($value) {
 					echo "$name: $value<br />";

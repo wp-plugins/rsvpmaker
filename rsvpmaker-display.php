@@ -103,7 +103,7 @@ $lm = mktime(0, 0, 1, $cm, 0, $cy);
 
 // Link to next month (but do not link to too early dates)
 $nm = mktime(0, 0, 1, $cm+1, 1, $cy);
-   $next_link = '<a href="' . $self . strftime('?cm=%m&amp;cy=%Y">%B, %Y</a>', $nm);
+   $next_link = '<a href="' . $self . strftime('?cm=%m&amp;cy=%Y">%B %Y</a>', $nm);
 
 $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
    $next_link .= sprintf('<form action="%s" method="get"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" ></form>', $self,date('m',$monthafter),date('Y',$monthafter));
@@ -118,7 +118,7 @@ $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
 //     '<td align="right" width="33%">' . $next_link . "</td></tr>\n</table>\n";
 
 // Begin the calendar table
-$content .= '<table id="cpcalendar" width="100%" cellspacing="0" cellpadding="3"><caption>'.strftime('<b>%B, %Y</b></td>', $bom)."</caption>\n".'<tr>'."\n";
+$content .= '<table id="cpcalendar" width="100%" cellspacing="0" cellpadding="3"><caption>'.strftime('<b>%B %Y</b></td>', $bom)."</caption>\n".'<tr>'."\n";
 
 $content .= '<thead>
 <tr> 
@@ -265,6 +265,34 @@ ORDER BY datetime LIMIT 0, $limit";
 // register CPEventsWidget widget
 add_action('widgets_init', create_function('', 'return register_widget("CPEventsWidget");'));
 
+function get_next_events_link( $label = '', $max_page = 0 ) {
+	global $paged, $wp_query;
+	global $rsvp_options;
+
+	if ( !$max_page )
+		$max_page = $wp_query->max_num_pages;
+
+	if ( !$paged )
+		$paged = 1;
+
+	$nextpage = intval($paged) + 1;
+
+	if ( $nextpage > 2 ) {
+		$link = '<a href="' . $rsvp_options["eventpage"] ."\" $attr>&laquo; " . __('Events Home','rsvpmaker') . '</a>';
+	}
+
+	if ( !is_single() && ( $nextpage <= $max_page ) ) {
+		$attr = apply_filters( 'next_posts_link_attributes', '' );
+		if($link)
+			$link .= " | ";
+		$link .= '<a href="' . $rsvp_options["eventpage"] .'page/'.$nextpage."/\" $attr>" . $label . ' &raquo;</a>';
+	}
+	
+	if($link)
+		echo "<p>$link</p>";
+}
+
+
 function rsvpmaker_join($join) {
   global $wpdb;
 
@@ -298,10 +326,11 @@ function rsvpmaker_upcoming ($atts)
 
 $no_events = ($atts["no_events"]) ? $atts["no_events"] : 'No events currently listed.';
 
-
 global $post;
 global $wp_query;
 global $wpdb;
+
+$backup = $wp_query;
 
 add_filter('posts_join', 'rsvpmaker_join' );
 add_filter('posts_where', 'rsvpmaker_where' );
@@ -316,7 +345,7 @@ if($atts["type"])
 	$querystring .= "&rsvpmaker-type=".$atts["type"];
 
 $wpdb->show_errors();
-$rq = new WP_Query($querystring);
+$wp_query = new WP_Query($querystring);
 
 ob_start();
 
@@ -326,25 +355,34 @@ if($atts["calendar"] || ($atts["format"] == "calendar") )
 	echo event_listing($atts);
 	}
 	
-if ( $rq->have_posts() ) {
-while ( $rq->have_posts() ) : $rq->the_post();?>
+if ( have_posts() ) {
+while ( have_posts() ) : the_post();?>
 
-<div id="post-<?php the_ID();?>" <?php post_class(); ?>>
-<h1 class="entry-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h1>
+<div id="post-<?php the_ID();?>" <?php post_class();?> itemscope itemtype="http://schema.org/Event" >  
+<h1 class="entry-title"><a href="<?php the_permalink(); ?>"  itemprop="url"><span itemprop="name"><?php the_title(); ?></span></a></h1>
 <div class="entry-content">
 
 <?php the_content(); ?>
 
 </div><!-- .entry-content -->
+
+<?php
+$authorlink = sprintf( '<span class="author vcard"><a class="url fn n" href="%1$s" title="%2$s">%3$s</a></span>',
+	get_author_posts_url( get_the_author_meta( 'ID' ) ),
+	sprintf( esc_attr__( 'View all posts by %s', 'rsvpmaker' ), get_the_author() ),
+	get_the_author());
+?>
+<div class="event_author"><?php _e('Posted by','rsvpmaker'); echo " $authorlink on ";?><span class="updated" datetime="<?php the_modified_date('c');?>"><?php the_modified_date(); ?></span></div>
 </div>
 <?php 
 endwhile;
 ?>
-<p><?php posts_nav_link(' &#8212; ', __('&laquo; Previous Page'), __('Next Page &raquo;'));?></p>
-<?php
+<p><?php 
+get_next_events_link(__('More Events','rsvpmaker'));
 } 
 else
 	echo "<p>$no_events</p>\n";
+$wp_query = $backup;
 
 wp_reset_postdata();
 
