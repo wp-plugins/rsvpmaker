@@ -14,7 +14,14 @@ $rsvp_confirm = $custom_fields["_rsvp_confirm"][0];
 $rsvp_max = $custom_fields["_rsvp_max"][0];
 $rsvp_show_attendees = $custom_fields["_rsvp_show_attendees"][0];
 $rsvp_captcha = $custom_fields["_rsvp_captcha"][0];
-
+if($custom_fields["_rsvp_reminder"][0])
+	{
+	$rparts = explode("-",$custom_fields["_rsvp_reminder"][0]);
+	$remindyear = $rparts[0];
+	$remindmonth = $rparts[1];
+	$remindday = $rparts[2];
+	}
+	
 if($custom_fields["_rsvp_deadline"][0])
 	{
 	$t = (int) $custom_fields["_rsvp_deadline"][0];
@@ -71,7 +78,12 @@ if($rsvp_on.$rsvp_to.$rsvp_instructions.$rsvp_confirm == '')
 <input type="text" name="deadyear" id="deadyear" value="<?php echo $deadyear;?>" size="4" /> (<?php echo __('stop collecting RSVPs at midnight','rsvpmaker');?>)</td></tr>
 
 <tr><td><?php echo __('Start Date (optional)','rsvpmaker').'</td><td>'.__('Month','rsvpmaker');?>: <input type="text" name="startmonth" id="startmonth" value="<?php echo $startmonth;?>" size="2" /> <?php echo __('Day','rsvpmaker');?>: <input type="text" name="startday" id="startday" value="<?php echo $startday;?>" size="2" /> <?php echo __('Year','rsvpmaker');?>: 
-<input type="text" name="startyear" id="startyear" value="<?php echo $startyear;?>" size="4" /> (<?php echo __('start collecting RSVPs','rsvpmaker');?>)</td></tr></table>
+<input type="text" name="startyear" id="startyear" value="<?php echo $startyear;?>" size="4" /> (<?php echo __('start collecting RSVPs','rsvpmaker');?>)</td></tr>
+
+<tr><td><?php echo __('Reminder (optional)','rsvpmaker').'</td><td>'.__('Month','rsvpmaker');?>: <input type="text" name="remindmonth" id="remindmonth" value="<?php echo $remindmonth;?>" size="2" /> <?php echo __('Day','rsvpmaker');?>: <input type="text" name="remindday" id="remindday" value="<?php echo $remindday;?>" size="2" /> <?php echo __('Year','rsvpmaker');?>: 
+<input type="text" name="remindyear" id="remindyear" value="<?php echo $remindyear;?>" size="4" /> (<?php echo __("Send email reminder to people on RSVP list",'rsvpmaker');?>)</td></tr>
+
+</table>
 
 <br /><?php echo __('Maximum participants','rsvpmaker');?> <input type="text" name="setrsvp[max]" id="setrsvp[max]" value="<?php echo $rsvp_max;?>" size="4" /> (<?php echo __('0 for none specified','rsvpmaker');?>)
 <br /><?php echo __('Time Slots','rsvpmaker');?>:
@@ -342,25 +354,25 @@ if(!function_exists('rsvp_notifications') )
 {
 function rsvp_notifications ($rsvp,$rsvp_to,$subject,$message) {
 
-  $headers = "Reply-To: ".$rsvp["email"]."\r\n"; 
-  $headers .= "From: ".'"'.$rsvp["first"]." ".$rsvp["last"].'" <'.$rsvp["email"].'>'."\r\n"; 
-  $headers .= "Organization: ".$_SERVER['SERVER_NAME']."\r\n";
-  $headers .= "MIME-Version: 1.0\r\n";
-  $headers .= "Content-type: text/plain; charset=iso-8859-1\r\n";
-  $headers .= "X-Priority: 3\r\n";
-  $headers .= "X-Mailer: PHP". phpversion() ."\r\n"; 
+  $headers = "Reply-To: ".$rsvp["email"]."\n"; 
+  $headers .= "From: ".'"'.$rsvp["first"]." ".$rsvp["last"].'" <'.$rsvp["email"].'>'."\n"; 
+  $headers .= "Organization: ".$_SERVER['SERVER_NAME']."\n";
+  $headers .= "MIME-Version: 1.0\n";
+  $headers .= "Content-type: text/plain; charset=UTF-8\n";
+  $headers .= "X-Priority: 3\n";
+  $headers .= "X-Mailer: PHP". phpversion() ."\n"; 
 
 mail($rsvp_to,$subject,$message,$headers);
 
 // now send confirmation
 
-  $headers = "Reply-To: The Sender <$rsvpto>\r\n"; 
-  $headers .= "From: <".$rsvp["email"].">\r\n"; 
-  $headers .= "Organization: ".$_SERVER['SERVER_NAME']."\r\n";
-  $headers .= "MIME-Version: 1.0\r\n";
-  $headers .= "Content-type: text/plain; charset=iso-8859-1\r\n";
-  $headers .= "X-Priority: 3\r\n";
-  $headers .= "X-Mailer: PHP ". phpversion() ."\r\n"; 
+  $headers = "Reply-To: The Sender <$rsvp_to>\n"; 
+  $headers .= "From: <$rsvp_to>\n"; 
+  $headers .= "Organization: ".$_SERVER['SERVER_NAME']."\n";
+  $headers .= "MIME-Version: 1.0\n";
+  $headers .= "Content-type: text/plain; charset=UTF-8\n";
+  $headers .= "X-Priority: 3\n";
+  $headers .= "X-Mailer: PHP ". phpversion() ."\n"; 
 
 mail($rsvp["email"],"Confirming ".$subject,$message,$headers);
 
@@ -1470,5 +1482,86 @@ exit();
 } }
 
 add_action('init','ajax_guest_lookup');
+
+add_action('rsvp_daily_reminder_event', 'rsvp_daily_reminder');
+
+function rsvp_reminder_activation() {
+	if ( !wp_next_scheduled( 'rsvp_daily_reminder_event' ) ) {
+		wp_schedule_event(time(), 'daily', 'rsvp_daily_reminder_event');
+	}
+}
+add_action('wp', 'rsvp_reminder_activation');
+
+if(!function_exists('rsvp_daily_reminder') )
+{
+function rsvp_daily_reminder() {
+global $wpdb;
+global $rsvp_options;
+$today = date('Y-m-d');
+$sql = "SELECT * FROM `wp_postmeta` WHERE `meta_key` LIKE '_rsvp_reminder' AND `meta_value`='$today'";
+if( $reminders = $wpdb->get_results($sql) )
+	{
+	foreach($reminders as $reminder)
+		{
+		$postID = $reminder->post_id;
+		$q = "p=$postID&post_type=rsvpmaker";
+		echo "Post $postID is scheduled for a reminder $q<br />";
+		global $post;
+		query_posts($q);
+		//print_r($post);
+		the_post();
+		if($post->post_title)
+			{
+			$event_title = $post->post_title;
+			ob_start();
+			echo "<h1>";
+			the_title();
+			echo "</h1>\n<div>\n";	
+			the_content();
+			echo "\n</div>\n";
+			$event = ob_get_clean();
+			
+			$rsvpto = get_post_meta($postID,'_rsvp_to',true);
+			
+			$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=$postID AND yesno=1";
+			$rsvps = $wpdb->get_results($sql,ARRAY_A);
+			if($rsvps)
+			foreach($rsvps as $row)
+				{
+				$notify = $row["email"];
+
+				$row["yesno"] = ($row["yesno"]) ? "YES" : "NO";
+				
+				$notification = "<p>".__("This is an automated reminder that we have you on the RSVP list for the event shown below. If your plans have changed, you can update your response by clicking on the RSVP button again.",'rsvpmaker')."</p>";
+				$notification .= '<h3>'.$row["yesno"]." ".$row["first"]." ".$row["last"]." ".$row["email"];
+				if($row["guestof"])
+					$notification .=  " (". __('guest of','rsvpmaker')." ".$row["guestof"].")";
+				$notification .=  "</h3>\n";
+				$notification .=   "<p>";
+				if($row["details"])
+					{
+					$details = unserialize($row["details"]);
+					foreach($details as $name => $value)
+						if($value) {
+							$notification .=  "$name: $value<br />";
+							}
+					}
+				if($row["note"])
+					$notification .= "note: " . nl2br($row["note"])."<br />";
+				$t = strtotime($row["timestamp"]);
+				$notification .= 'posted: '.date($rsvp_options["short_date"],$t);
+				$notification .=  "</p>";
+				$notification .=  "<h3>Event Details</h3>\n".str_replace('*|EMAIL|*',$notify,$event);
+				
+				echo "Notification for $notify<br />$notification";
+				mail($notify,__("Event Reminder for",'rsvpmaker').' '.$event_title,$notification,"From: $rsvpto\nContent-Type: text/html; charset=UTF-8");
+				}
+			}
+		}
+	}
+	else
+		echo "none found";
+}
+}// end
 
 ?>

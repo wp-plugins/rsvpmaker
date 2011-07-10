@@ -188,7 +188,6 @@ GetRSVPAdminForm($post->ID);
 }
 
 function my_events_menu() {
-
 add_meta_box( 'EventDatesBox', __('Event Dates, RSVP Options','rsvpmaker'), 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
 
 }
@@ -288,6 +287,9 @@ if($_POST["deadyear"] && $_POST["deadmonth"] && $_POST["deadday"])
 
 if($_POST["startyear"] && $_POST["startmonth"] && $_POST["startday"])
 	$setrsvp["start"] = strtotime($_POST["startyear"].'-'.$_POST["startmonth"].'-'.$_POST["startday"].' 00:00:00');
+
+if($_POST["remindyear"] && $_POST["remindmonth"] && $_POST["remindday"])
+	$setrsvp["reminder"] = date('Y-m-d',strtotime($_POST["remindyear"].'-'.$_POST["remindmonth"].'-'.$_POST["remindday"].' 00:00:00') );
 
 foreach($setrsvp as $name => $value)
 	{
@@ -452,7 +454,6 @@ if($_GET["test"])
 </div>
 
 	<h2>Calendar Options</h2>
-				
 	<div id="poststuff" style="margin-top:10px;">
 
 	 <div id="mainblock" style="width:710px">
