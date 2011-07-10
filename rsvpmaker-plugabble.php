@@ -1207,9 +1207,6 @@ function format_rsvp_details($results) {
 		if($row["details"])
 			{
 			$details = unserialize($row["details"]);
-			echo '<br />'.$row["details"].'<br />';
-			print_r($details);
-			echo '<br />';
 			foreach($details as $name => $value)
 				if($value) {
 					echo "$name: $value<br />";
