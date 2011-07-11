@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.2
-Stable tag: 2.3.4
+Stable tag: 2.3.5
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
 
 == Changelog ==
+
+= 2.3.5 =
+
+* Improvements to automated reminders. Ability to set timing for reminders cron job
+* Even more tweaks for UTF-8 email (coding for From and Subject headers)
 
 = 2.3.4 =
 

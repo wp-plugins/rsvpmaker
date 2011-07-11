@@ -337,7 +337,6 @@ if($_POST["unit"])
 }
 
 
-
 add_action('admin_menu', 'my_events_menu');
 
 add_action('save_post','save_calendar_data');
@@ -440,7 +439,9 @@ for($i=0; $i < 60; $i += 5)
 if($_GET["test"])
 	print_r($options);
 
-;?>
+if($_GET["reminder_reset"])
+	rsvp_reminder_reset($_GET["reminder_reset"]);
+?>
 
 <div class="wrap" style="max-width:950px !important;">
 
@@ -569,6 +570,11 @@ else
 <br />
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
+
+<form action="options-general.php" method="get"><input type="hidden" name="page" value="rsvpmaker-admin.php" />RSVP Reminders scheduled for: <?php echo date('F jS, g:i A / H:i',wp_next_scheduled( 'rsvp_daily_reminder_event' )).' GMT offset '.get_option('gmt_offset').' hours'; // ?><br />
+Set new time: <select name="reminder_reset">
+<?php echo $houropt;?>
+</select><input type="submit" name="submit" value="Set" /></form>
 	    </div>
 		
 	 </div>

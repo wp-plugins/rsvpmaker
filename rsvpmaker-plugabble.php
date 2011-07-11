@@ -355,14 +355,14 @@ if(!function_exists('rsvp_notifications') )
 function rsvp_notifications ($rsvp,$rsvp_to,$subject,$message) {
 
   $headers = "Reply-To: ".$rsvp["email"]."\n"; 
-  $headers .= "From: ".'"'.$rsvp["first"]." ".$rsvp["last"].'" <'.$rsvp["email"].'>'."\n"; 
+  $headers .= "From: ".'"=?UTF-8?B?'.base64_encode($rsvp["first"]." ".$rsvp["last"]).'?=" <'.$rsvp["email"].'>'."\n"; 
   $headers .= "Organization: ".$_SERVER['SERVER_NAME']."\n";
   $headers .= "MIME-Version: 1.0\n";
   $headers .= "Content-type: text/plain; charset=UTF-8\n";
   $headers .= "X-Priority: 3\n";
   $headers .= "X-Mailer: PHP". phpversion() ."\n"; 
 
-mail($rsvp_to,$subject,$message,$headers);
+mail($rsvp_to,'=?UTF-8?B?'.base64_encode($subject).'?=',$message,$headers);
 
 // now send confirmation
 
@@ -1487,9 +1487,19 @@ add_action('rsvp_daily_reminder_event', 'rsvp_daily_reminder');
 
 function rsvp_reminder_activation() {
 	if ( !wp_next_scheduled( 'rsvp_daily_reminder_event' ) ) {
+		$hour = 12 - get_option('gmt_offset');
+		$t = mktime($hour,0,0);
 		wp_schedule_event(time(), 'daily', 'rsvp_daily_reminder_event');
 	}
 }
+
+function rsvp_reminder_reset($basehour) {
+	wp_clear_scheduled_hook('rsvp_daily_reminder_event'); //
+	$hour = $basehour - get_option('gmt_offset');
+	$t = mktime($hour,0,0);
+	wp_schedule_event($t, 'daily', 'rsvp_daily_reminder_event');
+}
+
 add_action('wp', 'rsvp_reminder_activation');
 
 if(!function_exists('rsvp_daily_reminder') )
@@ -1497,6 +1507,7 @@ if(!function_exists('rsvp_daily_reminder') )
 function rsvp_daily_reminder() {
 global $wpdb;
 global $rsvp_options;
+
 $today = date('Y-m-d');
 $sql = "SELECT * FROM `wp_postmeta` WHERE `meta_key` LIKE '_rsvp_reminder' AND `meta_value`='$today'";
 if( $reminders = $wpdb->get_results($sql) )
@@ -1508,8 +1519,11 @@ if( $reminders = $wpdb->get_results($sql) )
 		echo "Post $postID is scheduled for a reminder $q<br />";
 		global $post;
 		query_posts($q);
-		//print_r($post);
+		global $wp_query;
+		// treat as single, display rsvp button, not form
+		$wp_query->is_single = false;
 		the_post();
+
 		if($post->post_title)
 			{
 			$event_title = $post->post_title;
@@ -1554,7 +1568,8 @@ if( $reminders = $wpdb->get_results($sql) )
 				$notification .=  "<h3>Event Details</h3>\n".str_replace('*|EMAIL|*',$notify,$event);
 				
 				echo "Notification for $notify<br />$notification";
-				mail($notify,__("Event Reminder for",'rsvpmaker').' '.$event_title,$notification,"From: $rsvpto\nContent-Type: text/html; charset=UTF-8");
+				$subject = '=?UTF-8?B?'.base64_encode( __("Event Reminder for",'rsvpmaker').' '.$event_title ).'?=';
+				mail($notify,$subject,$notification,"From: $rsvpto\nContent-Type: text/html; charset=UTF-8");
 				}
 			}
 		}

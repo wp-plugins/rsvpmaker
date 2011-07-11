@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RSVPMaker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-24 15:27-0500\n"
-"PO-Revision-Date: 2011-04-24 15:28-0500\n"
+"POT-Creation-Date: 2011-07-11 18:33-0500\n"
+"PO-Revision-Date: 2011-07-11 18:33-0500\n"
 "Last-Translator: David F. Carr <david@carrcommunications.com>\n"
 "Language-Team:  <david@carrcommunications.com>\n"
 "MIME-Version: 1.0\n"
@@ -31,183 +31,203 @@ msgid "Day:"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:150
-#: ../rsvpmaker-plugabble.php:66
-#: ../rsvpmaker-plugabble.php:69
+#: ../rsvpmaker-plugabble.php:77
+#: ../rsvpmaker-plugabble.php:80
+#: ../rsvpmaker-plugabble.php:83
 msgid "Year"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:159
-#: ../rsvpmaker-admin.php:1065
+#: ../rsvpmaker-admin.php:1085
 msgid "Hour:"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:163
-#: ../rsvpmaker-admin.php:1069
+#: ../rsvpmaker-admin.php:1089
 msgid "Minutes:"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:167
-#: ../rsvpmaker-admin.php:1073
+#: ../rsvpmaker-admin.php:1093
 msgid "Duration"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:168
-#: ../rsvpmaker-admin.php:1074
+#: ../rsvpmaker-admin.php:1094
 msgid "Not set (optional)"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:169
-#: ../rsvpmaker-admin.php:1075
+#: ../rsvpmaker-admin.php:1095
 msgid "All day/don't show time in headline"
 msgstr ""
 
-#: ../rsvpmaker-admin.php:192
+#: ../rsvpmaker-admin.php:191
 msgid "Event Dates, RSVP Options"
 msgstr ""
 
-#: ../rsvpmaker-admin.php:1216
+#: ../rsvpmaker-admin.php:1236
 msgid "Event Dates"
 msgstr ""
 
-#: ../rsvpmaker-display.php:52
-#: ../rsvpmaker-display.php:222
+#: ../rsvpmaker-display.php:61
+#: ../rsvpmaker-display.php:230
 msgid "Go to Events Page"
 msgstr ""
 
-#: ../rsvpmaker-display.php:247
+#: ../rsvpmaker-display.php:255
 msgid "Title:"
 msgstr ""
 
-#: ../rsvpmaker-display.php:248
+#: ../rsvpmaker-display.php:256
 msgid "Number to Show:"
 msgstr ""
 
-#: ../rsvpmaker-display.php:250
+#: ../rsvpmaker-display.php:258
 msgid "Date Format:"
 msgstr ""
 
-#: ../rsvpmaker-display.php:335
-msgid "&laquo; Previous Page"
+#: ../rsvpmaker-display.php:281
+msgid "Events Home"
 msgstr ""
 
-#: ../rsvpmaker-display.php:335
-msgid "Next Page &raquo;"
+#: ../rsvpmaker-display.php:375
+msgid "Posted by"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:38
+#: ../rsvpmaker-display.php:381
+msgid "More Events"
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:45
 msgid "Loading default values for RSVPs - check the checkbox to collect RSVPs online"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:50
+#: ../rsvpmaker-plugabble.php:58
 msgid "Collect RSVPs"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:50
-#: ../rsvpmaker-plugabble.php:53
+#: ../rsvpmaker-plugabble.php:58
+#: ../rsvpmaker-plugabble.php:61
+#: ../rsvpmaker-plugabble.php:64
 msgid "Check to activate"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:53
+#: ../rsvpmaker-plugabble.php:61
 msgid " Display attendee names and content of note field publicly"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:58
+#: ../rsvpmaker-plugabble.php:64
+msgid " Include CAPTCHA challenge"
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:69
 msgid "Email Address for Notifications"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:59
+#: ../rsvpmaker-plugabble.php:70
 msgid "Instructions for User"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:61
+#: ../rsvpmaker-plugabble.php:72
 msgid "Confirmation Message"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:66
+#: ../rsvpmaker-plugabble.php:77
 msgid "Deadline (optional)"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:66
-#: ../rsvpmaker-plugabble.php:69
+#: ../rsvpmaker-plugabble.php:77
+#: ../rsvpmaker-plugabble.php:80
+#: ../rsvpmaker-plugabble.php:83
 msgid "Month"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:66
-#: ../rsvpmaker-plugabble.php:69
+#: ../rsvpmaker-plugabble.php:77
+#: ../rsvpmaker-plugabble.php:80
+#: ../rsvpmaker-plugabble.php:83
 msgid "Day"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:67
+#: ../rsvpmaker-plugabble.php:78
 msgid "stop collecting RSVPs at midnight"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:69
+#: ../rsvpmaker-plugabble.php:80
 msgid "Start Date (optional)"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:70
+#: ../rsvpmaker-plugabble.php:81
 msgid "start collecting RSVPs"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:72
+#: ../rsvpmaker-plugabble.php:83
+msgid "Reminder (optional)"
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:84
+msgid "Send email reminder to people on RSVP list"
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:88
 msgid "Maximum participants"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:72
+#: ../rsvpmaker-plugabble.php:88
 msgid "0 for none specified"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:73
+#: ../rsvpmaker-plugabble.php:89
 msgid "Time Slots"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:87
+#: ../rsvpmaker-plugabble.php:103
 msgid "Used for volunteer shift signups. Duration must also be set."
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:94
+#: ../rsvpmaker-plugabble.php:110
 msgid "Pricing for Online Payments"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:95
+#: ../rsvpmaker-plugabble.php:111
 msgid "You can set a different price for members vs. non-members, adults vs. children, etc."
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:101
+#: ../rsvpmaker-plugabble.php:117
 msgid "Tickets"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:649
 #: ../rsvpmaker-plugabble.php:677
+#: ../rsvpmaker-plugabble.php:705
 msgid "First Name"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:655
-#: ../rsvpmaker-plugabble.php:677
+#: ../rsvpmaker-plugabble.php:683
+#: ../rsvpmaker-plugabble.php:705
 msgid "Last Name"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:661
+#: ../rsvpmaker-plugabble.php:689
 msgid "Email"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:675
+#: ../rsvpmaker-plugabble.php:703
 msgid "Guests"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:675
+#: ../rsvpmaker-plugabble.php:703
 msgid "If you are bringing guests, please enter their names here"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:678
+#: ../rsvpmaker-plugabble.php:706
 msgid "Add more guests"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:689
+#: ../rsvpmaker-plugabble.php:717
 msgid "Note"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:704
+#: ../rsvpmaker-plugabble.php:732
 #, php-format
 msgid ""
 "Phone # on file.<br />To update profile, \n"
@@ -215,112 +235,101 @@ msgid ""
 "form</a>"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:715
-msgid "Phone"
-msgstr ""
-
-#: ../rsvpmaker-plugabble.php:723
-msgid "Phone Type"
-msgstr ""
-
-#: ../rsvpmaker-plugabble.php:728
-msgid "Work Phone"
-msgstr ""
-
-#: ../rsvpmaker-plugabble.php:729
-msgid "Mobile Phone"
-msgstr ""
-
-#: ../rsvpmaker-plugabble.php:730
-msgid "Home Phone"
-msgstr ""
-
-#: ../rsvpmaker-plugabble.php:789
-#: ../rsvpmaker-plugabble.php:906
-#: ../rsvpmaker-plugabble.php:1143
+#: ../rsvpmaker-plugabble.php:822
+#: ../rsvpmaker-plugabble.php:939
+#: ../rsvpmaker-plugabble.php:1192
 msgid "Yes"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:789
-#: ../rsvpmaker-plugabble.php:908
+#: ../rsvpmaker-plugabble.php:822
+#: ../rsvpmaker-plugabble.php:941
 msgid "No"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:790
+#: ../rsvpmaker-plugabble.php:823
 msgid "Your RSVP"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:796
+#: ../rsvpmaker-plugabble.php:829
 msgid "Pay by PayPal for"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:809
+#: ../rsvpmaker-plugabble.php:842
 msgid "Secure payment processing is provided by <strong>PayPal</strong>. After you click &quot;Next,&quot; we will transfer you to the PayPal website, where you can pay by credit card or with a PayPal account."
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:870
+#: ../rsvpmaker-plugabble.php:903
 msgid "signed up so far. Limit: "
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:875
+#: ../rsvpmaker-plugabble.php:908
 msgid "signed up so far."
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:880
+#: ../rsvpmaker-plugabble.php:913
 msgid "RSVP deadline is past"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:882
+#: ../rsvpmaker-plugabble.php:915
 msgid "Event date is past"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:884
+#: ../rsvpmaker-plugabble.php:917
 msgid "RSVPs accepted starting: "
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:886
+#: ../rsvpmaker-plugabble.php:919
 msgid "RSVPs are closed"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:898
+#: ../rsvpmaker-plugabble.php:931
 #: ../rsvpmaker.php:31
 msgid "RSVP Now!"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:902
+#: ../rsvpmaker-plugabble.php:935
 msgid "Names of attendees will be displayed publicly, along with the contents of the notes field."
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:904
+#: ../rsvpmaker-plugabble.php:937
 msgid "Your Answer"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:917
+#: ../rsvpmaker-plugabble.php:950
 msgid "Number of Participants"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:930
+#: ../rsvpmaker-plugabble.php:963
 msgid "Choose timeslots"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:954
+#: ../rsvpmaker-plugabble.php:987
 msgid "Paying For"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:1011
+#: ../rsvpmaker-plugabble.php:1060
 msgid "Show Attendees"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:1074
+#: ../rsvpmaker-plugabble.php:1123
 msgid "RSVPs for"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:1143
+#: ../rsvpmaker-plugabble.php:1192
 msgid "RSVP"
 msgstr ""
 
-#: ../rsvpmaker-plugabble.php:1167
+#: ../rsvpmaker-plugabble.php:1216
+#: ../rsvpmaker-plugabble.php:1552
 msgid "guest of"
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:1549
+msgid "This is an automated reminder that we have you on the RSVP list for the event shown below. If your plans have changed, you can update your response by clicking on the RSVP button again."
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:1571
+msgid "Event Reminder for"
 msgstr ""
 
 #: ../rsvpmaker.php:15
@@ -331,59 +340,79 @@ msgstr ""
 msgid "Thank you!"
 msgstr ""
 
+#: ../rsvpmaker.php:47
+msgid "Phone"
+msgstr ""
+
+#: ../rsvpmaker.php:53
+msgid "Phone Type"
+msgstr ""
+
 #: ../rsvpmaker.php:58
-msgid "RSVP Events"
+msgid "Work Phone"
 msgstr ""
 
 #: ../rsvpmaker.php:59
-msgid "Add New Event"
+msgid "Mobile Phone"
 msgstr ""
 
 #: ../rsvpmaker.php:60
-msgid "Edit Event"
+msgid "Home Phone"
 msgstr ""
 
-#: ../rsvpmaker.php:61
-msgid "Events"
+#: ../rsvpmaker.php:80
+msgid "RSVP Events"
 msgstr ""
 
-#: ../rsvpmaker.php:62
-msgid "Event"
+#: ../rsvpmaker.php:81
+msgid "Add New Event"
 msgstr ""
 
 #: ../rsvpmaker.php:82
-msgid "Search Event Types"
+msgid "Edit Event"
 msgstr ""
 
 #: ../rsvpmaker.php:83
-msgid "All Event Types"
+msgid "Events"
 msgstr ""
 
 #: ../rsvpmaker.php:84
+msgid "Event"
+msgstr ""
+
+#: ../rsvpmaker.php:104
+msgid "Search Event Types"
+msgstr ""
+
+#: ../rsvpmaker.php:105
+msgid "All Event Types"
+msgstr ""
+
+#: ../rsvpmaker.php:106
 msgid "Parent Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:85
+#: ../rsvpmaker.php:107
 msgid "Parent Event Type:"
 msgstr ""
 
-#: ../rsvpmaker.php:86
+#: ../rsvpmaker.php:108
 msgid "Edit Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:87
+#: ../rsvpmaker.php:109
 msgid "Update Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:88
+#: ../rsvpmaker.php:110
 msgid "Add New Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:89
+#: ../rsvpmaker.php:111
 msgid "New Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:90
+#: ../rsvpmaker.php:112
 msgid "Event Type"
 msgstr ""
 
