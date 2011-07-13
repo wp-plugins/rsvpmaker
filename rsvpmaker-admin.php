@@ -76,7 +76,7 @@ for($i=$start; $i < 6; $i++)
 {
 if($i == 2)
 	{
-	echo "<p><a onclick=\"document.getElementById('additional_dates').style.display='block'\" >Add More Dates</a> </p>
+	echo "<p><a onclick=\"document.getElementById('additional_dates').style.display='block'\" >".__('Add More Dates','rsvpmaker')."</a> </p>
 	<div id=\"additional_dates\" style=\"display: none;\">";
 	}
 
@@ -281,6 +281,9 @@ if($_POST["edit_month"])
 function save_rsvp_meta($postID)
 {
 $setrsvp = $_POST["setrsvp"];
+
+if(!$setrsvp["show_attendees"]) $setrsvp["show_attendees"] = 0;
+if(!$setrsvp["captcha"]) $setrsvp["captcha"] = 0;
 
 if($_POST["deadyear"] && $_POST["deadmonth"] && $_POST["deadday"])
 	$setrsvp["deadline"] = strtotime($_POST["deadyear"].'-'.$_POST["deadmonth"].'-'.$_POST["deadday"].' 23:59:59');
@@ -548,8 +551,12 @@ if(file_exists($config) )
 else
 	echo ' <span style="color: red;">error: file not found</span>';
 
-;?>	
-    <br /><em>To enable PayPal payments, you must manually create a configuration file. Sample config file included with distribution. Must be manually configured. For security reasons, we recommend storing the file outside of web root. For example, /home/account/paypal_config.php where web content is stored in /home/account/public_html/</em>
+?>	
+    <br /><em>To enable PayPal payments, you must manually create a configuration file. Sample config file included with distribution. Must be manually configured. For security reasons, we recommend storing the file outside of web root. For example, /home/account/paypal_config.php where web content is stored in /home/account/public_html/
+<?php
+echo "<br /><br />On your system, the base web directory is: <strong>".$_SERVER['DOCUMENT_ROOT'].'</strong>';
+?>
+    </em>
 
 <br /><h3>PayPal Currency:</h3>
 <input type="text" name="option[paypal_currency]" value="<?php echo $options["paypal_currency"];?>" size="5" /> <a href="https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_nvp_currency_codes">(list of codes)</a>

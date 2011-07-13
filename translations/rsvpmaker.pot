@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RSVPMaker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-07-11 18:33-0500\n"
-"PO-Revision-Date: 2011-07-11 18:33-0500\n"
+"POT-Creation-Date: 2011-07-12 23:08-0500\n"
+"PO-Revision-Date: 2011-07-12 23:08-0500\n"
 "Last-Translator: David F. Carr <david@carrcommunications.com>\n"
 "Language-Team:  <david@carrcommunications.com>\n"
 "MIME-Version: 1.0\n"
@@ -22,6 +22,10 @@ msgstr ""
 msgid "Enter one or more dates. For an event starting at 1:30 p.m., you would select 1 p.m. (or 13: for 24-hour format) and then 30 minutes. Specifying the duration is optional."
 msgstr ""
 
+#: ../rsvpmaker-admin.php:79
+msgid "Add More Dates"
+msgstr ""
+
 #: ../rsvpmaker-admin.php:99
 msgid "Month:"
 msgstr ""
@@ -38,27 +42,27 @@ msgid "Year"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:159
-#: ../rsvpmaker-admin.php:1085
+#: ../rsvpmaker-admin.php:1092
 msgid "Hour:"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:163
-#: ../rsvpmaker-admin.php:1089
+#: ../rsvpmaker-admin.php:1096
 msgid "Minutes:"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:167
-#: ../rsvpmaker-admin.php:1093
+#: ../rsvpmaker-admin.php:1100
 msgid "Duration"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:168
-#: ../rsvpmaker-admin.php:1094
+#: ../rsvpmaker-admin.php:1101
 msgid "Not set (optional)"
 msgstr ""
 
 #: ../rsvpmaker-admin.php:169
-#: ../rsvpmaker-admin.php:1095
+#: ../rsvpmaker-admin.php:1102
 msgid "All day/don't show time in headline"
 msgstr ""
 
@@ -66,7 +70,7 @@ msgstr ""
 msgid "Event Dates, RSVP Options"
 msgstr ""
 
-#: ../rsvpmaker-admin.php:1236
+#: ../rsvpmaker-admin.php:1243
 msgid "Event Dates"
 msgstr ""
 
@@ -283,7 +287,7 @@ msgid "RSVPs are closed"
 msgstr ""
 
 #: ../rsvpmaker-plugabble.php:931
-#: ../rsvpmaker.php:31
+#: ../rsvpmaker.php:33
 msgid "RSVP Now!"
 msgstr ""
 
@@ -336,83 +340,83 @@ msgstr ""
 msgid "RSVPmaker plugin requires WordPress 3.0 or greater"
 msgstr ""
 
-#: ../rsvpmaker.php:29
+#: ../rsvpmaker.php:31
 msgid "Thank you!"
 msgstr ""
 
-#: ../rsvpmaker.php:47
+#: ../rsvpmaker.php:49
 msgid "Phone"
 msgstr ""
 
-#: ../rsvpmaker.php:53
+#: ../rsvpmaker.php:55
 msgid "Phone Type"
 msgstr ""
 
-#: ../rsvpmaker.php:58
+#: ../rsvpmaker.php:60
 msgid "Work Phone"
 msgstr ""
 
-#: ../rsvpmaker.php:59
+#: ../rsvpmaker.php:61
 msgid "Mobile Phone"
 msgstr ""
 
-#: ../rsvpmaker.php:60
+#: ../rsvpmaker.php:62
 msgid "Home Phone"
 msgstr ""
 
-#: ../rsvpmaker.php:80
+#: ../rsvpmaker.php:82
 msgid "RSVP Events"
 msgstr ""
 
-#: ../rsvpmaker.php:81
+#: ../rsvpmaker.php:83
 msgid "Add New Event"
 msgstr ""
 
-#: ../rsvpmaker.php:82
+#: ../rsvpmaker.php:84
 msgid "Edit Event"
 msgstr ""
 
-#: ../rsvpmaker.php:83
+#: ../rsvpmaker.php:85
 msgid "Events"
 msgstr ""
 
-#: ../rsvpmaker.php:84
+#: ../rsvpmaker.php:86
 msgid "Event"
 msgstr ""
 
-#: ../rsvpmaker.php:104
+#: ../rsvpmaker.php:106
 msgid "Search Event Types"
 msgstr ""
 
-#: ../rsvpmaker.php:105
+#: ../rsvpmaker.php:107
 msgid "All Event Types"
 msgstr ""
 
-#: ../rsvpmaker.php:106
+#: ../rsvpmaker.php:108
 msgid "Parent Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:107
+#: ../rsvpmaker.php:109
 msgid "Parent Event Type:"
 msgstr ""
 
-#: ../rsvpmaker.php:108
+#: ../rsvpmaker.php:110
 msgid "Edit Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:109
+#: ../rsvpmaker.php:111
 msgid "Update Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:110
+#: ../rsvpmaker.php:112
 msgid "Add New Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:111
+#: ../rsvpmaker.php:113
 msgid "New Event Type"
 msgstr ""
 
-#: ../rsvpmaker.php:112
+#: ../rsvpmaker.php:114
 msgid "Event Type"
 msgstr ""
 
