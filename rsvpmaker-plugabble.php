@@ -1002,7 +1002,7 @@ foreach($per["unit"] as $index => $value)
     <option value="9">9</option>
     <option value="10">10</option>
   </select>
-<input type="hidden" name="unit['.$index.']" value="'.$value.'" />'.$value.' @ <input type="hidden" name="price['.$index.']" value="'.$price.'" />$'.number_format($price,2).'<br />';
+<input type="hidden" name="unit['.$index.']" value="'.$value.'" />'.$value.' @ <input type="hidden" name="price['.$index.']" value="'.$price.'" />'.(($rsvp_options["paypal_currency"] == 'USD') ? '$' : $rsvp_options["paypal_currency"]).' '.number_format($price,2).'<br />';
 	}
 echo "</p>\n";
 }
@@ -1215,6 +1215,10 @@ function format_rsvp_details($results) {
 		if($row["guestof"])
 			echo " (". __('guest of','rsvpmaker')." ".$row["guestof"].")";
 		echo "</h3>";
+
+		if($row["amountpaid"] > 0)
+			echo '<div style="color: #006400;font-weight: bold;">Paid: '.$row["amountpaid"]."</div>";		
+
 		echo "<p>";
 		if($row["details"])
 			{
