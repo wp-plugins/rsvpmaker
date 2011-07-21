@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.2.1
-Stable tag: 2.3.9
+Stable tag: 2.4
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
 
 == Changelog ==
+
+= 2.4 =
+
+Number format options on settings screen for non-U.S. currencies. For example, PLN 1.000,00 (Polish currency, European separation for thousands and decimal) instead of $1,000.00
 
 = 2.3.9 =
 

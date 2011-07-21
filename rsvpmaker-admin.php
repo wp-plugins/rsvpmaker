@@ -402,6 +402,10 @@ add_action('save_post','save_calendar_data');
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
 				  $newoptions["posttypecheck"] = $options["posttypecheck"];
 				$newoptions["noeventpageok"] = $options["noeventpageok"];
+				$nfparts = explode('|',$_POST["currency_format"]);
+				$newoptions["currency_decimal"] = $nfparts[0];
+				$newoptions["currency_thousands"] = $nfparts[1];
+				
 				  $options = $newoptions;
 				  
                   update_option($this->db_option, $options);
@@ -560,6 +564,14 @@ echo "<br /><br />On your system, the base web directory is: <strong>".$_SERVER[
 
 <br /><h3>PayPal Currency:</h3>
 <input type="text" name="option[paypal_currency]" value="<?php echo $options["paypal_currency"];?>" size="5" /> <a href="https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_nvp_currency_codes">(list of codes)</a>
+
+<select name="currency_format">
+<option value="<?php echo $options["currency_decimal"];?>|<?php echo $options["currency_thousands"];?>"><?php echo number_format(1000.00, 2, $options["currency_decimal"],  $options["currency_thousands"]); ?></option>
+<option value=".|,"><?php echo number_format(1000.00, 2, '.',  ','); ?></option>
+<option value=",|."><?php echo number_format(1000.00, 2, ',',  '.'); ?></option>
+<option value=",| "><?php echo number_format(1000.00, 2, ',',  ' '); ?></option>
+</select>
+
     
     <br />
 <h3>Tweak Permalinks:</h3>

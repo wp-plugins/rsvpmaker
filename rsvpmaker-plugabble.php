@@ -245,7 +245,7 @@ if(is_array($_POST["payingfor"]) )
 		$cost = $value * $price;
 		if($rsvp["payingfor"])
 			$rsvp["payingfor"] .= ", ";
-		$rsvp["payingfor"] .= "$value $unit @ ".number_format($price,2) . ' '.$rsvp_options["paypal_currency"];
+		$rsvp["payingfor"] .= "$value $unit @ ".number_format($price,2,$rsvp_options["currency_decimal"],$rsvp_options["currency_thousands"]) . ' '.$rsvp_options["paypal_currency"];
 		$rsvp["total"] += $cost;
 		$participants += $value;
 		}
@@ -826,7 +826,7 @@ if($e)
 		if($details["total"])
 			{
 			$nonce= wp_create_nonce('pp-nonce');
-			$rsvpconfirm .= "<p><strong>".__('Pay by PayPal for','rsvpmaker')." ".$details["payingfor"].' = '.number_format($details["total"],2).' ' . $rsvp_options["paypal_currency"]."</strong></p>".
+			$rsvpconfirm .= "<p><strong>".__('Pay by PayPal for','rsvpmaker')." ".$details["payingfor"].' = '.number_format($details["total"],2,$rsvp_options["currency_decimal"],$rsvp_options["currency_thousands"]).' ' . $rsvp_options["paypal_currency"]."</strong></p>".
 			'<form method="post" name="donationform" id="donationform" action="'.$permalink.'">
 <input type="hidden" name="paypal" value="payment" /> 
 <p>Amount: '.$details["total"].'<input name="paymentAmount" type="hidden" id="paymentAmount" size="10" value="'.$details["total"].'"> '.$rsvp_options["paypal_currency"].'
@@ -1002,7 +1002,7 @@ foreach($per["unit"] as $index => $value)
     <option value="9">9</option>
     <option value="10">10</option>
   </select>
-<input type="hidden" name="unit['.$index.']" value="'.$value.'" />'.$value.' @ <input type="hidden" name="price['.$index.']" value="'.$price.'" />'.(($rsvp_options["paypal_currency"] == 'USD') ? '$' : $rsvp_options["paypal_currency"]).' '.number_format($price,2).'<br />';
+<input type="hidden" name="unit['.$index.']" value="'.$value.'" />'.$value.' @ <input type="hidden" name="price['.$index.']" value="'.$price.'" />'.(($rsvp_options["paypal_currency"] == 'USD') ? '$' : $rsvp_options["paypal_currency"]).' '.number_format($price,2,$rsvp_options["currency_decimal"],$rsvp_options["currency_thousands"]).'<br />';
 	}
 echo "</p>\n";
 }
