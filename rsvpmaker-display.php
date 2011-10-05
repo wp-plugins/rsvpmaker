@@ -14,16 +14,22 @@ global $rsvp_options;
 $date_format = ($atts["date_format"]) ? $atts["date_format"] : $rsvp_options["short_date"];
 
 if($atts["past"])
-	$sql = "SELECT *, $wpdb->posts.ID as postID
+	$sql = "SELECT *, $wpdb->posts.ID as postID, 1 as current
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
 WHERE datetime < CURDATE( ) AND $wpdb->posts.post_status = 'publish'
 ORDER BY datetime DESC";
-else
-	$sql = "SELECT *, $wpdb->posts.ID as postID
+elseif($_GET["cy"])
+	$sql = "SELECT *, $wpdb->posts.ID as postID, 1 as current
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
-WHERE datetime > CURDATE( ) AND $wpdb->posts.post_status = 'publish'
+WHERE datetime > '".$_GET["cy"] .'-'. $_GET["cm"].'-0'."' AND $wpdb->posts.post_status = 'publish'
+ORDER BY datetime";
+else
+	$sql = "SELECT *, $wpdb->posts.ID as postID, datetime > CURDATE( ) as current
+FROM `".$wpdb->prefix."rsvp_dates`
+JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
+WHERE datetime > '".date('Y-m-0')."' AND $wpdb->posts.post_status = 'publish'
 ORDER BY datetime";
 
 if($atts["limit"])
@@ -37,7 +43,7 @@ foreach($results as $row)
 	if($dateline[$row["postID"]])
 		$dateline[$row["postID"]] .= ", ";
 	$dateline[$row["postID"]] .= date($date_format,$t);
-	if(!$eventlist[$row["postID"]])
+	if($row["current"] && !$eventlist[$row["postID"]])
 		$eventlist[$row["postID"]] = $row;
 	$cal[date('Y-m-d',$t)] .= '<div><a class="calendar_item" href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
 	}
@@ -303,7 +309,10 @@ function rsvpmaker_join($join) {
 
 function rsvpmaker_where($where) {
 
-return $where . " AND datetime > CURDATE( )";
+if($_GET["cm"])
+	return $where . " AND datetime > '".$_GET["cy"]."-".$_GET["cm"]."-0'";
+else
+	return $where . " AND datetime > CURDATE( )";
 
 }
 
@@ -410,5 +419,14 @@ return $title;
 }
 
 add_filter('wp_title','date_title', 1, 3);
+
+//utility function, template tag
+function is_rsvpmaker() {
+global $post;
+if($post->post_type == 'rsvpmaker')
+	return true;
+else
+	return false;
+}
 
 ?>
