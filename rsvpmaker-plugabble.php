@@ -504,11 +504,11 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 		   if($ack == "SUCCESS"){
 $paymentAmount =urlencode ($_SESSION['paymentAmount']);
 $paymentType = urlencode($_SESSION['paymentType']);
-$currCodeType = urlencode($_SESSION['currCodeType']);
+$currencyCodeType = urlencode($_SESSION["currencyCodeType"]);
 $payerID = urlencode($_REQUEST['PayerID']);
 $serverName = urlencode($_SERVER['SERVER_NAME']);
 
-$nvpstr='&TOKEN='.$token.'&PAYERID='.$payerID.'&PAYMENTACTION='.$paymentType.'&AMT='.$paymentAmount.'&CURRENCYCODE='.$currCodeType.'&IPADDRESS='.$serverName ;
+$nvpstr='&TOKEN='.$token.'&PAYERID='.$payerID.'&PAYMENTACTION='.$paymentType.'&AMT='.$paymentAmount.'&CURRENCYCODE='.$currencyCodeType.'&IPADDRESS='.$serverName ;
 
  /* Make the call to PayPal to finalize payment
     If an error occured, show the resulting errors
@@ -574,7 +574,7 @@ $resArray = $_SESSION["reshash"];
         <tr>
             <td>
                 Amount:</td>
-            <td>$'. $currCodeType.' '.$resArray['AMT'] . '</td>
+            <td>'.$resArray['CURRENCYCODE'].' '.$resArray['AMT'] . '</td>
         </tr>
     </table>
 	</div>
