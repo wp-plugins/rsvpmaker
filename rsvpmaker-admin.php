@@ -207,7 +207,7 @@ if(isset($_POST["event_month"]) )
 
 	foreach($_POST["event_year"] as $index => $year)
 		{
-		if(isset($_POST["event_day"][$index]) )
+		if(isset($_POST["event_day"][$index]) && $_POST["event_day"][$index])
 			{
 			$cddate = $year . "-" . $_POST["event_month"][$index]  . "-" . $_POST["event_day"][$index] . " " . $_POST["event_hour"][$index] . ":" . $_POST["event_minutes"][$index] . ":00";
 			if( $wpdb->get_var("SELECT id FROM ".$wpdb->prefix."rsvp_dates WHERE postID=$postID AND datetime='$cddate' ") )
@@ -242,6 +242,7 @@ if(isset($_POST["event_month"]) )
 			{
 			$dsql = "DELETE FROM ".$wpdb->prefix."rsvp_dates WHERE id=$id";
 			$wpdb->query($dsql);
+			
 			}
 		}
 	
