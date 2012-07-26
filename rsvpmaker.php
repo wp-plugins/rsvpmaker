@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 2.4.1
+Version: 2.5.3
 Author URI: http://www.carrcommunications.com
 */
 
@@ -23,51 +23,78 @@ load_textdomain('rsvpmaker',$mofile);
 $rsvp_options = get_option('RSVPMAKER_Options');
 
 //defaults
-if(!$rsvp_options["menu_security"])
+if(!isset($rsvp_options["menu_security"]))
 	$rsvp_options["menu_security"] = 'manage_options';
-if(!$rsvp_options["rsvp_to"])
+if(!isset($rsvp_options["rsvp_to"]))
 	$rsvp_options["rsvp_to"] = get_bloginfo('admin_email');
-if(!$rsvp_options["rsvp_confirm"])
+if(!isset($rsvp_options["rsvp_confirm"]))
 	$rsvp_options["rsvp_confirm"] = __('Thank you!','rsvpmaker');
-if(!$rsvp_options['rsvplink'])
+if(!isset($rsvp_options['rsvplink']))
 	$rsvp_options['rsvplink'] = '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">'. __('RSVP Now!','rsvpmaker').'</a></p>';
-if(!$rsvp_options['defaulthour'])
+if(!isset($rsvp_options['defaulthour']))
 	{
 	$rsvp_options['defaulthour'] = 19;
 	$rsvp_options['defaultmin'] = 0;
 	}
-if(!$rsvp_options["long_date"])
+if(!isset($rsvp_options["long_date"]))
 	$rsvp_options["long_date"] = 'l F jS, Y';
-if(!$rsvp_options["short_date"])
+if(!isset($rsvp_options["short_date"]))
 	$rsvp_options["short_date"] = 'F jS';
-if(!$rsvp_options["time_format"])
+if(!isset($rsvp_options["time_format"]))
 	$rsvp_options["time_format"] = 'g:i A';
-if(!$rsvp_options["profile_table"])
-	$rsvp_options["profile_table"] = '
+
+if(!isset($rsvp_options["rsvp_form"]))
+	$rsvp_options["rsvp_form"] = '
+        <table border="0" cellspacing="0" cellpadding="0"> 
+          <tr> 
+            <td>'. __('First Name','rsvpmaker').':</td> 
+            <td> 
+              [rsvpfield textfield="first"]
+            </td> 
+          </tr> 
+          <tr> 
+            <td>'. __('Last Name','rsvpmaker').':</td> 
+            <td> 
+              [rsvpfield textfield="last"]
+            </td> 
+          </tr> 
+          <tr> 
+            <td width="100">'.__('Email','rsvpmaker').':</td>
+            <td>[rsvpfield textfield="email"]</td> 
+          </tr> 
+</table>
+
+<!-- by default, this displays the phone # field or a message saying this is already on file can also be customized to request more extensive contact info -->
+
+[rsvpprofiletable show_if_empty="phone"]
 <table border="0" cellspacing="0" cellpadding="0"> 
 <tr> 
 <td width="100">'.__('Phone','rsvpmaker').':</td> 
-<td>
-	<input name="profile[phone]" type="text" id="phone" size="20" value="" />
-</td> 
+<td>[rsvpfield textfield="phone" size="20"]</td> 
 </tr> 
 <tr> 
-<td>'.__('Phone Type','rsvpmaker').':</td> 
-<td> 
-  <select name="profile[phonetype]" id="phonetype"> 
-	<option> 
-	</option> 
-	<option>'.__('Work Phone','rsvpmaker').'</option> 
-	<option>'.__('Mobile Phone','rsvpmaker').'</option> 
-	<option>'.__('Home Phone','rsvpmaker').'</option> 
-  </select></td> 
+<td>'.__('Phone Type','rsvpmaker').':</td>
+<td>[rsvpfield selectfield="phonetype" options="'.__('Work Phone','rsvpmaker').','.__('Mobile Phone','rsvpmaker').','.__('Home Phone','rsvpmaker').'</option> 
+"]</td> 
 </tr> 
-</table>';
-if(!$rsvp_options["paypal_currency"])
+</table>
+[/rsvpprofiletable]
+
+<!-- end of profile section-->      
+
+[rsvpguests]
+        
+<p>'. __('Note','rsvpmaker').':<br /> 
+<textarea name="note" cols="60" rows="2" id="note"></textarea> 
+</p>
+';
+
+
+if(!isset($rsvp_options["paypal_currency"]))
 	$rsvp_options["paypal_currency"] = 'USD';
-if(!$rsvp_options["currency_decimal"])
+if(!isset($rsvp_options["currency_decimal"]))
 	$rsvp_options["currency_decimal"] = '.';
-if(!$rsvp_options["currency_thousands"])
+if(!isset($rsvp_options["currency_thousands"]))
 	$rsvp_options["currency_thousands"] = ',';
 
 if(file_exists(WP_PLUGIN_DIR."/rsvpmaker-custom.php") )
@@ -129,13 +156,13 @@ function rsvpmaker_create_post_type() {
 
 //tweak for users who report "page not found" errors - flush rules on every init
 global $rsvp_options;
-if($rsvp_options["flush"])
+if(isset($rsvp_options["flush"]) && $rsvp_options["flush"])
 	flush_rewrite_rules();
 
 }
 
 //make sure new rules will be generated for custom post type - flush for admin but not for regular site visitors
-if(!$rsvp_options["flush"])
+if(!isset($rsvp_options["flush"]))
 	add_action('admin_init','flush_rewrite_rules');
 
 function cpevent_activate() {
