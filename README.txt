@@ -3,8 +3,8 @@ Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
-Tested up to: 3.2.1
-Stable tag: 2.5
+Tested up to: 3.4.1
+Stable tag: 2.5.1
 
 Event scheduling and RSVP tracking.
 
