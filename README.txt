@@ -4,7 +4,7 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.2.1
-Stable tag: 2.4.2
+Stable tag: 2.5
 
 Event scheduling and RSVP tracking.
 
@@ -68,6 +68,12 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
 
 == Changelog ==
+
+= 2.5 =
+
+Introduced a new method for customizing the RSVP form, either on the settings screen or on a per-event basis. NOTE THAT PREVIOUS CUSTOMIZATIONS WILL NOT BE AUTOMATICALLY BE PRESERVED. The new method provides greater design freedom, allowing you to change the form layout, the order in which fields appear, and whether you want to include the guest section or a note field. A series of shortcodes are provide to generate the fields in the correct format for RSVPMaker.
+
+This release also includes some code cleanup and a fix to the JavaScript function for adding guest fields (thanks to soaringthor for the code shared on thes upport forum).
 
 = 2.4.2 =
 
