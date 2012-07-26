@@ -294,7 +294,7 @@ function get_next_events_link( $label = '', $max_page = 0 ) {
 		$link .= '<a href="' . $rsvp_options["eventpage"] .'page/'.$nextpage."/\" $attr>" . $label . ' &raquo;</a>';
 	}
 	
-	if($link)
+	if(isset($link))
 		echo "<p>$link</p>";
 }
 
@@ -309,7 +309,7 @@ function rsvpmaker_join($join) {
 
 function rsvpmaker_where($where) {
 
-if($_GET["cm"])
+if(isset($_GET["cm"]))
 	return $where . " AND datetime > '".$_GET["cy"]."-".$_GET["cm"]."-0'";
 else
 	return $where . " AND datetime > CURDATE( )";
@@ -333,7 +333,7 @@ function rsvpmaker_distinct($distinct){
 function rsvpmaker_upcoming ($atts)
 {
 
-$no_events = ($atts["no_events"]) ? $atts["no_events"] : 'No events currently listed.';
+$no_events = (isset($atts["no_events"]) && $atts["no_events"]) ? $atts["no_events"] : 'No events currently listed.';
 
 global $post;
 global $wp_query;
@@ -350,7 +350,7 @@ add_filter('posts_distinct', 'rsvpmaker_distinct' );
 $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
 $querystring = "post_type=rsvpmaker&post_status=publish&paged=$paged";
-if($atts["type"])
+if(isset($atts["type"]))
 	$querystring .= "&rsvpmaker-type=".$atts["type"];
 
 $wpdb->show_errors();
@@ -358,7 +358,7 @@ $wp_query = new WP_Query($querystring);
 
 ob_start();
 
-if($atts["calendar"] || ($atts["format"] == "calendar") )
+if(isset($atts["calendar"]) || (isset($atts["format"]) && ($atts["format"] == "calendar") ) )
 	{
 	$atts["format"] = "calendar";
 	echo event_listing($atts);
@@ -384,6 +384,7 @@ $authorlink = sprintf( '<span class="author vcard"><a class="url fn n" href="%1$
 <div class="event_author"><?php _e('Posted by','rsvpmaker'); echo " $authorlink on ";?><span class="updated" datetime="<?php the_modified_date('c');?>"><?php the_modified_date(); ?></span></div>
 </div>
 <?php 
+
 endwhile;
 ?>
 <p><?php 
