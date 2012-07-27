@@ -666,7 +666,7 @@ global $rsvp_options;
 if( is_object($post) && ( ($post->post_type == 'rsvpmaker') || strstr($post->post_content,'[rsvpmaker_') ) )
 	{
 	wp_enqueue_script('jquery');
-	$myStyleUrl = (isset($rsvp_options["custom_css"])) ? $rsvp_options["custom_css"] : WP_PLUGIN_URL . '/rsvpmaker/style.css';
+	$myStyleUrl = (isset($rsvp_options["custom_css"]) && $rsvp_options["custom_css"]) ? $rsvp_options["custom_css"] : WP_PLUGIN_URL . '/rsvpmaker/style.css';
 	wp_register_style('rsvp_style', $myStyleUrl);
 	wp_enqueue_style( 'rsvp_style');
 	}
