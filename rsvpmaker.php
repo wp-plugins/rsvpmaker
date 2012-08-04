@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 2.5.3.1
+Version: 2.5.4
 Author URI: http://www.carrcommunications.com
 */
 
@@ -98,7 +98,7 @@ if(!isset($rsvp_options["currency_thousands"]))
 	$rsvp_options["currency_thousands"] = ',';
 
 if(file_exists(WP_PLUGIN_DIR."/rsvpmaker-custom.php") )
-	include WP_PLUGIN_DIR."/rsvpmaker-custom.php";
+	include_once WP_PLUGIN_DIR."/rsvpmaker-custom.php";
 
 include WP_PLUGIN_DIR."/rsvpmaker/rsvpmaker-admin.php";
 include WP_PLUGIN_DIR."/rsvpmaker/rsvpmaker-display.php";
@@ -107,11 +107,13 @@ include WP_PLUGIN_DIR."/rsvpmaker/rsvpmaker-plugabble.php";
 add_action( 'init', 'rsvpmaker_create_post_type' );
 
 function rsvpmaker_create_post_type() {
+global $rsvp_options;
+$menu_label = (isset($rsvp_options["menu_label"])) ? $rsvp_options["menu_label"] : __("RSVP Events");
 
   register_post_type( 'rsvpmaker',
     array(
       'labels' => array(
-        'name' => __( 'RSVP Events' ),
+        'name' => $menu_label,
         'add_new_item' => __( 'Add New Event' ),
         'edit_item' => __( 'Edit Event' ),
         'new_item' => __( 'Events' ),
@@ -123,7 +125,9 @@ function rsvpmaker_create_post_type() {
     'show_ui' => true, 
     'query_var' => true,
     'rewrite' => array( 'slug' => 'rsvpmaker','with_front' => FALSE), 
-    'capability_type' => 'post',
+    'capability_type' => 'rsvpmaker',
+    'map_meta_cap' => true,
+    'has_archive' => true,
     'hierarchical' => false,
     'menu_position' => 5,
     'supports' => array('title','editor','author','excerpt','custom-fields'),
@@ -158,6 +162,11 @@ function rsvpmaker_create_post_type() {
 global $rsvp_options;
 if(isset($rsvp_options["flush"]) && $rsvp_options["flush"])
 	flush_rewrite_rules();
+
+// if there is a logged in user, set editing roles
+global $current_user;
+if( isset($current_user) )
+	rsvpmaker_roles();
 
 }
 

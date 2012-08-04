@@ -385,6 +385,10 @@ $authorlink = sprintf( '<span class="author vcard"><a class="url fn n" href="%1$
 </div>
 <?php 
 
+if(is_admin() )
+	{
+		echo '<p><a href="'.admin_url('post.php?action=edit&post='.$post->ID).'">Edit</a></p>';
+	}
 endwhile;
 ?>
 <p><?php 

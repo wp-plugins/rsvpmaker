@@ -4,19 +4,21 @@ Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 2.5.3.1
+Stable tag: 2.5.4
 
 Event scheduling and RSVP tracking.
 
 == Description ==
 
-RSVPmaker is an event scheduling and RSVP tracking plugin for WordPress, using the custom post types feature introduced in WP3.0 to track events as an alternate post type with associated dates.
+RSVPMaker is an event scheduling and RSVP tracking plugin for WordPress, using the custom post types feature introduced in WP3.0 to track events as an alternate post type with associated dates.
 
 Site editors and administrators have the option to request RSVPs for any given event and specify an email address for notifications when someone responds. RSVP Reports can also be run from the administrator's dashboard.
 
-If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface or downloaded to Excel. Download to Excel function now based on [PHPExcel](http://www.phpexcel.net/) library.
+If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface or downloaded to Excel.
 
-[__RSVPmaker.com__](http://www.rsvpmaker.com/)
+When used with an additional plugin, RSVPMaker Excel, RSVP reports can easily be downloaded to a spreadsheet, using the Excel functions from the [PHPExcel](http://www.phpexcel.net/) library.
+
+[__RSVPMaker.com__](http://www.rsvpmaker.com/)
 
 Related plugin: [__ChimpBlast__](http://wordpress.org/extend/plugins/chimpblast/) for sending event invites and other email broadcasts through the MailChimp broadcast email service.
 
@@ -24,7 +26,7 @@ Related plugin: [__ChimpBlast__](http://wordpress.org/extend/plugins/chimpblast/
 
 1. Upload the entire `rsvpmaker` folder to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. Visit the RSVPmaker options page to configure default values for RSVP email notifications, etc.
+1. Visit the RSVPMaker options page to configure default values for RSVP email notifications, etc.
 1. See the documentation for shortcodes you can use to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget if you would like to add an events listing to your WordPress sidebar.
 1. OPTIONAL: Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
 1. OPTIONAL: To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
@@ -49,7 +51,7 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 
 == Credits ==
 
-    RSVPmaker
+    RSVPMaker
     Copyright (C) 2010 David F. Carr
 
     This program is free software: you can redistribute it and/or modify
@@ -69,11 +71,17 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 
 == Changelog ==
 
+= 2.5.4 =
+
+Moved functions for downloading RSVP results to Excel to a separate plugin, RSVPMaker Excel.
+
+Several bugfixes were released following version 2.5, and a few more are included in this release.
+
 = 2.5 =
 
 Introduced a new method for customizing the RSVP form, either on the settings screen or on a per-event basis. NOTE THAT PREVIOUS CUSTOMIZATIONS WILL NOT BE AUTOMATICALLY BE PRESERVED. The new method provides greater design freedom, allowing you to change the form layout, the order in which fields appear, and whether you want to include the guest section or a note field. A series of shortcodes are provide to generate the fields in the correct format for RSVPMaker.
 
-This release also includes some code cleanup and a fix to the JavaScript function for adding guest fields (thanks to soaringthor for the code shared on thes upport forum).
+This release also includes some code cleanup and a fix to the JavaScript function for adding guest fields (thanks to soaringthor for the code shared on the support forum).
 
 = 2.4.2 =
 
@@ -210,7 +218,7 @@ Added debug checkbox in options. When this is turned on, it creates an additiona
 * Added ability to set RSVP start date as well as deadline for RSVPs
 * If signing up workers or volunteers for specific timeslots, you can now specify the duration of the timeslots in one-hour increments
 * Cleaned up Event Dates, RSVP Options box in editor, moving less commonly used parameters to the bottom.
-* Added a Tweak Permalinks setting (a hack for a few users who have reported "page not found" errors, possibly because some other plugin is overwriting the RSVPmaker rewrite rules).
+* Added a Tweak Permalinks setting (a hack for a few users who have reported "page not found" errors, possibly because some other plugin is overwriting the RSVPMaker rewrite rules).
 * Tested with WP 3.1 release candidate
 
 = 0.7.6 =
@@ -260,5 +268,10 @@ Bug fix, tweak to register post type configuration
 
 == Upgrade Notice ==
 
-= 1.0 =
-Final cleanup to qualify for version 1.0 status.
+= 2.5.4 =
+
+Export to Excel function moved to a separate plugin.
+
+= 2.5 =
+
+New method for customizing the RSVP form introduced.
