@@ -24,7 +24,7 @@ if(isset($_POST["event_month"]) )
 			if( $wpdb->get_var("SELECT id FROM ".$wpdb->prefix."rsvp_dates WHERE postID=$postID AND datetime='$cddate' ") )
 				continue;
 			
-			$dpart = explode(':',$_POST["event_duration"][$index]);			
+			$dpart = explode(':',$_POST["event_duration"][$index]);
 			if( is_numeric($dpart[0]) )
 				{
 				$hour = $_POST["event_hour"][$index] + $dpart[0];
@@ -72,20 +72,185 @@ if(isset($_POST["edit_month"]))
 		{
 			$cddate = $year . "-" . $_POST["edit_month"][$index]  . "-" . $_POST["edit_day"][$index] . " " . $_POST["edit_hour"][$index] . ":" . $_POST["edit_minutes"][$index] . ":00";
 			
-			if( is_numeric($_POST["edit_duration"][$index]) )
+			if(strpos( $_POST["edit_duration"][$index],':' ))
 				{
+				$dpart = explode(':',$_POST["edit_duration"][$index]);
+				if( is_numeric($dpart[0]) )
+					{
+					$hour = $_POST["edit_hour"][$index] + $dpart[0];
+					$minutes = (isset($dpart[1]) ) ? $_POST["edit_minutes"][$index] + $dpart[1] : $_POST["edit_minutes"][$index];
+					$duration = mktime( $hour, $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year);
+					}
+				}
+			elseif( is_numeric($_POST["edit_duration"][$index]) )
+				{					
 				$minutes = $_POST["edit_minutes"][$index] + (60*$_POST["edit_duration"][$index]);
 				$duration = mktime( $_POST["edit_hour"][$index], $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year);
 				}
 			else
 				$duration = $_POST["edit_duration"][$index]; // empty or all day
-				
+			
 			$sql = "UPDATE ".$wpdb->prefix."rsvp_dates  SET datetime='$cddate',duration='$duration'  WHERE id=$index"; 
 			//echo $sql;
 			$wpdb->query($sql);
 			}
 		}
 	
+}
+
+function rsvpmaker_date_option($datevar = NULL, $index = NULL) {
+
+global $rsvp_options;
+$prefix = "event_";
+
+if(is_array($datevar) )
+{
+	$datestring = $datevar["datetime"];
+	$duration = $datevar["duration"];
+	$prefix = "edit_";
+	$index = $datevar["id"];
+}
+else
+{
+	$datestring = $datevar;
+}
+
+if(strpos($datestring,'-'))
+	{
+	$t = strtotime($datestring);
+	$month =  (int) date('n',$t);
+	$year =  (int) date('Y',$t);
+	$day =  (int) date('j',$t);
+	$hour =  (int) date('G',$t);
+	$minutes =  (int) date('i',$t);
+	}
+elseif($datestring == 'today')
+	{
+	$month =  (int) date('n');
+	$year =  (int) date('Y');
+	$day =  (int) date('j');
+	$hour = (isset($rsvp_options["defaulthour"])) ? ( (int) $rsvp_options["defaulthour"]) : 19;
+	$minutes = (isset($rsvp_options["defaultmin"])) ? ( (int) $rsvp_options["defaultmin"]) : 0;
+	}
+else
+	{
+	$month = (int) date('n');
+	$year =  (int) date('Y');
+	$day = 0;
+	$hour = (isset($rsvp_options["defaulthour"])) ? ( (int) $rsvp_options["defaulthour"]) : 19;
+	$minutes = (isset($rsvp_options["defaultmin"])) ? ( (int) $rsvp_options["defaultmin"]) : 0;
+	}
+
+?>
+<div id="<?php echo $prefix; ?>date<?php echo $index;?>" style="border-bottom: thin solid #888;">
+<table width="100%">
+<tr>
+            <td width="*"><div id="date_block"><?php echo __('Month:','rsvpmaker');?> 
+<select name="<?php echo $prefix; ?>month[<?php echo $index;?>]"> 
+<?php
+for($i = 1; $i <= 12; $i++)
+{
+echo "<option ";
+	if($i == $month)
+		echo ' selected="selected" ';
+	echo 'value="'.$i.'">'.$i."</option>\n";
+}
+?>
+</select> 
+<?php echo __('Day:','rsvpmaker');?> 
+<select name="<?php echo $prefix; ?>day[<?php echo $index;?>]"> 
+<?php
+if($day == 0)
+	echo '<option value="0">Not Set</option>';
+for($i = 1; $i <= 31; $i++)
+{
+echo "<option ";
+	if($i == $day)
+		echo ' selected="selected" ';
+	echo 'value="'.$i.'">'.$i."</option>\n";
+}
+?>
+</select> 
+<?php echo __('Year','rsvpmaker');?>
+<select name="<?php echo $prefix; ?>year[<?php echo $index ;?>]"> 
+<?php
+$y = (int) date('Y');
+$limit = $y + 3;
+for($i = $y; $i < $limit; $i++)
+{
+echo "<option ";
+	if($i == $year)
+		echo ' selected="selected" ';
+	echo 'value="'.$i.'">'.$i."</option>\n";
+}
+?>
+</select> 
+</div> 
+            </td> 
+          </tr> 
+<tr> 
+<td><?php echo __('Hour:','rsvpmaker');?> <select name="<?php echo $prefix; ?>hour[<?php echo $index;?>]"> 
+<?php
+for($i=0; $i < 24; $i++)
+	{
+	$selected = ($i == $hour) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	if($i == 0)
+		$twelvehour = "12 a.m.";
+	elseif($i == 12)
+		$twelvehour = "12 p.m.";
+	elseif($i > 12)
+		$twelvehour = ($i - 12) ." p.m.";
+	else		
+		$twelvehour = $i." a.m.";
+
+	printf('<option  value="%s" %s>%s / %s:</option>',$padded,$selected,$twelvehour,$padded);
+	}
+?>
+</select> 
+ 
+<?php echo __('Minutes:','rsvpmaker');?> <select name="<?php echo $prefix; ?>minutes[<?php echo $index;?>]"> 
+<?php
+for($i=0; $i < 60; $i ++)
+	{
+	$selected = ($i == $minutes) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	printf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
+	}
+?>
+</select> -
+
+<?php echo __('Duration','rsvpmaker');?> <select name="<?php echo $prefix; ?>duration[<?php echo $index;?>]">
+<option value=""><?php echo __('Not set (optional)','rsvpmaker');?></option>
+<option value="allday" <?php if(isset($duration) && ($duration == 'allday')) echo ' selected="selected" '; ?>><?php echo __("All day/don't show time in headline",'rsvpmaker');?></option>
+<?php
+if(isset($duration) && is_numeric($duration) )
+	{
+	$diff = (string) ( (((int) $duration) - $t) / 3600);
+	$dparts = explode('.',$diff);
+	$dh = (int) $dparts[0];
+	$decimal = (isset($dparts[1]) ) ? (int) $dparts[1] : 0;
+	}
+else
+	{
+		$dh = $decimal = NULL;
+	}
+for($h = 1; $h < 24; $h++) {
+	 ;?>
+<option value="<?php echo $h;?>" <?php if(($h == $dh) && ($decimal == 0) ) echo ' selected="selected" '; ?> ><?php echo $h;?> hours</option>
+<option value="<?php echo $h;?>:15" <?php if(($h == $dh) && ($decimal == 25) ) echo ' selected="selected" '; ?> ><?php echo $h;?>:15</option>
+<option value="<?php echo $h;?>:30"  <?php if(($h == $dh) && ($decimal == 5) ) echo ' selected="selected" '; ?> ><?php echo $h;?>:30</option>
+
+<option value="<?php echo $h;?>:45"  <?php if(($h == $dh) && ($decimal == 75) ) echo ' selected="selected" '; ?> ><?php echo $h;?>:45</option>
+<?php } ;?>
+</select>
+<br /> 
+</td> 
+          </tr> 
+</table>
+</div>
+<?php
+
 }
 
 function save_rsvp_meta($postID)

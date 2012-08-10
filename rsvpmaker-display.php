@@ -282,6 +282,7 @@ function get_next_events_link( $label = '', $max_page = 0 ) {
 		$paged = 1;
 
 	$nextpage = intval($paged) + 1;
+	$link = '';
 
 	if ( $nextpage > 2 ) {
 		$link = '<a href="' . $rsvp_options["eventpage"] ."\" $attr>&laquo; " . __('Events Home','rsvpmaker') . '</a>';
@@ -352,8 +353,17 @@ $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 $querystring = "post_type=rsvpmaker&post_status=publish&paged=$paged";
 if(isset($atts["type"]))
 	$querystring .= "&rsvpmaker-type=".$atts["type"];
+if(isset($atts["limit"]))
+	$querystring .= "&posts_per_page=".$atts["limit"];
+if(isset($atts["add_to_query"]))
+	{
+		if(!strpos($atts["add_to_query"],'&'))
+			$atts["add_to_query"] = '&'.$atts["add_to_query"];
+		$querystring .= $atts["add_to_query"];
+	}
 
 $wpdb->show_errors();
+
 $wp_query = new WP_Query($querystring);
 
 ob_start();
@@ -376,15 +386,19 @@ while ( have_posts() ) : the_post();?>
 </div><!-- .entry-content -->
 
 <?php
+if(!$atts["hideauthor"])
+{
 $authorlink = sprintf( '<span class="author vcard"><a class="url fn n" href="%1$s" title="%2$s">%3$s</a></span>',
 	get_author_posts_url( get_the_author_meta( 'ID' ) ),
 	sprintf( esc_attr__( 'View all posts by %s', 'rsvpmaker' ), get_the_author() ),
 	get_the_author());
 ?>
 <div class="event_author"><?php _e('Posted by','rsvpmaker'); echo " $authorlink on ";?><span class="updated" datetime="<?php the_modified_date('c');?>"><?php the_modified_date(); ?></span></div>
-</div>
 <?php 
-
+}
+?>
+</div>
+<?php
 if(is_admin() )
 	{
 		echo '<p><a href="'.admin_url('post.php?action=edit&post='.$post->ID).'">Edit</a></p>';

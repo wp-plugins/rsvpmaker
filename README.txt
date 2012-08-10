@@ -2,9 +2,12 @@
 Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
+Donate link: http://rsvpmaker.com/
+License: GPLv2
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 2.5.4
+Stable tag: 2.5.5
 
 Event scheduling and RSVP tracking.
 
@@ -16,7 +19,7 @@ Site editors and administrators have the option to request RSVPs for any given e
 
 If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface or downloaded to Excel.
 
-When used with an additional plugin, RSVPMaker Excel, RSVP reports can easily be downloaded to a spreadsheet, using the Excel functions from the [PHPExcel](http://www.phpexcel.net/) library.
+When used with an additional plugin, [RSVPMaker Excel](http://wordpress.org/extend/plugins/rsvpmaker-excel), RSVP reports can easily be downloaded to a spreadsheet, using the Excel functions from the [PHPExcel](http://www.phpexcel.net/) library.
 
 [__RSVPMaker.com__](http://www.rsvpmaker.com/)
 
@@ -30,6 +33,7 @@ Related plugin: [__ChimpBlast__](http://wordpress.org/extend/plugins/chimpblast/
 1. See the documentation for shortcodes you can use to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget if you would like to add an events listing to your WordPress sidebar.
 1. OPTIONAL: Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
 1. OPTIONAL: To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
+1. OPTIONAL: Install [RSVPMaker Excel](http://wordpress.org/extend/plugins/rsvpmaker-excel) if you want the ability to export RSVP reports to a spreadsheet.
 1. OPTIONAL: You can override any of the functions in rsvpmaker-pluggable.php by creating your own rsvpmaker-custom.php file and adding it to the plugins directory (the directory above the rsvpmaker folder). You can, for example, override the function that displays the RSVP form to include more, fewer, or different fields.
 
 For basic usage, you can also have a look at the [plugin homepage](http://www.rsvpmaker.com/).
@@ -64,18 +68,26 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    See the GNU General Public License at <http://www.gnu.org/licenses/>.
+    See the GNU General Public License at <http://www.gnu.org/licenses/gpl-2.0.html>.
 	
 	RSVPMaker also includes code derived from the PayPal NVP API software
-	development kit for PHP and from the [PHPExcel](http://www.phpexcel.net/).
+	development kit for PHP.
 
 == Changelog ==
 
+= 2.5.5 =
+
+* The date editing section of the event editor now uses drop-downs controls for both adding dates and editing dates.
+
+* rsvpmaker_upcoming shortcode now accepts limit="x" (show x number of events) as an attribute. Example `[rsvpmaker_upcoming limit="3"]` would retrieve a maximum of 3 posts. You can also use add_to_query="myquerystring" to modify the query using query_posts() syntax. Example: `[rsvpmaker_upcoming add_to_query="p=99"]` would retrieve a single rsvpmaker post with the ID of 99. 
+
+* Code changes to prevent a potential security risk with user submitted data in RSVP Reports, use of esc_attr() on variables to prevent script injection.
+
 = 2.5.4 =
 
-Moved functions for downloading RSVP results to Excel to a separate plugin, RSVPMaker Excel.
+* Moved functions for downloading RSVP results to Excel to a separate plugin, RSVPMaker Excel.
 
-Several bugfixes were released following version 2.5, and a few more are included in this release.
+* Several bugfixes were released following version 2.5, and a few more are included in this release.
 
 = 2.5 =
 
