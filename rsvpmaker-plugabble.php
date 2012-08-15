@@ -139,6 +139,13 @@ if(!isset($rsvp_on) && !isset($rsvp_to) && !isset($rsvp_instructions) && !isset(
 	$rsvp_max = 0;
 	$rsvp_show_attendees = $rsvp_options["show_attendees"];
 	}
+if(!isset($rsvp_show_attendees))
+	$rsvp_show_attendees = 0;
+if(!isset($rsvp_captcha))
+	$rsvp_captcha = 0;	
+if(!isset($rsvp_on))
+	$rsvp_on = 0;	
+
 //get_post_meta($post->ID, '_rsvp_on', true)
 //echo "<br />'"; print_r($rsvp_form); echo "'<br />";?>
 <p>

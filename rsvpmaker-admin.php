@@ -274,15 +274,20 @@ foreach($setrsvp as $name => $value)
 	$field = '_rsvp_'.$name;
 	$single = true;
 	$current = get_post_meta($postID, $field, $single);
-	 
-	if($value && ($current == "") )
+	
+	if($value && (($current == "") || ($current == NULL)) )
+		{
 		add_post_meta($postID, $field, $value, true);
-	
+		}
 	elseif($value != $current)
+		{
 		update_post_meta($postID, $field, $value);
-	
+		}
 	elseif($value == "")
+		{
 		delete_post_meta($postID, $field, $current);
+		}
+
 	}
 
 if(isset($_POST["unit"]))
