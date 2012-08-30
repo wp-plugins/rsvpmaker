@@ -1063,8 +1063,6 @@ if(!empty($pf))
 
 basic_form($profile, $guestedit);
 
-global $rsvp_required_field;
-
 if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][0])
 {
 ?>
@@ -1076,8 +1074,10 @@ if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][
 </p>
 <?php
 }
+global $rsvp_required_field;
 if(isset($rsvp_required_field) )
 	echo '<div id="jqerror"></div><input type="hidden" name="required" value="'.implode(",",$rsvp_required_field).'" />'; 
+wp_nonce_field('rsvp','rsvp_nonce');
 ?>
         <p> 
 		  <input type="hidden" name="event" value="<?php echo $post->ID;?>" /> 
@@ -1085,39 +1085,8 @@ if(isset($rsvp_required_field) )
         </p> 
 
 </form>	
-
 </div>
 <?php
-if(isset($rsvp_required_field) )
-	{
-?>
-
-<script type="text/javascript">
-jQuery(document).ready(function() {
-    jQuery("#rsvpform").submit(function() {
-	var leftblank = '';
-<?php
-foreach($rsvp_required_field as $field)
-	{
-	echo "if(jQuery(\"#".$field."\").val() === '') leftblank = leftblank + '<div class=\"rsvp_missing\">".$field."</div>';\n";
-	}
-?>
-
-	if(leftblank != '')
-		{
-		jQuery("#jqerror").html('<div class="rsvp_validation_error">' + "<?php _e("Required fields left blank",'rsvpmaker'); ?>:\n" + leftblank + '</div>');
-		//alert("Required fields left blank:\n" + leftblank);
-		return false;
-		}
-	else
-		return true;
-});
-  });
-</script>
-
-<?php
-wp_nonce_field('rsvp','rsvp_nonce');
-	}
 
 	$content .= ob_get_clean();
 	}

@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 2.5.7
+Stable tag: 2.5.8
 
 Event scheduling and RSVP tracking.
 
@@ -75,11 +75,15 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 
 == Changelog ==
 
+= 2.5.8 =
+
+Bugfix
+
 = 2.5.7 =
 
 * Form customization now includes the ability to set fields as required, with both client and server-side validation. This works with the new shortcode-style method of specifying form fields and form layout. Example: `[rsvpfield textfield="phone" required="1"]`. By default, the required fields are first, last, and email.
 
-* The filter used to add RSVP form fields has also been updated with a lower priority index to make it execute before other filters on the_content. This is in response to a user complaint about interaction with a related posts plugin that also operates on the_content, where the related posts widget was appearing above rather than below the form. New call is `add_filter('the_content','event_content',2)`
+* The filter used to add RSVP form fields has also been updated with a lower priority index to make it execute before other filters on the_content. This is in response to a user complaint about interaction with a related posts plugin that also operates on the_content, where the related posts widget was appearing above rather than below the form. New call is `add_filter('the_content','event_content',5)`
 
 = 2.5.6 =
 

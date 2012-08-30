@@ -5,13 +5,44 @@
 add_filter('the_content','event_content',5);
 
 function event_js($content) {
-return $content .= "
-<script>
-jQuery(document).ready(function($) { 
+global $rsvp_required_field;
+ob_start();
+?>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
 $('#add_guests').click(function(){
-$('.add_one').append('<div class=\"guest_blank\">First Name: <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> Last Name: <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\"/><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div>');});});
-</script>";
+$('.add_one').append('<div class=\"guest_blank\">First Name: <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> Last Name: <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\"/><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div>');});
+<?php
+if(isset($rsvp_required_field) )
+	{
+?>
+    jQuery("#rsvpform").submit(function() {
+	var leftblank = '';
+<?php
+foreach($rsvp_required_field as $field)
+	{
+	echo "if(jQuery(\"#".$field."\").val() === '') leftblank = leftblank + '<div class=\"rsvp_missing\">".$field."</div>';\n";
+	}
+?>
+	if(leftblank != '')
+		{
+		jQuery("#jqerror").html('<div class="rsvp_validation_error">' + "<?php _e("Required fields left blank",'rsvpmaker'); ?>:\n" + leftblank + '</div>');
+		//alert("Required fields left blank:\n" + leftblank);
+		return false;
+		}
+	else
+		return true;
+
+});
+<?php
+	}
+?>
+ });
+</script>
+<?php
+return $content . ob_get_clean();
 }
+
 add_filter('the_content','event_js',15);
 
 add_shortcode('event_listing', 'event_listing');
