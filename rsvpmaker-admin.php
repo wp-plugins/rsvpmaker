@@ -489,13 +489,15 @@ Minutes: <select name="option[defaultmin]">
 					<h3>Confirmation Message:</h3>
   <textarea name="option[rsvp_confirm]"  rows="5" cols="80" id="rsvp_confirm"><?php if( isset($options["rsvp_confirm"]) ) echo $options["rsvp_confirm"];?></textarea>
 	<br />
-					<h3>Profile Table:</h3>
-  <textarea name="option[profile_table]"  rows="5" cols="80" id="profile_table"><?php if( isset($options["profile_table"]) ) echo $options["profile_table"];?></textarea>
-<br />This is the section of the RSVP form that asks for additional details, beyond name and email. You can add additional fields in HTML and they will be recorded as long as you follow the name=&quot;profile[fieldname]&quot; convention. The standard text field length is size=&quot;60&quot;
-	<br />
-					<h3>RSVP Form:</h3>
-  <textarea name="option[rsvp_form]"  rows="5" cols="80" id="profile_table"><?php if( isset($options["rsvp_form"]) ) echo htmlentities($options["rsvp_form"]);?></textarea>
+					<h3>RSVP Form (<a href="#" id="enlarge">Enlarge</a>):</h3>
+  <textarea name="option[rsvp_form]"  rows="5" cols="80" id="rsvpform"><?php if( isset($options["rsvp_form"]) ) echo htmlentities($options["rsvp_form"]);?></textarea>
 <br />This is a customizable template for the RSVP form, introduced as part of the Aug. 2012 update. With the exception of the yes/no radio buttons and the notes textarea, fields are represented by the shortcodes [rsvpfield textfield=&quot;fieldname&quot;] or [rsvpfield selectfield=&quot;fieldname&quot; options=&quot;option1,option2&quot;]. There is also a [rsvpprofiletable show_if_empty=&quot;phone&quot;] shortcode which is an optional block that will not be displayed if the required details (such as a phone number) are already &quot;on file&quot; from a prior RSVP. For this to work, there must also be a [/rsvpprofiletable] closing tag. The guest section of the form is represented by [rsvpguests] (no parameters). If you don't want the guest blanks to show up, you can remove this. The form code you supply will be wrapped in a form tag with the CSS ID of &quot;rsvpform&quot;.
+<script>
+jQuery('#enlarge').click(function() {
+  jQuery('#rsvpform').attr('rows','40');
+  return false;
+});
+</script>
 	<br />
 					<h3>RSVP Link:</h3>
   <textarea name="option[rsvplink]"  rows="5" cols="80" id="rsvplink"><?php if(isset($options["rsvplink"]) ) echo $options["rsvplink"];?></textarea>
@@ -1128,7 +1130,8 @@ echo GetRSVPAdminForm(0);
 
 
 function rsvpmaker_doc () {
-;?>
+global $rsvp_options;
+?>
 <h2>Documentation</h2>
 <p>More detailed documentation at <a href="http://www.rsvpmaker.com/documentation/">http://www.rsvpmaker.com/documentation/</a></p>
 		    <h3>Shortcodes and Event Listing / Calendar Views</strong></h3>
@@ -1143,6 +1146,19 @@ function rsvpmaker_doc () {
             <img src="<?php echo plugins_url('/shortcode.png',__FILE__);?>" width="535" height="412" />
 <br /><em>Contents for an events page.</em>
             </div>
+<h3>RSVP Form</h3>
+<p>The RSVP from is also now formatted using shortcodes, which you can edit in the RSVP Form section of the Settings screen. You can also vary the form on a per-event basis, which can be handy for capturing an extra field. This is your current default form:</p>
+<pre>
+<?php echo(htmlentities($rsvp_options["rsvp_form"])); ?>
+</pre>
+<p>Explanation:</p>
+<p>[rsvpfield textfield=&quot;myfield&quot;] outputs a text field coded to capture data for &quot;myfield&quot;</p>
+<p>[rsvpfield textfield=&quot;myfield&quot; required=&quot;1&quot;] treats &quot;myfield&quot; as a required field.</p>
+<p>[rsvpfield selectfield=&quot;phonetype&quot; options=&quot;Work Phone,Mobile Phone,Home Phone&quot;] HTML select field with specified options</p>
+<p>[rsvpprofiletable show_if_empty=&quot;phone&quot;]CONDITIONAL CONTENT GOES HERE[/rsvpprofiletable] This section only shown if the required field is empty; otherwise displays a message that the info is &quot;on file&quot;. Because RSVPMaker is capable of looking up profile data based on an email address, you may want some data to be hidden for privacy reasons.</p>
+<p>[rsvpguests] Outputs the guest blanks.</p>
+
+<p>If you're having trouble with the form fields not being formatted correctly, <a href="options-general.php?page=rsvpmaker-admin.php&reset_form=1">Reset default RSVP Form</a></p>            
             
 <?php
 

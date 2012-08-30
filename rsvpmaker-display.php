@@ -2,7 +2,17 @@
 
 //event_content defined in rsvpmaker-pluggable.php to allow for variations
 
-add_filter('the_content','event_content');
+add_filter('the_content','event_content',5);
+
+function event_js($content) {
+return $content .= "
+<script>
+jQuery(document).ready(function($) { 
+$('#add_guests').click(function(){
+$('.add_one').append('<div class=\"guest_blank\">First Name: <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> Last Name: <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\"/><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div>');});});
+</script>";
+}
+add_filter('the_content','event_js',15);
 
 add_shortcode('event_listing', 'event_listing');
 
@@ -258,10 +268,10 @@ ORDER BY datetime LIMIT 0, $limit";
 		$limit = ($instance["limit"]) ? $instance["limit"] : 10;
 		$dateformat = ($instance["dateformat"]) ? $instance["dateformat"] : 'M. j';
         ;?>
-            <p><label for="<?php echo $this->get_field_id('title');?>"><?php _e('Title:');?> <input class="widefat" id="<?php echo $this->get_field_id('title');?>" name="<?php echo $this->get_field_name('title');?>" type="text" value="<?php echo $title;?>" /></label></p>
-            <p><label for="<?php echo $this->get_field_id('limit');?>"><?php _e('Number to Show:');?> <input class="widefat" id="<?php echo $this->get_field_id('limit');?>" name="<?php echo $this->get_field_name('limit');?>" type="text" value="<?php echo $limit;?>" /></label></p>
+            <p><label for="<?php echo $this->get_field_id('title');?>"><?php _e('Title:','rsvpmaker');?> <input class="widefat" id="<?php echo $this->get_field_id('title');?>" name="<?php echo $this->get_field_name('title');?>" type="text" value="<?php echo $title;?>" /></label></p>
+            <p><label for="<?php echo $this->get_field_id('limit');?>"><?php _e('Number to Show:','rsvpmaker');?> <input class="widefat" id="<?php echo $this->get_field_id('limit');?>" name="<?php echo $this->get_field_name('limit');?>" type="text" value="<?php echo $limit;?>" /></label></p>
 
-            <p><label for="<?php echo $this->get_field_id('dateformat');?>"><?php _e('Date Format:');?> <input class="widefat" id="<?php echo $this->get_field_id('dateformat');?>" name="<?php echo $this->get_field_name('dateformat');?>" type="text" value="<?php echo $dateformat;?>" /></label> (PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date</a> format string)</p>
+            <p><label for="<?php echo $this->get_field_id('dateformat');?>"><?php _e('Date Format:','rsvpmaker');?> <input class="widefat" id="<?php echo $this->get_field_id('dateformat');?>" name="<?php echo $this->get_field_name('dateformat');?>" type="text" value="<?php echo $dateformat;?>" /></label> (PHP <a target="_blank" href="http://us2.php.net/manual/en/function.date.php">date</a> format string)</p>
 
         <?php 
     }
@@ -365,6 +375,13 @@ if(isset($atts["add_to_query"]))
 $wpdb->show_errors();
 
 $wp_query = new WP_Query($querystring);
+
+// clean up so this doesn't interfere with other operations
+remove_filter('posts_join', 'rsvpmaker_join' );
+remove_filter('posts_where', 'rsvpmaker_where' );
+remove_filter('posts_groupby', 'rsvpmaker_groupby' );
+remove_filter('posts_orderby', 'rsvpmaker_orderby' );
+remove_filter('posts_distinct', 'rsvpmaker_distinct' );
 
 ob_start();
 

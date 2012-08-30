@@ -197,10 +197,15 @@ for($i = 1; $i < 13; $i++)
 </select>
 <br /><em><?php echo __('Used for volunteer shift signups. Duration must also be set.','rsvpmaker');?></em>
 
-<br /><?php echo __('RSVP Form','rsvpmaker');?>:<br />
-<textarea id="rsvp[form]" name="setrsvp[form]" cols="80"><?php if(isset($rsvp_form)) echo htmlentities($rsvp_form);?></textarea>
+<br /><?php echo __('RSVP Form','rsvpmaker');?> (<a href="#" id="enlarge">Enlarge</a>):<br />
+<textarea id="rsvpform" name="setrsvp[form]" cols="120" rows="5"><?php if(isset($rsvp_form)) echo htmlentities($rsvp_form);?></textarea>
+<script>
+jQuery('#enlarge').click(function() {
+  jQuery('#rsvpform').attr('rows','40');
+  return false;
+});
+</script>
 <br />
-
 <?php
 if($rsvp_options["paypal_config"])
 {
@@ -276,12 +281,26 @@ if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][
 		session_start();
 	if($_SESSION["captcha_key"] != md5($_POST['captcha']) )	
 		{
-		header('Location: '.$req_uri.'err='.urlencode('Error - security code not entered correctly! Please try again.'));
+		header('Location: '.$req_uri.'err='.urlencode('security code not entered correctly! Please try again.'));
 		exit();
 		}
 	}
 
-
+if(isset($_POST["required"]))
+	{
+		$required = explode(",",$_POST["required"]);
+		$missing = "";
+		foreach($required as $r)
+			{
+				if(empty($rsvp[$r]))
+					$missing .= $r." ";
+			}
+		if($missing != '')
+			{
+			header('Location: '.$req_uri.'err='.urlencode('missing required fields: '.$missing));
+			exit();
+			}
+	}
 if( preg_match_all('/http/',$_POST["note"],$matches) > 2 )
 	{
 	header('Location: '.$req_uri.'err=Invalid input');
@@ -299,7 +318,7 @@ if(isset($rsvp["email"]))
 	// assuming the form includes email, test to make sure it's a valid one
 	if(!filter_var($rsvp["email"], FILTER_VALIDATE_EMAIL))
 		{
-		header('Location: '.$_SERVER['REDIRECT_URL'].'?err='.urlencode('Error - Invalid input.') );
+		header('Location: '.$req_uri.'err='.urlencode('Invalid input.') );
 		exit();
 		}
 	
@@ -971,14 +990,8 @@ elseif($rsvp_on && is_single() )
 
   <?php if($rsvp_show_attendees) echo '<p class="rsvp_status">'.__('Names of attendees will be displayed publicly, along with the contents of the notes field.','rsvpmaker').'</p>';?>
    
-  <p><?php echo __('Your Answer','rsvpmaker');?>:
-            <input name="yesno" type="radio" value="1" <?php echo (!isset($rsvprow) || $rsvprow["yesno"]) ? 'checked="checked"' : '';?> /> 
-    <?php echo __('Yes','rsvpmaker');?>
-    <input name="yesno" type="radio" value="0" /> 
-    <?php echo __('No','rsvpmaker');?></p> 
+  <p><?php echo __('Your Answer','rsvpmaker');?>: <input name="yesno" type="radio" value="1" <?php echo (!isset($rsvprow) || $rsvprow["yesno"]) ? 'checked="checked"' : '';?> /> <?php echo __('Yes','rsvpmaker');?> <input name="yesno" type="radio" value="0" /> <?php echo __('No','rsvpmaker');?></p> 
 <?php
-
-wp_nonce_field('rsvp','rsvp_nonce');
 
 if($dur && ( $slotlength = $custom_fields["_rsvp_timeslots"][0] ))
 {
@@ -1018,15 +1031,17 @@ for($i=0; ($slot = mktime($hour ,$minutes + ($i * $min_add),0,$month,$day,$year)
 	}
 }
 
-
 if(isset($custom_fields["_per"][0]) && $custom_fields["_per"][0])
 {
-echo "<h3>".__('Paying For','rsvpmaker')."</h3><p>";
+$pf = "";
 $per = unserialize($custom_fields["_per"][0]);
+
 foreach($per["unit"] as $index => $value)
 	{
-	$price = $per["price"][$index];
-	echo '<select name="payingfor['.$index.']">
+	$price = (int) $per["price"][$index];
+	if(!$price)
+		break;
+	$pf .= '<select name="payingfor['.$index.']">
     <option value="0">0</option>
     <option value="1">1</option>
     <option value="2">2</option>
@@ -1041,10 +1056,14 @@ foreach($per["unit"] as $index => $value)
   </select>
 <input type="hidden" name="unit['.$index.']" value="'.$value.'" />'.$value.' @ <input type="hidden" name="price['.$index.']" value="'.$price.'" />'.(($rsvp_options["paypal_currency"] == 'USD') ? '$' : $rsvp_options["paypal_currency"]).' '.number_format($price,2,$rsvp_options["currency_decimal"],$rsvp_options["currency_thousands"]).'<br />';
 	}
-echo "</p>\n";
+
+if(!empty($pf))
+	echo  "<h3>".__('Paying For','rsvpmaker')."</h3><p>".$pf."</p>\n";
 }
 
 basic_form($profile, $guestedit);
+
+global $rsvp_required_field;
 
 if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][0])
 {
@@ -1057,6 +1076,8 @@ if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][
 </p>
 <?php
 }
+if(isset($rsvp_required_field) )
+	echo '<div id="jqerror"></div><input type="hidden" name="required" value="'.implode(",",$rsvp_required_field).'" />'; 
 ?>
         <p> 
 		  <input type="hidden" name="event" value="<?php echo $post->ID;?>" /> 
@@ -1067,6 +1088,37 @@ if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][
 
 </div>
 <?php
+if(isset($rsvp_required_field) )
+	{
+?>
+
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    jQuery("#rsvpform").submit(function() {
+	var leftblank = '';
+<?php
+foreach($rsvp_required_field as $field)
+	{
+	echo "if(jQuery(\"#".$field."\").val() === '') leftblank = leftblank + '<div class=\"rsvp_missing\">".$field."</div>';\n";
+	}
+?>
+
+	if(leftblank != '')
+		{
+		jQuery("#jqerror").html('<div class="rsvp_validation_error">' + "<?php _e("Required fields left blank",'rsvpmaker'); ?>:\n" + leftblank + '</div>');
+		//alert("Required fields left blank:\n" + leftblank);
+		return false;
+		}
+	else
+		return true;
+});
+  });
+</script>
+
+<?php
+wp_nonce_field('rsvp','rsvp_nonce');
+	}
+
 	$content .= ob_get_clean();
 	}
 
@@ -1087,7 +1139,7 @@ if(isset($_GET["err"]))
 '.$content;
 	else
 		$content = '<div id="rsvpconfirm" >
-<h3 class="rsvperror">Error: Invalid Input</h3>
+<h3 class="rsvperror">Error: '.esc_attr($error).'</h3>
 <p>Please correct your submission.</p>
 </div>
 '.$content;
@@ -1517,17 +1569,7 @@ return "
 <!-- guest section -->
         <p id=\"guest_section\"><strong>". __('Guests','rsvpmaker').":</strong>". __('If you are bringing guests, please enter their names here','rsvpmaker'). "</p>
 ".$guestedit."
-<div class=\"guest_blank\">". __('First Name','rsvpmaker').": <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> ". __('Last Name','rsvpmaker').": <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\" /><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div><div class=\"add_one\"></div>
-        <a href=\"#guest_section\" id=\"add_guests\" name=\"add_guests\">(+) ". __('Add more guests','rsvpmaker')."</a></p>
-<script>
-jQuery(document).ready(function($) {
-
-$('#add_guests').click(function(){
-	$('.add_one').append('<div class=\"guest_blank\">First Name: <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> Last Name: <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\"/><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div>');
-	});
-});
-</script>
-<!-- end of guest section-->
+<div class=\"guest_blank\">". __('First Name','rsvpmaker').": <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> ". __('Last Name','rsvpmaker').": <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\" /><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div><div class=\"add_one\"></div><p><a href=\"#guest_section\" id=\"add_guests\" name=\"add_guests\">(+) ". __('Add more guests','rsvpmaker')."</a><script>jQuery(document).ready(function($) { $('#add_guests').click(function(){ $('.add_one').append('<div class=\"guest_blank\">First Name: <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> Last Name: <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\"/><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div>');});});</script><!-- end of guest section--></p>
 ";
 
 }
@@ -1558,11 +1600,13 @@ if(!function_exists('rsvpfield') )
 {
 function rsvpfield($atts) {
 global $profile;
+global $rsvp_required_field;
+
 if(isset($atts["textfield"])) {
 	$field = $atts["textfield"];
 	$size = ( isset($atts["size"]) ) ? ' size="'.$atts["size"].'" ' : '';
 	$data = ( isset($profile[$field]) ) ? ' value="'.$profile[$field].'" ' : '';
-	return '<input type="text" name="profile['.$field.']" id="'.$field.'" '.$size.$data.' />';
+	$output = '<input type="text" name="profile['.$field.']" id="'.$field.'" '.$size.$data.' />';
 	}
 elseif(isset($atts["selectfield"])) {
 	$field = $atts["selectfield"];
@@ -1577,8 +1621,16 @@ elseif(isset($atts["selectfield"])) {
 				}
 		}
 		$output .= '</select>';
-	return $output;
 	}
+
+if(isset($atts["required"]) || isset($atts["require"]))
+	{
+		$output = '<span class="required">'.$output.'</span>';
+		$rsvp_required_field[] = $field;
+	}
+
+return $output;
+
 }
 }
 
