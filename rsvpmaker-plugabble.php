@@ -99,6 +99,7 @@ if(isset($custom_fields["_rsvp_instructions"][0]) ) $rsvp_instructions = $custom
 if(isset($custom_fields["_rsvp_confirm"][0]) ) $rsvp_confirm = $custom_fields["_rsvp_confirm"][0];
 if(isset($custom_fields["_rsvp_form"][0]) ) $rsvp_form = $custom_fields["_rsvp_form"][0];
 if(isset($custom_fields["_rsvp_max"][0]) ) $rsvp_max = $custom_fields["_rsvp_max"][0];
+if(isset($custom_fields["_rsvp_count"][0]) ) $rsvp_count = $custom_fields["_rsvp_count"][0]; //else $rsvp_count = 1;
 if(isset($custom_fields["_rsvp_show_attendees"][0]) ) $rsvp_show_attendees = $custom_fields["_rsvp_show_attendees"][0];
 if(isset($custom_fields["_rsvp_captcha"][0]) ) $rsvp_captcha = $custom_fields["_rsvp_captcha"][0];
 if(isset($custom_fields["_rsvp_reminder"][0]) && $custom_fields["_rsvp_reminder"][0])
@@ -136,6 +137,7 @@ if(!isset($rsvp_on) && !isset($rsvp_to) && !isset($rsvp_instructions) && !isset(
 	$rsvp_form = $rsvp_options["rsvp_form"];
 	$rsvp_on = $rsvp_options["rsvp_on"];
 	$rsvp_captcha = $rsvp_options["rsvp_captcha"];
+	$rsvp_count = (isset($rsvp_options["rsvp_count"])) ? $rsvp_options["rsvp_count"] : 1;
 	$rsvp_max = 0;
 	$rsvp_show_attendees = $rsvp_options["show_attendees"];
 	}
@@ -145,9 +147,7 @@ if(!isset($rsvp_captcha))
 	$rsvp_captcha = 0;	
 if(!isset($rsvp_on))
 	$rsvp_on = 0;	
-
-//get_post_meta($post->ID, '_rsvp_on', true)
-//echo "<br />'"; print_r($rsvp_form); echo "'<br />";?>
+?>
 <p>
   <input type="checkbox" name="setrsvp[on]" id="setrsvp[on]" value="1" <?php if( $rsvp_on ) echo 'checked="checked" ';?> />
 <?php echo __('Collect RSVPs','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
@@ -167,7 +167,7 @@ if(!isset($rsvp_on))
 <br /><?php echo __('Confirmation Message','rsvpmaker');?>:<br />
 <textarea id="rsvp[confirm]" name="setrsvp[confirm]" cols="80"><?php if(isset($rsvp_confirm)) echo $rsvp_confirm;?></textarea>
 
-<br /><strong>Special Options</strong>
+<br /><strong><?php echo __('Special Options','rsvpmaker'); ?></strong>
 
 <table><tr><td><?php echo __('Deadline (optional)','rsvpmaker').'</td><td> '.__('Month','rsvpmaker');?>: <input type="text" name="deadmonth" id="deadmonth" value="<?php if(isset($deadmonth)) echo $deadmonth;?>" size="2" /> <?php echo __('Day','rsvpmaker');?>: <input type="text" name="deadday" id="deadday" value="<?php  if(isset($deadday)) echo $deadday;?>" size="2" /> <?php echo __('Year','rsvpmaker');?>: 
 <input type="text" name="deadyear" id="deadyear" value="<?php  if(isset($deadyear)) echo $deadyear;?>" size="4" /> (<?php echo __('stop collecting RSVPs at midnight','rsvpmaker');?>)</td></tr>
@@ -179,6 +179,8 @@ if(!isset($rsvp_on))
 <input type="text" name="remindyear" id="remindyear" value="<?php  if(isset($remindyear)) echo $remindyear;?>" size="4" /> (<?php echo __("Send email reminder to people on RSVP list",'rsvpmaker');?>)</td></tr>
 
 </table>
+
+<br /><?php echo __('Show RSVP Count','rsvpmaker');?> <input type="checkbox" name="setrsvp[count]" id="setrsvp[count]" value="1" <?php if(isset($rsvp_count) && $rsvp_count) echo ' checked="checked" ';?> /> 
 
 <br /><?php echo __('Maximum participants','rsvpmaker');?> <input type="text" name="setrsvp[max]" id="setrsvp[max]" value="<?php if(isset($rsvp_max)) echo $rsvp_max;?>" size="4" /> (<?php echo __('0 for none specified','rsvpmaker');?>)
 <br /><?php echo __('Time Slots','rsvpmaker');?>:
@@ -581,19 +583,6 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 		   $nvpstr="&Amt=".$paymentAmount."&PAYMENTACTION=".$paymentType."&RETURNURL=".$returnURL."&CANCELURL=".$cancelURL ."&CURRENCYCODE=".$currencyCodeType.'&EMAIL='.$email;
 		   
 		   $nvpstr.="&INVNUM=" . $invoice . "&SOLUTIONTYPE=Sole&LANDING=Billing&DESC=" . urlencode($desc);
-
-		 /* Make the call to PayPal to set the Express Checkout token
-			If the API call succeded, then redirect the buyer to PayPal
-			to begin to authorize payment.  If an error occured, show the
-			resulting errors
-			*/
-
-/*		   echo "$nvpstr<br />";
-		   print_r($_REQUEST);
-		   echo "<br />";
-		   print_r($_SESSION);
-		   exit();
-*/
 			
 		   $resArray=hash_call("SetExpressCheckout",$nvpstr);
 
@@ -847,10 +836,11 @@ if(isset($custom_fields["_rsvp_to"][0]))
 $rsvp_to = $custom_fields["_rsvp_to"][0];
 if(isset($custom_fields["_rsvp_max"][0]))
 $rsvp_max = $custom_fields["_rsvp_max"][0];
+$rsvp_count = (isset($custom_fields["_rsvp_count"][0])) ? $custom_fields["_rsvp_count"][0] : 1;
 $rsvp_show_attendees = (isset($custom_fields["_rsvp_show_attendees"][0]) && $custom_fields["_rsvp_show_attendees"][0]) ? 1 : 0;
-if(isset($custom_fields["_rsvp_deadline"][0]))
+if(isset($custom_fields["_rsvp_deadline"][0]) && $custom_fields["_rsvp_deadline"][0])
 	$deadline = (int) $custom_fields["_rsvp_deadline"][0];
-if(isset($custom_fields["_rsvp_start"][0]))
+if(isset($custom_fields["_rsvp_start"][0]) && $custom_fields["_rsvp_start"][0])
 	$rsvpstart = (int) $custom_fields["_rsvp_start"][0];
 $rsvp_instructions = (isset($custom_fields["_rsvp_instructions"][0])) ? $custom_fields["_rsvp_instructions"][0] : NULL;
 $rsvp_confirm = (isset($custom_fields["_rsvp_confirm"][0])) ? $custom_fields["_rsvp_confirm"][0] : NULL;
@@ -899,7 +889,6 @@ if($e)
 		$guestsql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE master_rsvp=".$rsvprow["id"];
 		if($results = $wpdb->get_results($guestsql, ARRAY_A) )
 			{
-			//print_r($results);
 			$rsvpconfirm .=  "<p>Guests:</p>";
 			foreach($results as $row)
 				{
@@ -960,7 +949,7 @@ if(isset($rsvp_max) && $rsvp_max)
 	if($total >= $rsvp_max)
 		$too_many = true;
 	}
-else
+elseif(!isset($rsvp_count) || (isset($rsvp_count) && $rsvp_count)  )
 	$content .= '<p class="signed_up">'.$total.' '. __('signed up so far.','rsvpmaker').'</p>';
 
 $now = current_time('timestamp');
