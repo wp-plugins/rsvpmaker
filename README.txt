@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 2.5.9
+Stable tag: 2.6
 
 Event scheduling and RSVP tracking.
 
@@ -17,7 +17,7 @@ RSVPMaker is an event scheduling and RSVP tracking plugin for WordPress, using t
 
 Site editors and administrators have the option to request RSVPs for any given event and specify an email address for notifications when someone responds. RSVP Reports can also be run from the administrator's dashboard.
 
-If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface or downloaded to Excel.
+If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface.
 
 When used with an additional plugin, [RSVPMaker Excel](http://wordpress.org/extend/plugins/rsvpmaker-excel), RSVP reports can easily be downloaded to a spreadsheet, using the Excel functions from the [PHPExcel](http://www.phpexcel.net/) library.
 
@@ -74,6 +74,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.6 =
+
+Incremental update to translation files.
 
 = 2.5.9 =
 

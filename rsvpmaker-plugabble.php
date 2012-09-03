@@ -873,14 +873,14 @@ if($e)
 			$rsvpconfirm .= "<p><strong>".__('Pay by PayPal for','rsvpmaker')." ".$details["payingfor"].' = '.number_format($details["total"],2,$rsvp_options["currency_decimal"],$rsvp_options["currency_thousands"]).' ' . $rsvp_options["paypal_currency"]."</strong></p>".
 			'<form method="post" name="donationform" id="donationform" action="'.$permalink.'">
 <input type="hidden" name="paypal" value="payment" /> 
-<p>Amount: '.$details["total"].'<input name="paymentAmount" type="hidden" id="paymentAmount" size="10" value="'.$details["total"].'"> '.$rsvp_options["paypal_currency"].'
+<p>'. __('Amount','rsvpmaker').': '.$details["total"].'<input name="paymentAmount" type="hidden" id="paymentAmount" size="10" value="'.$details["total"].'"> '.$rsvp_options["paypal_currency"].'
     </p>
   <p>Email: <input name="email" type="text" id="email" size="40"  value="'.$e.'" >
     </p>
 <input name="desc" type="hidden" id="desc" value="'.htmlentities($post->post_title).'" >
 <input name="invoice" type="hidden" id="invoice" value="'.$rsvprow["id"].'" >
 <input name="rsvp-pp-nonce" type="hidden" id="rsvp-pp-nonce" value="'.$nonce.'" >
-<input type="submit" name="Submit" value="Next &gt;&gt;">
+<input type="submit" name="Submit" value="'. __('Next','rsvpmaker').' &gt;&gt;">
 </form> 
 
 <p>'.__('Secure payment processing is provided by <strong>PayPal</strong>. After you click &quot;Next,&quot; we will transfer you to the PayPal website, where you can pay by credit card or with a PayPal account.','rsvpmaker').' </p>';
@@ -889,11 +889,11 @@ if($e)
 		$guestsql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE master_rsvp=".$rsvprow["id"];
 		if($results = $wpdb->get_results($guestsql, ARRAY_A) )
 			{
-			$rsvpconfirm .=  "<p>Guests:</p>";
+			$rsvpconfirm .=  "<p>". __('Guests','rsvpmaker').":</p>";
 			foreach($results as $row)
 				{
 				$rsvpconfirm .= $row["first"]." ".$row["last"]."<br />";
-				$guestedit .= sprintf('<div class="guest_exist">First Name: <input type="text" name="guestfirst[]" value="%s" /> Last Name: <input type="text" name="guestlast[]" value="%s" /><input type="hidden" name="guestid[]" value="%d" /><br /><input type="checkbox" name="guestdelete[%d]" value="1" /> Remove %s %s</div>',$row["first"], $row["last"], $row["id"], $row["id"],$row["first"], $row["last"]);
+				$guestedit .= sprintf('<div class="guest_exist">'. __('First Name','rsvpmaker').': <input type="text" name="guestfirst[]" value="%s" /> '. __('Last Name','rsvpmaker').': <input type="text" name="guestlast[]" value="%s" /><input type="hidden" name="guestid[]" value="%d" /><br /><input type="checkbox" name="guestdelete[%d]" value="1" /> '. __('Remove','rsvpmaker').' %s %s</div>',$row["first"], $row["last"], $row["id"], $row["id"],$row["first"], $row["last"]);
 				}
 			}
 
@@ -1070,7 +1070,7 @@ wp_nonce_field('rsvp','rsvp_nonce');
 ?>
         <p> 
 		  <input type="hidden" name="event" value="<?php echo $post->ID;?>" /> 
-          <input type="submit" id="rsvpsubmit" name="Submit" value="Submit" /> 
+          <input type="submit" id="rsvpsubmit" name="Submit" value="<?php  _e('Submit','rsvpmaker');?>" /> 
         </p> 
 
 </form>	

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RSVPMaker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-09-01 18:37-0500\n"
-"PO-Revision-Date: 2012-09-01 18:39-0500\n"
+"POT-Creation-Date: 2012-09-03 16:38-0500\n"
+"PO-Revision-Date: 2012-09-03 16:39-0500\n"
 "Last-Translator: David F. Carr <david@carrcommunications.com>\n"
 "Language-Team:  <david@carrcommunications.com>\n"
 "MIME-Version: 1.0\n"
@@ -97,6 +97,7 @@ msgstr ""
 
 #: ../rsvpmaker-obsolete.php:10
 #: ../rsvpmaker-obsolete.php:38
+#: ../rsvpmaker-plugabble.php:896
 #: ../rsvpmaker-plugabble.php:1530
 #: ../rsvpmaker.php:51
 msgid "First Name"
@@ -104,6 +105,7 @@ msgstr ""
 
 #: ../rsvpmaker-obsolete.php:16
 #: ../rsvpmaker-obsolete.php:38
+#: ../rsvpmaker-plugabble.php:896
 #: ../rsvpmaker-plugabble.php:1530
 #: ../rsvpmaker.php:54
 msgid "Last Name"
@@ -115,6 +117,7 @@ msgid "Email"
 msgstr ""
 
 #: ../rsvpmaker-obsolete.php:36
+#: ../rsvpmaker-plugabble.php:892
 #: ../rsvpmaker-plugabble.php:1528
 msgid "Guests"
 msgstr ""
@@ -279,8 +282,20 @@ msgstr ""
 msgid "Pay by PayPal for"
 msgstr ""
 
+#: ../rsvpmaker-plugabble.php:876
+msgid "Amount"
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:883
+msgid "Next"
+msgstr ""
+
 #: ../rsvpmaker-plugabble.php:886
 msgid "Secure payment processing is provided by <strong>PayPal</strong>. After you click &quot;Next,&quot; we will transfer you to the PayPal website, where you can pay by credit card or with a PayPal account."
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:896
+msgid "Remove"
 msgstr ""
 
 #: ../rsvpmaker-plugabble.php:948
@@ -330,6 +345,10 @@ msgstr ""
 
 #: ../rsvpmaker-plugabble.php:1050
 msgid "Paying For"
+msgstr ""
+
+#: ../rsvpmaker-plugabble.php:1073
+msgid "Submit"
 msgstr ""
 
 #: ../rsvpmaker-plugabble.php:1108
