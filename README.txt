@@ -6,8 +6,8 @@ Donate link: http://rsvpmaker.com/
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
-Tested up to: 3.4.1
-Stable tag: 2.6
+Tested up to: 3.4.2
+Stable tag: 2.7
 
 Event scheduling and RSVP tracking.
 
@@ -30,6 +30,7 @@ Related plugin: [__ChimpBlast__](http://wordpress.org/extend/plugins/chimpblast/
 1. Upload the entire `rsvpmaker` folder to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Visit the RSVPMaker options page to configure default values for RSVP email notifications, etc.
+1. Ensure you have enabled directory-style permalinks so the address to events is displayed in the format /rsvpmaker/my-event/ rather than ?rsvpmaker=my-event -- see [http://codex.wordpress.org/Using_Permalinks](http://codex.wordpress.org/Using_Permalinks)
 1. See the documentation for shortcodes you can use to create an events listing page, or a list of event headlines for the home page. Use the RSVPMaker widget if you would like to add an events listing to your WordPress sidebar.
 1. OPTIONAL: Depending on your theme, you may want to create a single-rsvpmaker.php template to prevent confusion between the post date and the event date (move the post date display code to the bottom or just remove it). A sample for the Twentyten theme is included with this distribution.
 1. OPTIONAL: To enable online payments for events, obtain a PayPal API signature and password, edit the included paypal-constants.php file, and upload it (ideally to a location outside of web root). Record the file location on the settings screen.
@@ -43,6 +44,8 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 = Why am I getting a "page not found" error? =
 
 A minority of users report that the RSVPMaker permalinks don't function properly in the default configuration. Go to the RSVPMaker options settings screen and check the box for "Tweak Permalinks." This should clear up the problem by making WordPress reset the permalinks.
+
+Also ensure you have enabled directory-style permalinks so the address to events is displayed in the format /rsvpmaker/my-event/ rather than ?rsvpmaker=my-event -- see [http://codex.wordpress.org/Using_Permalinks](http://codex.wordpress.org/Using_Permalinks).
 
 = Where can I get more information about using RSVPMaker? =
 
@@ -74,6 +77,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.7 =
+
+* Added the option to require a login prior to RSVP for membership-oriented sites where event attendees have a user name and password in WordPress. Name and email can automatically be filled in on the form. It's possible to read in other profile data by customizing the rsvpmaker_profile_lookup function (see the documentation on RSVPMaker customization at rsvpmaker.com).
 
 = 2.6 =
 

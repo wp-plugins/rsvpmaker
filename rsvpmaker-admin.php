@@ -377,6 +377,7 @@ add_action('save_post','save_calendar_data');
               		
                   $newoptions = stripslashes_deep($_POST["option"]);
                   $newoptions["rsvp_on"] = (isset($_POST["option"]["rsvp_on"]) && $_POST["option"]["rsvp_on"]) ? 1 : 0;
+                  $newoptions["login_required"] = (isset($_POST["option"]["login_required"]) && $_POST["option"]["login_required"]) ? 1 : 0;
                   $newoptions["rsvp_captcha"] = (isset($_POST["option"]["rsvp_captcha"]) && $_POST["option"]["rsvp_captcha"]) ? 1 : 0;
                   $newoptions["rsvp_count"] = (isset($_POST["option"]["rsvp_count"]) && $_POST["option"]["rsvp_count"]) ? 1 : 0;
                   $newoptions["show_attendees"] = (isset($_POST["option"]["show_attendees"]) && $_POST["option"]["show_attendees"]) ? 1 : 0;
@@ -475,6 +476,9 @@ Minutes: <select name="option[defaultmin]">
 					
 					<h3>RSVP On:</h3>
   <input type="checkbox" name="option[rsvp_on]" value="1" <?php if(isset($options["rsvp_on"]) && $options["rsvp_on"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
+					<h3>Login Required to RSVP:</h3>
+  <input type="checkbox" name="option[login_required]" value="1" <?php if(isset($options["login_required"]) && $options["login_required"]) echo ' checked="checked" ';?> /> check to turn on by default
 	<br />
 					<h3>RSVP TO:</h3> 
 					  <textarea rows="2" cols="80" name="option[rsvp_to]" id="rsvp_to"><?php if(isset($options["rsvp_to"])) echo $options["rsvp_to"];?></textarea>

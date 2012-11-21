@@ -93,7 +93,10 @@ function GetRSVPAdminForm($postID)
 {
 $custom_fields = get_post_custom($postID);
 
+//print_r($custom_fields);
+
 if(isset($custom_fields["_rsvp_on"][0]) ) $rsvp_on = $custom_fields["_rsvp_on"][0];
+if(isset($custom_fields["_rsvp_login_required"][0]) ) $login_required = $custom_fields["_rsvp_login_required"][0];
 if(isset($custom_fields["_rsvp_to"][0]) ) $rsvp_to = $custom_fields["_rsvp_to"][0];
 if(isset($custom_fields["_rsvp_instructions"][0]) ) $rsvp_instructions = $custom_fields["_rsvp_instructions"][0];
 if(isset($custom_fields["_rsvp_confirm"][0]) ) $rsvp_confirm = $custom_fields["_rsvp_confirm"][0];
@@ -136,6 +139,7 @@ if(!isset($rsvp_on) && !isset($rsvp_to) && !isset($rsvp_instructions) && !isset(
 	$rsvp_confirm = $rsvp_options["rsvp_confirm"];
 	$rsvp_form = $rsvp_options["rsvp_form"];
 	$rsvp_on = $rsvp_options["rsvp_on"];
+	$login_required = $rsvp_options["login_required"];
 	$rsvp_captcha = $rsvp_options["rsvp_captcha"];
 	$rsvp_count = (isset($rsvp_options["rsvp_count"])) ? $rsvp_options["rsvp_count"] : 1;
 	$rsvp_max = 0;
@@ -151,6 +155,8 @@ if(!isset($rsvp_on))
 <p>
   <input type="checkbox" name="setrsvp[on]" id="setrsvp[on]" value="1" <?php if( $rsvp_on ) echo 'checked="checked" ';?> />
 <?php echo __('Collect RSVPs','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
+  <input type="checkbox" name="setrsvp[login_required]" id="setrsvp[login_required]" value="1" <?php if( $login_required ) echo 'checked="checked" ';?> />
+<?php echo __('Login required','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
 
 <br />  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" ';?> />
 <?php echo __(' Display attendee names and content of note field publicly','rsvpmaker');?> <?php if( !$rsvp_show_attendees ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
@@ -309,7 +315,7 @@ if( preg_match_all('/http/',$_POST["note"],$matches) > 2 )
 	exit();
 	}
 
-if( ereg("//",implode(' ',$rsvp)) )
+if( preg_match("|//|",implode(' ',$rsvp)) )
 	{
 	header('Location: '.$req_uri.'err=Invalid input');
 	exit();
@@ -832,6 +838,8 @@ $permalink = get_permalink($post->ID);
 
 if(isset($custom_fields["_rsvp_on"][0]))
 $rsvp_on = $custom_fields["_rsvp_on"][0];
+if(isset($custom_fields["_rsvp_login_required"][0]))
+$login_required = $custom_fields["_rsvp_login_required"][0];
 if(isset($custom_fields["_rsvp_to"][0]))
 $rsvp_to = $custom_fields["_rsvp_to"][0];
 if(isset($custom_fields["_rsvp_max"][0]))
@@ -953,6 +961,7 @@ elseif(!isset($rsvp_count) || (isset($rsvp_count) && $rsvp_count)  )
 	$content .= '<p class="signed_up">'.$total.' '. __('signed up so far.','rsvpmaker').'</p>';
 
 $now = current_time('timestamp');
+$rsvplink = ($login_required) ? wp_login_url( get_permalink( $post->ID ) ) : get_permalink( $post->ID );
 
 if(isset($deadline) && ($now  > $deadline  ) )
 	$content .= '<p class="rsvp_status">'.__('RSVP deadline is past','rsvpmaker').'</p>';
@@ -962,8 +971,12 @@ elseif(isset($rsvpstart) && ( $now < $rsvpstart  ) )
 	$content .= '<p class="rsvp_status">'.__('RSVPs accepted starting: ','rsvpmaker').date($rsvp_options["long_date"],$rsvpstart).'</p>';
 elseif(isset($too_many))
 	$content .= '<p class="rsvp_status">'.__('RSVPs are closed','rsvpmaker').'</p>';
-elseif(($rsvp_on && is_admin()) ||  ($rsvp_on && isset($_GET["load"])) ||  ($rsvp_on && !is_single()) ) // when loaded into editor
-	$content .= sprintf($rsvp_options["rsvplink"],get_permalink( $post->ID ) );
+elseif(($rsvp_on && is_admin()) ||  ($rsvp_on && isset($_GET["load"]))) // when loaded into editor
+	$content .= sprintf($rsvp_options["rsvplink"],$rsvplink );
+elseif($rsvp_on && $login_required && !is_user_logged_in()) // show button, coded to require login
+	$content .= sprintf($rsvp_options["rsvplink"],$rsvplink );
+elseif($rsvp_on && !is_single()) // show button
+	$content .= sprintf($rsvp_options["rsvplink"],$rsvplink );
 elseif($rsvp_on && is_single() )
 	{
 	ob_start();
@@ -1389,7 +1402,7 @@ if(!$email)
 		global $current_user;
 		$profile["email"] = $current_user->user_email;
 		$profile["first"] = $current_user->first_name;
-		$profile["last"] = $current_user->last_name;		
+		$profile["last"] = $current_user->last_name;
 		}
 	else
 		$profile = NULL;
@@ -1606,5 +1619,27 @@ if(isset($rsvp_options["debug"]) && $rsvp_options["debug"])
 	add_submenu_page('edit.php?post_type=rsvpmaker', "Debug", "Debug", 'manage_options', "rsvpmaker_debug", "rsvpmaker_debug");
 }
 }//end my_rsvp_menu
+
+if(!function_exists('date_title') )
+{
+function date_title( $title, $sep, $seplocation ) {
+global $post;
+global $wpdb;
+if($post->post_type == 'rsvpmaker')
+	{
+	// get first date associated with event
+	$sql = "SELECT datetime FROM ".$wpdb->prefix."rsvp_dates WHERE postID = $post->ID ORDER BY datetime";
+	$dt = $wpdb->get_var($sql);
+	$title .= date('F jS',strtotime($dt) );
+	if($seplocation == "right")
+		$title .= " $sep ";
+	else
+		$title = " $sep $title ";
+	}
+return $title;
+}
+}
+
+add_filter('wp_title','date_title', 1, 3);
 
 ?>

@@ -468,25 +468,6 @@ return ob_get_clean();
 
 add_shortcode("rsvpmaker_upcoming","rsvpmaker_upcoming");
 
-function date_title( $title, $sep, $seplocation ) {
-global $post;
-global $wpdb;
-if($post->post_type == 'rsvpmaker')
-	{
-	// get first date associated with event
-	$sql = "SELECT datetime FROM ".$wpdb->prefix."rsvp_dates WHERE postID = $post->ID ORDER BY datetime";
-	$dt = $wpdb->get_var($sql);
-	$title .= date('F jS',strtotime($dt) );
-	if($seplocation == "right")
-		$title .= " $sep ";
-	else
-		$title = " $sep $title ";
-	}
-return $title;
-}
-
-add_filter('wp_title','date_title', 1, 3);
-
 //utility function, template tag
 function is_rsvpmaker() {
 global $post;
