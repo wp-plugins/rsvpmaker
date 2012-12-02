@@ -280,8 +280,9 @@ $custom_fields = get_post_custom($post->ID);
 $rsvp_to = $custom_fields["_rsvp_to"][0];
 
 //if permalinks are not turned on, we need to append to query string not add our own ?
-$req_uri = $_SERVER['REQUEST_URI'];
+$req_uri = get_permalink($event);
 $req_uri .= (strpos($req_uri,'?') ) ? '&' : '?';
+$req_uri .= 'e='.$rsvp["email"];
 
 if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][0])
 	{
@@ -289,7 +290,7 @@ if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][
 		session_start();
 	if($_SESSION["captcha_key"] != md5($_POST['captcha']) )	
 		{
-		header('Location: '.$req_uri.'err='.urlencode('security code not entered correctly! Please try again.'));
+		header('Location: '.$req_uri.'&err='.urlencode('security code not entered correctly! Please try again.'));
 		exit();
 		}
 	}
@@ -305,19 +306,19 @@ if(isset($_POST["required"]))
 			}
 		if($missing != '')
 			{
-			header('Location: '.$req_uri.'err='.urlencode('missing required fields: '.$missing));
+			header('Location: '.$req_uri.'&err='.urlencode('missing required fields: '.$missing));
 			exit();
 			}
 	}
 if( preg_match_all('/http/',$_POST["note"],$matches) > 2 )
 	{
-	header('Location: '.$req_uri.'err=Invalid input');
+	header('Location: '.$req_uri.'&err=Invalid input');
 	exit();
 	}
 
 if( preg_match("|//|",implode(' ',$rsvp)) )
 	{
-	header('Location: '.$req_uri.'err=Invalid input');
+	header('Location: '.$req_uri.'&err=Invalid input');
 	exit();
 	}
 
@@ -326,7 +327,7 @@ if(isset($rsvp["email"]))
 	// assuming the form includes email, test to make sure it's a valid one
 	if(!filter_var($rsvp["email"], FILTER_VALIDATE_EMAIL))
 		{
-		header('Location: '.$req_uri.'err='.urlencode('Invalid input.') );
+		header('Location: '.$req_uri.'&err='.urlencode('Invalid input.') );
 		exit();
 		}
 	
@@ -487,9 +488,12 @@ foreach($_POST["guestfirst"] as $index => $first) {
 $subject = "RSVP $answer for ".$post->post_title." $date";
 if($_POST["note"])
 	$cleanmessage .= 'Note: '.stripslashes($_POST["note"]);
+
+$cleanmessage = "\n\nUse this link to update: \n". $req_uri;	
+
 rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage);
 
-	header('Location: '.$req_uri.'rsvp='.$rsvp_id.'&e='.$rsvp["email"]);
+	header('Location: '.$req_uri.'&rsvp='.$rsvp_id.'&e='.$rsvp["email"]);
 	exit();
 	}
 } } // end save rsvp
@@ -855,6 +859,10 @@ $rsvp_confirm = (isset($custom_fields["_rsvp_confirm"][0])) ? $custom_fields["_r
 $e = (isset($_GET["e"]) ) ? $_GET["e"] : NULL;
 if ( $e && !filter_var($e, FILTER_VALIDATE_EMAIL) )
 	$e = '';
+//returns null if email ($e) is not empty
+$profile = rsvpmaker_profile_lookup($e);
+if($profile)
+	$e = $profile["email"];
 
 if(isset($_GET["rsvp"]))
 	{
@@ -909,14 +917,12 @@ if($e)
 		
 		}
 	
-	$sql = "SELECT details FROM ".$wpdb->prefix."rsvpmaker WHERE email='".$e."' ORDER BY id DESC";
-	if($details = $wpdb->get_var($sql) )
-		$profile = unserialize($details);
+	$sql = "SELECT details, note FROM ".$wpdb->prefix."rsvpmaker WHERE email='".$e."' ORDER BY id DESC";
+	global $rsvp_row;
+	$rsvp_row = $wpdb->get_row($sql);
+	if($rsvp_row->details )
+		$profile = unserialize($rsvp_row->details);
 	}
-
-	if(!$profile)
-		$profile = rsvpmaker_profile_lookup($e);
-
 
 $sql = "SELECT * FROM ".$wpdb->prefix."rsvp_dates WHERE postID=".$post->ID.' ORDER BY datetime';
 $results = $wpdb->get_results($sql,ARRAY_A);
@@ -1540,7 +1546,7 @@ return "
 <!-- guest section -->
         <p id=\"guest_section\"><strong>". __('Guests','rsvpmaker').":</strong>". __('If you are bringing guests, please enter their names here','rsvpmaker'). "</p>
 ".$guestedit."
-<div class=\"guest_blank\">". __('First Name','rsvpmaker').": <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> ". __('Last Name','rsvpmaker').": <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\" /><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div><div class=\"add_one\"></div><p><a href=\"#guest_section\" id=\"add_guests\" name=\"add_guests\">(+) ". __('Add more guests','rsvpmaker')."</a><script>jQuery(document).ready(function($) { $('#add_guests').click(function(){ $('.add_one').append('<div class=\"guest_blank\">First Name: <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> Last Name: <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\"/><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div>');});});</script><!-- end of guest section--></p>
+<div class=\"guest_blank\">". __('First Name','rsvpmaker').": <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> ". __('Last Name','rsvpmaker').": <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\" /><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div><div class=\"add_one\"></div><p><a href=\"#guest_section\" id=\"add_guests\" name=\"add_guests\">(+) ". __('Add more guests','rsvpmaker')."</a><!-- end of guest section--></p>
 ";
 
 }
@@ -1572,7 +1578,6 @@ if(!function_exists('rsvpfield') )
 function rsvpfield($atts) {
 global $profile;
 global $rsvp_required_field;
-
 if(isset($atts["textfield"])) {
 	$field = $atts["textfield"];
 	$size = ( isset($atts["size"]) ) ? ' size="'.$atts["size"].'" ' : '';
@@ -1604,6 +1609,15 @@ return $output;
 
 }
 }
+
+if(!function_exists('rsvpnote')) {
+	function rsvpnote() {
+	global $rsvp_row;
+	return $rsvp_row->note;
+	}
+}
+
+add_shortcode('rsvpnote','rsvpnote');
 
 add_shortcode('rsvpfield','rsvpfield');
 

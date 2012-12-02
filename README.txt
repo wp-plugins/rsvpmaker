@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 2.7
+Stable tag: 2.7.1
 
 Event scheduling and RSVP tracking.
 
@@ -77,6 +77,12 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.7.1 =
+
+* Improved functionality for attendees updating their RSVPs. Previous data loaded from email address coded in link (from confirmation message) or from profile of a logged in user.
+* Fixed JavaScript error that was interfering with display attendees function.
+* Fixed error in More Events link for an event listing.
 
 = 2.7 =
 

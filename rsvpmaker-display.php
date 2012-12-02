@@ -11,7 +11,8 @@ ob_start();
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 $('#add_guests').click(function(){
-$('.add_one').append('<div class=\"guest_blank\">First Name: <input type=\"text\" name=\"guestfirst[]\" style=\"width:30%\" /> Last Name: <input type=\"text\" name=\"guestlast[]\" style=\"width:30%\"/><input type=\"hidden\" name=\"guestid[]\" value=\"0\" /></div>');});
+var guestline = '<div class="guest_blank">First Name: <input type="text" name="guestfirst[]" style="width:30%" /> Last Name: <input type="text" name="guestlast[]" style="width:30%"/><input type="hidden" name="guestid[]" value="0" /></div>';
+$('.add_one').append(guestline);});
 <?php
 if(isset($rsvp_required_field) )
 	{
@@ -313,6 +314,7 @@ ORDER BY datetime LIMIT 0, $limit";
 add_action('widgets_init', create_function('', 'return register_widget("CPEventsWidget");'));
 
 function get_next_events_link( $label = '', $max_page = 0 ) {
+	
 	global $paged, $wp_query;
 	global $rsvp_options;
 
@@ -326,14 +328,14 @@ function get_next_events_link( $label = '', $max_page = 0 ) {
 	$link = '';
 
 	if ( $nextpage > 2 ) {
-		$link = '<a href="' . $rsvp_options["eventpage"] ."\" $attr>&laquo; " . __('Events Home','rsvpmaker') . '</a>';
+		$link = '<a href="' . site_url() . '/' . $rsvp_options["eventpage"] ."\">&laquo; " . __('Events Home','rsvpmaker') . '</a>';
 	}
 
 	if ( !is_single() && ( $nextpage <= $max_page ) ) {
 		$attr = apply_filters( 'next_posts_link_attributes', '' );
 		if($link)
 			$link .= " | ";
-		$link .= '<a href="' . $rsvp_options["eventpage"] .'page/'.$nextpage."/\" $attr>" . $label . ' &raquo;</a>';
+		$link .= '<a href="' . site_url() . '/' . $rsvp_options["eventpage"] .'/page/'.$nextpage."/\" $attr>" . $label . ' &raquo;</a>';
 	}
 	
 	if(isset($link))
