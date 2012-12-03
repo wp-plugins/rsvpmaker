@@ -5,6 +5,9 @@
 add_filter('the_content','event_content',5);
 
 function event_js($content) {
+global $post;
+if($post->post_type != 'rsvpmaker')
+	return $content;
 global $rsvp_required_field;
 ob_start();
 ?>
