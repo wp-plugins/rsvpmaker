@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 2.7.3
+Stable tag: 2.7.4
 
 Event scheduling and RSVP tracking.
 
@@ -77,6 +77,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.7.4 =
+
+You can now specify an SMTP account to be used for more reliable delivery of notification emails (less likely to be flagged as spam if they're coming from a real account).
 
 = 2.7.3 =
 

@@ -588,6 +588,47 @@ echo "<br /><br />On your system, the base web directory is: <strong>".$_SERVER[
   <option value="edit_posts" <?php if(isset($options["menu_security"]) && ($options["menu_security"] == 'edit_posts')) echo ' selected="selected" ';?> >Contributor</option>
   </select> Security level required to access custom menus (RSVP Report, Documentation)
 <br />
+<h3>SMTP for Notifications</h3>
+<p>For more reliable delivery of email notifications, enable delivery through the SMTP email protocol. Standard server parameters will be used for Gmail and the SendGrid service, or specify the server port number and security protocol.</p>
+  <select name="option[smtp]" id="smtp">
+  <option value="" <?php if(!isset($options["smtp"]) || empty($options["smtp"]) ) echo ' selected="selected" ';?> >None - use PHP mail()</option>
+  <option value="gmail" <?php if(isset($options["smtp"]) && ($options["smtp"] == 'gmail')) echo ' selected="selected" ';?> >Gmail</option>
+  <option value="sendgrid" <?php if(isset($options["smtp"]) && ($options["smtp"] == 'sendgrid')) echo ' selected="selected" ';?> >SendGrid</option>
+  <option value="other" <?php if(isset($options["smtp"]) && ($options["smtp"] == 'other')) echo ' selected="selected" ';?> >Other SMTP (specified below)</option>
+  </select>
+<br />
+Email Account for Notifications
+<br />
+<input type="text" name="option[smtp_useremail]" value="<?php if(isset($options["smtp_useremail"])) echo $options["smtp_useremail"];?>" size="15" />
+<br />
+Email Username
+<br />
+<input type="text" name="option[smtp_username]" value="<?php if(isset($options["smtp_username"])) echo $options["smtp_username"];?>" size="15" />
+<br />
+Email Password
+<br />
+<input type="text" name="option[smtp_password]" value="<?php if(isset($options["smtp_password"])) echo $options["smtp_password"];?>" size="15" />
+<br />
+Server (parameters below not necessary if you specified Gmail or SendGrid)<br />
+<input type="text" name="option[smtp_server]" value="<?php if(isset($options["smtp_server"])) echo $options["smtp_server"];?>" size="15" />
+<br />
+SMTP Security Prefix (ssl or tls) 
+<br />
+<input type="text" name="option[smtp_prefix]" value="<?php if(isset($options["smtp_prefix"])) echo $options["smtp_prefix"];?>" size="15" />
+<br />
+SMTP Port
+<br /> 
+<input type="text" name="option[smtp_port]" value="<?php if(isset($options["smtp_port"])) echo $options["smtp_port"];?>" size="15" />
+<br />
+<?php 
+if($options["smtp"])
+	{
+?>
+<a href="<?php echo admin_url('?smtptest=1'); ?>">Send SMTP Test to RSVP To address</a>
+<?php
+	}
+?>
+
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
 
@@ -1328,8 +1369,81 @@ if(isset($rsvp_options["profile_table"]) && !empty($rsvp_options["profile_table"
 		update_option('RSVPMAKER_Options',$rsvp_options);	
 		}
 
+	if(isset($_GET["smtptest"]))
+		{
+		$mail["to"] = $rsvp_options["rsvp_to"];
+	$mail["from"] = "david@carrcommunications.com";
+	$mail["fromname"] = "RSVPMaker";
+	$mail["subject"] = "Testing SMTP email notification";
+	$mail["html"] = ' <h1>SMTP Test</h1>
+<p>I hope you will find this is a more reliable way to send email notifications related to RSVP Events.</p>
+
+<p>In normal operation, RSVPMaker sends the event organizer a notification as people RSVP. It also sends attendees a confirmation message with the rsvp_to email address as the From email address.';
+	$result = rsvpmailer($mail);
+	echo '<div class="updated" style="background-color:#fee;">'."<strong>Sending test email $result </strong></div>";
+		}
 }
 
 add_action('admin_notices', 'rsvpmaker_admin_notice');
+
+function rsvpmailer($mail) {
+	
+	global $rsvp_options;	
+	
+	require_once ABSPATH . WPINC . '/class-phpmailer.php';
+	require_once ABSPATH . WPINC . '/class-smtp.php';
+	$rsvpmail = new PHPMailer();
+	
+	$rsvpmail->IsSMTP(); // telling the class to use SMTP
+
+	if($rsvpmail_opt["smtp"] == "gmail") {
+		$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
+		$rsvpmail->SMTPSecure = "tls";                 // sets the prefix to the servier
+		$rsvpmail->Host       = "smtp.gmail.com";      // sets GMAIL as the SMTP server
+		$rsvpmail->Port       = 587;                   // set the SMTP port for the GMAIL server
+	}
+	elseif($rsvpmail_opt["smtp"] == "sendgrid") {
+	$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
+	$mail->Host = 'smtp.sendgrid.net';
+	$mail->Port = 587; 
+	}
+	else {
+	$rsvpmail->Host = $rsvp_options["smtp_server"]; // SMTP server
+	$rsvpmail->SMTPAuth=true;
+	if(isset($rsvp_options["smtp_prefix"]) && $rsvp_options["smtp_prefix"] )
+		$rsvpmail->SMTPSecure = $rsvp_options["smtp_prefix"];                 // sets the prefix to the servier
+	$rsvpmail->Port=$rsvp_options["smtp_port"];
+	}
+ 
+ $rsvpmail->Username=$rsvp_options["smtp_username"];
+ $rsvpmail->Password=$rsvp_options["smtp_password"];
+ $rsvpmail->AddAddress($mail["to"]);
+ $rsvpmail->SetFrom($rsvp_options["smtp_useremail"], $mail["fromname"]. ' (via '.$_SERVER['SERVER_NAME'].')');
+ $rsvpmail->ClearReplyTos();
+ $rsvpmail->AddReplyTo($mail["from"], $mail["fromname"]);
+ $rsvpmail->Subject = $mail["subject"];
+if($mail["html"])
+	{
+	if($mail["text"])
+		$rsvpmail->AltBody = $mail["text"];
+	else
+		$rsvpmail->AltBody = trim(strip_tags($mail["html"]) );
+	$rsvpmail->MsgHTML($mail["html"]);
+	}
+	else
+		{
+			$rsvpmail->Body = $mail["text"];
+			$rsvpmail->WordWrap = 50;
+		}
+	
+	try {
+		$rsvpmail->Send();
+	} catch (phpmailerException $e) {
+		echo $e->errorMessage();
+	} catch (Exception $e) {
+		echo $e->getMessage(); //Boring error messages from anything else!
+	}
+	return $rsvpmail->ErrorInfo;
+}
 
 ?>

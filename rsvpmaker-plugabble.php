@@ -489,7 +489,7 @@ $subject = "RSVP $answer for ".$post->post_title." $date";
 if($_POST["note"])
 	$cleanmessage .= 'Note: '.stripslashes($_POST["note"]);
 
-$cleanmessage = "\n\nUse this link to update: \n". $req_uri;	
+$cleanmessage .= "\n\nUse this link to update: \n". $req_uri;	
 
 rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage);
 
@@ -502,6 +502,26 @@ rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage);
 if(!function_exists('rsvp_notifications') )
 {
 function rsvp_notifications ($rsvp,$rsvp_to,$subject,$message) {
+
+global $rsvp_options;
+
+if(isset($rsvp_options["smtp"]) && !empty($rsvp_options["smtp"]) )
+	{
+	$mail["to"] = $rsvp_to;
+	$mail["from"] = $rsvp["email"];
+	$mail["fromname"] = $rsvp["first"].' '.$rsvp["last"];
+	$mail["subject"] = $subject;
+	$mail["text"] = $message;
+	rsvpmailer($mail);
+	$mail["to"] = $rsvp["email"];
+	$mail["from"] = $rsvp_to;
+	$mail["fromname"] = get_bloginfo('name');
+	$mail["subject"] = "Confirming ".$subject;
+	rsvpmailer($mail);
+	}
+else
+	{
+	//use php mail()
 
   $headers = "Reply-To: ".$rsvp["email"]."\n"; 
   $headers .= "From: ".'"=?UTF-8?B?'.base64_encode($rsvp["first"]." ".$rsvp["last"]).'?=" <'.$rsvp["email"].'>'."\n"; 
@@ -524,7 +544,8 @@ mail($rsvp_to,'=?UTF-8?B?'.base64_encode($subject).'?=',$message,$headers);
   $headers .= "X-Mailer: PHP ". phpversion() ."\n"; 
 
 mail($rsvp["email"],"Confirming ".$subject,$message,$headers);
-
+	}
+	
 } } // end rsvp notifications
 
 
@@ -1527,7 +1548,21 @@ if( $reminders = $wpdb->get_results($sql) )
 				
 				echo "Notification for $notify<br />$notification";
 				$subject = '=?UTF-8?B?'.base64_encode( __("Event Reminder for",'rsvpmaker').' '.$event_title ).'?=';
-				mail($notify,$subject,$notification,"From: $rsvpto\nContent-Type: text/html; charset=UTF-8");
+				if(isset($rsvp_options["smtp"]) && !empty($rsvp_options["smtp"]) )
+					{
+					$mail["subject"] = __("Event Reminder for",'rsvpmaker').' '.$event_title;
+					$mail["html"] = $notification;
+					$mail["to"] = $notify;
+					$mail["from"] = $rsvp_to;
+					$mail["fromname"] = get_bloginfo('name');
+					rsvpmailer($mail);
+					}
+				else
+					{
+					$subject = '=?UTF-8?B?'.base64_encode( __("Event Reminder for",'rsvpmaker').' '.$event_title ).'?=';
+					mail($notify,$subject,$notification,"From: $rsvpto\nContent-Type: text/html; charset=UTF-8");
+					}
+
 				}
 			}
 		}
