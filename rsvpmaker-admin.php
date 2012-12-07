@@ -591,11 +591,11 @@ echo "<br /><br />On your system, the base web directory is: <strong>".$_SERVER[
 <h3>SMTP for Notifications</h3>
 <p>For more reliable delivery of email notifications, enable delivery through the SMTP email protocol. Standard server parameters will be used for Gmail and the SendGrid service, or specify the server port number and security protocol.</p>
   <select name="option[smtp]" id="smtp">
-  <option value="" <?php if(!isset($options["smtp"]) || empty($options["smtp"]) ) echo ' selected="selected" ';?> >None - use PHP mail()</option>
-  <option value="gmail" <?php if(isset($options["smtp"]) && ($options["smtp"] == 'gmail')) echo ' selected="selected" ';?> >Gmail</option>
-  <option value="sendgrid" <?php if(isset($options["smtp"]) && ($options["smtp"] == 'sendgrid')) echo ' selected="selected" ';?> >SendGrid</option>
-  <option value="other" <?php if(isset($options["smtp"]) && ($options["smtp"] == 'other')) echo ' selected="selected" ';?> >Other SMTP (specified below)</option>
-  </select>
+  <option value="" <?php if($options["smtp"] == '' ) {echo ' selected="selected" ';}?> >None - use PHP mail()</option>
+  <option value="gmail" <?php if($options["smtp"] == 'gmail') {echo ' selected="selected" ';}?> >Gmail</option>
+  <option value="sendgrid" <?php if($options["smtp"] == 'sendgrid') {echo ' selected="selected" ';}?> >SendGrid</option>
+  <option value="other" <?php if($options["smtp"] == 'other') {echo ' selected="selected" ';}?> >Other SMTP (specified below)</option>
+  </select> <?php echo $options["smtp"]; ?>
 <br />
 Email Account for Notifications
 <br />
@@ -632,7 +632,7 @@ if($options["smtp"])
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
 
-<form action="options-general.php" method="get"><input type="hidden" name="page" value="rsvpmaker-admin.php" />RSVP Reminders scheduled for: <?php echo date('F jS, g:i A / H:i',wp_next_scheduled( 'rsvp_daily_reminder_event' )).' GMT offset '.get_option('gmt_offset').' hours'; // ?><br />
+<form action="../../../../wp-content/plugins/rsvpmaker/options-general.php" method="get"><input type="hidden" name="page" value="rsvpmaker-admin.php" />RSVP Reminders scheduled for: <?php echo date('F jS, g:i A / H:i',wp_next_scheduled( 'rsvp_daily_reminder_event' )).' GMT offset '.get_option('gmt_offset').' hours'; // ?><br />
 Set new time: <select name="reminder_reset">
 <?php echo $houropt;?>
 </select><input type="submit" name="submit" value="Set" /></form>
@@ -755,7 +755,7 @@ global $rsvp_options;
 
 <p>Use this form to enter multiple events quickly with basic formatting.</p>
 
-<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
+<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['../../../../wp-content/plugins/rsvpmaker/REQUEST_URI'];?>">
 <?php
 $today = '<option value="0">None</option>';
 for($i=0; $i < 10; $i++)
@@ -981,7 +981,7 @@ if(!isset($_GET["week"]))
 
 <p><em>Optional: Calculate dates for a recurring schedule ...</em></p>
 
-<form method="get" action="edit.php" id="recursked">
+<form method="get" action="../../../../wp-content/plugins/rsvpmaker/edit.php" id="recursked">
 
 <p>Regular schedule: 
 
@@ -1057,7 +1057,7 @@ echo "<p>Loading recurring series of dates for $week $dow. To omit a date in the
 
 <h3>Enter Recurring Events</h3>
 
-<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
+<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['../../../../wp-content/plugins/rsvpmaker/REQUEST_URI'];?>">
 <p>Headline: <input type="text" name="recur-title" size="60" value="<?php if(isset($_POST["recur-title"])) echo stripslashes($_POST["recur-title"]);?>" /></p>
 <p><textarea name="recur-body" rows="5" cols="80"><?php echo (isset($_POST["recur-body"]) && $_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"];?></textarea></p>
 <?php
@@ -1208,7 +1208,7 @@ global $rsvp_options;
 <p>[rsvpprofiletable show_if_empty=&quot;phone&quot;]CONDITIONAL CONTENT GOES HERE[/rsvpprofiletable] This section only shown if the required field is empty; otherwise displays a message that the info is &quot;on file&quot;. Because RSVPMaker is capable of looking up profile data based on an email address, you may want some data to be hidden for privacy reasons.</p>
 <p>[rsvpguests] Outputs the guest blanks.</p>
 
-<p>If you're having trouble with the form fields not being formatted correctly, <a href="options-general.php?page=rsvpmaker-admin.php&reset_form=1">Reset default RSVP Form</a></p>            
+<p>If you're having trouble with the form fields not being formatted correctly, <a href="../../../../wp-content/plugins/rsvpmaker/options-general.php?page=rsvpmaker-admin.php&amp;reset_form=1">Reset default RSVP Form</a></p>            
             
 <?php
 
@@ -1266,7 +1266,7 @@ if($_GET["author"])
 ;?>
 <h2>Debug</h2>
 <p>Use this screen to verify that RSVPMaker is recording data correctly or to share debugging information with the plugin author. If you send debugging info, follow up with a note to <a href="mailto:david@carrcommunications.com">david@carrcommunications.com</a> and explain what you need help with.</p>
-<form action="./edit.php" method="get">
+<form action="../../../../wp-content/plugins/rsvpmaker/edit.php" method="get">
 <input type="hidden" name="post_type" value="rsvpmaker" />
 <input name="page" type="hidden" value="rsvpmaker_debug" />
   <label>
