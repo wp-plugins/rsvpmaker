@@ -612,12 +612,12 @@ Email Password
 Server (parameters below not necessary if you specified Gmail or SendGrid)<br />
 <input type="text" name="option[smtp_server]" value="<?php if(isset($options["smtp_server"])) echo $options["smtp_server"];?>" size="15" />
 <br />
-SMTP Security Prefix (ssl or tls) 
+SMTP Security Prefix (ssl or tls, leave blank for non-encrypted connections) 
 <br />
 <input type="text" name="option[smtp_prefix]" value="<?php if(isset($options["smtp_prefix"])) echo $options["smtp_prefix"];?>" size="15" />
 <br />
 SMTP Port
-<br /> 
+<br />
 <input type="text" name="option[smtp_port]" value="<?php if(isset($options["smtp_port"])) echo $options["smtp_port"];?>" size="15" />
 <br />
 <?php 
@@ -1396,13 +1396,13 @@ function rsvpmailer($mail) {
 	
 	$rsvpmail->IsSMTP(); // telling the class to use SMTP
 
-	if($rsvpmail_opt["smtp"] == "gmail") {
+	if($rsvp_options["smtp"] == "gmail") {
 		$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
 		$rsvpmail->SMTPSecure = "tls";                 // sets the prefix to the servier
 		$rsvpmail->Host       = "smtp.gmail.com";      // sets GMAIL as the SMTP server
 		$rsvpmail->Port       = 587;                   // set the SMTP port for the GMAIL server
 	}
-	elseif($rsvpmail_opt["smtp"] == "sendgrid") {
+	elseif($rsvp_options["smtp"] == "sendgrid") {
 	$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
 	$mail->Host = 'smtp.sendgrid.net';
 	$mail->Port = 587; 
@@ -1418,6 +1418,10 @@ function rsvpmailer($mail) {
  $rsvpmail->Username=$rsvp_options["smtp_username"];
  $rsvpmail->Password=$rsvp_options["smtp_password"];
  $rsvpmail->AddAddress($mail["to"]);
+ if(isset($mail["cc"]) )
+ 	$rsvpmail->AddCC($mail["cc"]);
+if(is_admin() && isset($_GET["debug"]))
+	$rsvpmail->SMTPDebug = 2;
  $rsvpmail->SetFrom($rsvp_options["smtp_useremail"], $mail["fromname"]. ' (via '.$_SERVER['SERVER_NAME'].')');
  $rsvpmail->ClearReplyTos();
  $rsvpmail->AddReplyTo($mail["from"], $mail["fromname"]);
