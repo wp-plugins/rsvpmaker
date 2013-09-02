@@ -6,8 +6,8 @@ Donate link: http://rsvpmaker.com/
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
-Tested up to: 3.5
-Stable tag: 2.7.4.2
+Tested up to: 3.6
+Stable tag: 2.7.5
 
 Event scheduling and RSVP tracking.
 
@@ -77,6 +77,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.7.5 =
+
+* Fixed a glitch with display of CAPTCHA image
+* Added option to hide yes/no radio boxes (assume the answer is yes)
 
 = 2.7.4.1 and 2.7.4.2 =
 

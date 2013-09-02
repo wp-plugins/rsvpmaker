@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 2.7.4.2
+Version: 2.7.5
 Author URI: http://www.carrcommunications.com
 */
 
@@ -31,6 +31,8 @@ if(!isset($rsvp_options["rsvp_confirm"]))
 	$rsvp_options["rsvp_confirm"] = __('Thank you!','rsvpmaker');
 if(!isset($rsvp_options["rsvp_count"]))
 	$rsvp_options["rsvp_count"] = 1;
+if(!isset($rsvp_options["rsvp_yesno"]))
+	$rsvp_options["rsvp_yesno"] = 1;
 if(!isset($rsvp_options['rsvplink']))
 	$rsvp_options['rsvplink'] = '<p><a style="width: 8em; display: block; border: medium inset #FF0000; text-align: center; padding: 3px; background-color: #0000FF; color: #FFFFFF; font-weight: bolder; text-decoration: none;" class="rsvplink" href="%s?e=*|EMAIL|*#rsvpnow">'. __('RSVP Now!','rsvpmaker').'</a></p>';
 if(!isset($rsvp_options['defaulthour']))

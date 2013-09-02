@@ -105,6 +105,7 @@ if(isset($custom_fields["_rsvp_max"][0]) ) $rsvp_max = $custom_fields["_rsvp_max
 if(isset($custom_fields["_rsvp_count"][0]) ) $rsvp_count = $custom_fields["_rsvp_count"][0]; //else $rsvp_count = 1;
 if(isset($custom_fields["_rsvp_show_attendees"][0]) ) $rsvp_show_attendees = $custom_fields["_rsvp_show_attendees"][0];
 if(isset($custom_fields["_rsvp_captcha"][0]) ) $rsvp_captcha = $custom_fields["_rsvp_captcha"][0];
+if(isset($custom_fields["_rsvp_yesno"][0]) ) $rsvp_yesno = $custom_fields["_rsvp_yesno"][0];
 if(isset($custom_fields["_rsvp_reminder"][0]) && $custom_fields["_rsvp_reminder"][0])
 	{
 	$rparts = explode("-",$custom_fields["_rsvp_reminder"][0]);
@@ -141,14 +142,17 @@ if(!isset($rsvp_on) && !isset($rsvp_to) && !isset($rsvp_instructions) && !isset(
 	$rsvp_on = $rsvp_options["rsvp_on"];
 	$login_required = $rsvp_options["login_required"];
 	$rsvp_captcha = $rsvp_options["rsvp_captcha"];
+	$rsvp_yesno = $rsvp_options["rsvp_yesno"];
 	$rsvp_count = (isset($rsvp_options["rsvp_count"])) ? $rsvp_options["rsvp_count"] : 1;
 	$rsvp_max = 0;
 	$rsvp_show_attendees = $rsvp_options["show_attendees"];
 	}
+if(!isset($rsvp_yesno))
+	$rsvp_yesno = 1;
 if(!isset($rsvp_show_attendees))
 	$rsvp_show_attendees = 0;
 if(!isset($rsvp_captcha))
-	$rsvp_captcha = 0;	
+	$rsvp_captcha = 0;
 if(!isset($rsvp_on))
 	$rsvp_on = 0;	
 ?>
@@ -157,6 +161,10 @@ if(!isset($rsvp_on))
 <?php echo __('Collect RSVPs','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
   <input type="checkbox" name="setrsvp[login_required]" id="setrsvp[login_required]" value="1" <?php if( $login_required ) echo 'checked="checked" ';?> />
 <?php echo __('Login required','rsvpmaker');?> <?php if( !$rsvp_on ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
+  <input type="checkbox" name="setrsvp[yesno]" id="setrsvp[yesno]" value="1" <?php if( $rsvp_yesno ) echo 'checked="checked" ';?> />
+<?php echo __('Show Yes/No Radio Buttons','rsvpmaker');?> 
+  <!--input type="radio" name="setrsvp[yesno]" id="setrsvp[yesno]" value="0" <?php if( !$yesno ) echo 'checked="checked" ';?> /-->
+<!-- ?php echo __('Hide Radio Buttons','rsvpmaker');? -->
 
 <br />  <input type="checkbox" name="setrsvp[show_attendees]" id="setrsvp[show_attendees]" value="1" <?php if( $rsvp_show_attendees ) echo 'checked="checked" ';?> />
 <?php echo __(' Display attendee names and content of note field publicly','rsvpmaker');?> <?php if( !$rsvp_show_attendees ) echo ' <strong style="color: red;">'.__('Check to activate','rsvpmaker').'</strong> ';?>
@@ -877,6 +885,7 @@ if(isset($custom_fields["_rsvp_start"][0]) && $custom_fields["_rsvp_start"][0])
 	$rsvpstart = (int) $custom_fields["_rsvp_start"][0];
 $rsvp_instructions = (isset($custom_fields["_rsvp_instructions"][0])) ? $custom_fields["_rsvp_instructions"][0] : NULL;
 $rsvp_confirm = (isset($custom_fields["_rsvp_confirm"][0])) ? $custom_fields["_rsvp_confirm"][0] : NULL;
+$rsvp_yesno = (isset($custom_fields["_rsvp_yesno"][0])) ? $custom_fields["_rsvp_yesno"][0] : 1;
 $e = (isset($_GET["e"]) ) ? $_GET["e"] : NULL;
 if ( $e && !filter_var($e, FILTER_VALIDATE_EMAIL) )
 	$e = '';
@@ -1019,7 +1028,7 @@ elseif($rsvp_on && is_single() )
 
   <?php if($rsvp_show_attendees) echo '<p class="rsvp_status">'.__('Names of attendees will be displayed publicly, along with the contents of the notes field.','rsvpmaker').'</p>';?>
    
-  <p><?php echo __('Your Answer','rsvpmaker');?>: <input name="yesno" type="radio" value="1" <?php echo (!isset($rsvprow) || $rsvprow["yesno"]) ? 'checked="checked"' : '';?> /> <?php echo __('Yes','rsvpmaker');?> <input name="yesno" type="radio" value="0" /> <?php echo __('No','rsvpmaker');?></p> 
+<?php if ($rsvp_yesno) { echo '<p>'.__('Your Answer','rsvpmaker');?>: <input name="yesno" type="radio" value="1" <?php echo (!isset($rsvprow) || $rsvprow["yesno"]) ? 'checked="checked"' : '';?> /> <?php echo __('Yes','rsvpmaker');?> <input name="yesno" type="radio" value="0" /> <?php echo __('No','rsvpmaker').'</p>'; } else echo '<input name="yesno" type="hidden" value="1" />'; ?> 
 <?php
 
 if($dur && ( $slotlength = $custom_fields["_rsvp_timeslots"][0] ))
@@ -1095,8 +1104,7 @@ basic_form($profile, $guestedit);
 if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][0])
 {
 ?>
-<p>          <img src="<?php echo plugins_url('/captcha/captcha_ttf.php',__FILE__);  ?>"
-                    alt="CAPTCHA image">
+<p>          <img src="<?php echo plugins_url('/captcha/captcha_ttf.php',__FILE__);  ?>" alt="CAPTCHA image">
 <br />
 		Type the hidden security message:<br />                    
 <input maxlength="10" size="10" name="captcha" type="text" />

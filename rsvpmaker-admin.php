@@ -260,6 +260,7 @@ $setrsvp = $_POST["setrsvp"];
 if(!isset($setrsvp["show_attendees"])) $setrsvp["show_attendees"] = 0;
 if(!isset($setrsvp["count"])) $setrsvp["count"] = 0;
 if(!isset($setrsvp["captcha"])) $setrsvp["captcha"] = 0;
+if(!isset($setrsvp["yesno"])) $setrsvp["yesno"] = 0;
 
 if(isset($_POST["deadyear"]) && isset($_POST["deadmonth"]) && isset($_POST["deadday"]))
 	$setrsvp["deadline"] = strtotime($_POST["deadyear"].'-'.$_POST["deadmonth"].'-'.$_POST["deadday"].' 23:59:59');
@@ -379,6 +380,7 @@ add_action('save_post','save_calendar_data');
                   $newoptions["rsvp_on"] = (isset($_POST["option"]["rsvp_on"]) && $_POST["option"]["rsvp_on"]) ? 1 : 0;
                   $newoptions["login_required"] = (isset($_POST["option"]["login_required"]) && $_POST["option"]["login_required"]) ? 1 : 0;
                   $newoptions["rsvp_captcha"] = (isset($_POST["option"]["rsvp_captcha"]) && $_POST["option"]["rsvp_captcha"]) ? 1 : 0;
+                  $newoptions["rsvp_yesno"] = (isset($_POST["option"]["rsvp_yesno"]) && $_POST["option"]["rsvp_yesno"]) ? 1 : 0;
                   $newoptions["rsvp_count"] = (isset($_POST["option"]["rsvp_count"]) && $_POST["option"]["rsvp_count"]) ? 1 : 0;
                   $newoptions["show_attendees"] = (isset($_POST["option"]["show_attendees"]) && $_POST["option"]["show_attendees"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
@@ -488,6 +490,9 @@ Minutes: <select name="option[defaultmin]">
 	<br />
 					<h3>Show RSVP Count:</h3>
   <input type="checkbox" name="option[rsvp_count]" value="1" <?php if(isset($options["rsvp_count"]) && $options["rsvp_count"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
+					<h3>Show RSVP Yes/No Radio Buttons:</h3>
+  <input type="checkbox" name="option[rsvp_yesno]" value="1" <?php if(isset($options["rsvp_yesno"]) && $options["rsvp_yesno"]) echo ' checked="checked" ';?> /> check to turn on by default
 	<br />
 					<h3>RSVP CAPTCHA On:</h3>
   <input type="checkbox" name="option[rsvp_captcha]" value="1" <?php if(isset($options["rsvp_captcha"]) && $options["rsvp_captcha"]) echo ' checked="checked" ';?> /> check to turn on by default
