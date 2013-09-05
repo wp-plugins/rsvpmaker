@@ -383,6 +383,7 @@ add_action('save_post','save_calendar_data');
                   $newoptions["rsvp_yesno"] = (isset($_POST["option"]["rsvp_yesno"]) && $_POST["option"]["rsvp_yesno"]) ? 1 : 0;
                   $newoptions["rsvp_count"] = (isset($_POST["option"]["rsvp_count"]) && $_POST["option"]["rsvp_count"]) ? 1 : 0;
                   $newoptions["show_attendees"] = (isset($_POST["option"]["show_attendees"]) && $_POST["option"]["show_attendees"]) ? 1 : 0;
+                  $newoptions["missing_members"] = (isset($_POST["option"]["missing_members"]) && $_POST["option"]["missing_members"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
 				  $newoptions["posttypecheck"] = $options["posttypecheck"];
 				if(isset($options["noeventpageok"]) ) $newoptions["noeventpageok"] = $options["noeventpageok"];
@@ -493,6 +494,9 @@ Minutes: <select name="option[defaultmin]">
 	<br />
 					<h3>Show RSVP Yes/No Radio Buttons:</h3>
   <input type="checkbox" name="option[rsvp_yesno]" value="1" <?php if(isset($options["rsvp_yesno"]) && $options["rsvp_yesno"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
+					<h3>RSVP Form Shows Members Not Responding:</h3>
+  <input type="checkbox" name="option[missing_members]" value="1" <?php if(isset($options["missing_members"]) && $options["missing_members"]) echo ' checked="checked" ';?> /> if members log in to RSVP, this shows user accounts NOT associated with an RSVP (tracking WordPress user IDs).
 	<br />
 					<h3>RSVP CAPTCHA On:</h3>
   <input type="checkbox" name="option[rsvp_captcha]" value="1" <?php if(isset($options["rsvp_captcha"]) && $options["rsvp_captcha"]) echo ' checked="checked" ';?> /> check to turn on by default
@@ -986,7 +990,7 @@ if(!isset($_GET["week"]))
 
 <p><em>Optional: Calculate dates for a recurring schedule ...</em></p>
 
-<form method="get" action="../../../../wp-content/plugins/rsvpmaker/edit.php" id="recursked">
+<form method="get" action="<?php echo admin_url("edit.php");?>" id="recursked">
 
 <p>Regular schedule: 
 
@@ -1062,7 +1066,7 @@ echo "<p>Loading recurring series of dates for $week $dow. To omit a date in the
 
 <h3>Enter Recurring Events</h3>
 
-<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['../../../../wp-content/plugins/rsvpmaker/REQUEST_URI'];?>">
+<form id="form1" name="form1" method="post" action="<?php echo admin_url("edit.php");?>">
 <p>Headline: <input type="text" name="recur-title" size="60" value="<?php if(isset($_POST["recur-title"])) echo stripslashes($_POST["recur-title"]);?>" /></p>
 <p><textarea name="recur-body" rows="5" cols="80"><?php echo (isset($_POST["recur-body"]) && $_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"];?></textarea></p>
 <?php
@@ -1455,4 +1459,29 @@ if($mail["html"])
 	return $rsvpmail->ErrorInfo;
 }
 
+function set_rsvpmaker_order_in_admin( $wp_query ) {
+  if ( is_admin() && $_GET["rsvpsort"]=="chronological") {
+//    $wp_query->set( 'orderby', 'title' );
+//    $wp_query->set( 'order', 'ASC' );
+add_filter('posts_join', 'rsvpmaker_join' );
+add_filter('posts_where', 'rsvpmaker_where' );
+add_filter('posts_groupby', 'rsvpmaker_groupby' );
+add_filter('posts_orderby', 'rsvpmaker_orderby' );
+add_filter('posts_distinct', 'rsvpmaker_distinct' );
+  }
+}
+add_filter('pre_get_posts', 'set_rsvpmaker_order_in_admin' );
+
+function rsvpmaker_sort_message() {
+	if((basename($_SERVER['SCRIPT_NAME']) == 'edit.php') && ($_GET["post_type"]=="rsvpmaker") && !isset($_GET["page"]))
+	{
+		echo '<div style="padding: 5px; margin: 2px; ">';
+		if($_GET["rsvpsort"] == 'chronological')
+			echo '<a href="'.admin_url('edit.php?post_type=rsvpmaker&rsvpsort=newest').'">'.__('Sort By Newest','rsvpmaker').'</a>';
+		else
+			echo '<a href="'.admin_url('edit.php?post_type=rsvpmaker&rsvpsort=chronological').'">'.__('Sort By Chronological','rsvpmaker').'</a>';
+		echo '</div>';
+	}
+}
+add_action('admin_notices','rsvpmaker_sort_message');
 ?>

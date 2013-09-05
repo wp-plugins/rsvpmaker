@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.6
-Stable tag: 2.7.5
+Stable tag: 2.7.6
 
 Event scheduling and RSVP tracking.
 
@@ -77,6 +77,13 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.7.6 =
+
+* Fixes to paypal code
+* Better handling of query string post addresses (question mark format rather than pretty permalinks)
+* Sort by chronological option for RSVPMaker posts in admin screen
+* RSVP Report option to show members who have not responded (for membership sites where users log in to a WordPress account before responding, tracks user IDs). Must be activated on settings screen.
 
 = 2.7.5 =
 

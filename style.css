@@ -26,3 +26,7 @@ margin-left: 20px;
 #rsvpform table {
 margin: 0;
 }
+select.tickets
+{
+display: block; float: left; margin-right: 5px;
+}

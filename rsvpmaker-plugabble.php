@@ -424,7 +424,9 @@ if(!isset($participants) && $yesno)
 if(!$yesno)
 	$participants = 0; // if they said no, they don't count
 
-$rsvp_sql = $wpdb->prepare(" SET first=%s, last=%s, email=%s, yesno=%d, event=%d, note=%s, details=%s, participants=%d ", $rsvp["first"], $rsvp["last"], $rsvp["email"],$yesno,$event, $note, serialize($rsvp), $participants );
+global $current_user; // if logged in
+
+$rsvp_sql = $wpdb->prepare(" SET first=%s, last=%s, email=%s, yesno=%d, event=%d, note=%s, details=%s, participants=%d, user_id=%d ", $rsvp["first"], $rsvp["last"], $rsvp["email"],$yesno,$event, $note, serialize($rsvp), $participants, $current_user->ID );
 
 capture_email($rsvp);
 
@@ -589,9 +591,12 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 		   Using the servername and serverport, the return URL is the first
 		   portion of the URL that buyers will return to after authorizing payment
 		   */
-		   $serverName = $_SERVER['SERVER_NAME'];
-		   $serverPort = $_SERVER['SERVER_PORT'];
-		   $url='http://'.$serverName.':'.$serverPort.$_SERVER['REDIRECT_URL'];
+		   //$serverName = $_SERVER['SERVER_NAME'];
+		   //$serverPort = $_SERVER['SERVER_PORT'];
+		   //$url='http://'.$serverName.':'.$serverPort.$_SERVER['REDIRECT_URL'];
+		   $url = $_POST["permalink"];
+		   $url .= ( strpos($url,'?') ) ? '&' : '?';
+		   $_SESSION['rsvp_permalink'] = $url;
 		if($_REQUEST['paymentAmount'])
 			$paymentAmount=$_REQUEST['paymentAmount'];
 		else
@@ -610,7 +615,7 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 			The cancelURL is the location buyers are sent to when they hit the
 			cancel button during authorization of payment during the PayPal flow
 			*/
-		   $returnURL =urlencode($url.'?currencyCodeType='.$currencyCodeType.'&paymentType='.$paymentType.'&paymentAmount='.$paymentAmount);
+		   $returnURL =urlencode($url.'currencyCodeType='.$currencyCodeType.'&paymentType='.$paymentType.'&paymentAmount='.$paymentAmount);
 		   
 		   $cancelURL =urlencode("$url");
 
@@ -625,7 +630,6 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 			
 		   $resArray=hash_call("SetExpressCheckout",$nvpstr);
 
-
 		   $_SESSION['reshash']=$resArray;
 
 		   $ack = strtoupper($resArray["ACK"]);
@@ -638,7 +642,7 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 					exit();
 				  } else  {
 					 //Redirecting to APIError.php to display errors. 
-						$location = $_SERVER['REDIRECT_URL'] . "?paypal=error&function=firstpass";
+						$location = $url . "paypal=error&function=firstpass";
 						header("Location: $location");
 						exit();
 					}
@@ -701,7 +705,7 @@ if($ack!="SUCCESS"){
 if($showerror)
 		   	{
 				//Redirecting to display errors. 
-				$location = $_SERVER['REDIRECT_URL'] . "?paypal=error";
+				$location = $_SESSION['rsvp_permalink'] . "paypal=error";
 				header("Location: $location");
 				exit();
 			  }
@@ -902,7 +906,7 @@ if(isset($_GET["rsvp"]))
 ';
 	}
 
-if($e)
+if($e && is_single())
 	{
 	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=".$post->ID." AND email='".$e."'";
 	$rsvprow = $wpdb->get_row($sql, ARRAY_A);
@@ -925,6 +929,7 @@ if($e)
     </p>
 <input name="desc" type="hidden" id="desc" value="'.htmlentities($post->post_title).'" >
 <input name="invoice" type="hidden" id="invoice" value="'.$rsvprow["id"].'" >
+<input name="permalink" type="hidden" id="permalink" value="'.$permalink.'" >
 <input name="rsvp-pp-nonce" type="hidden" id="rsvp-pp-nonce" value="'.$nonce.'" >
 <input type="submit" name="Submit" value="'. __('Next','rsvpmaker').' &gt;&gt;">
 </form> 
@@ -998,7 +1003,9 @@ elseif(!isset($rsvp_count) || (isset($rsvp_count) && $rsvp_count)  )
 
 $now = current_time('timestamp');
 $rsvplink = ($login_required) ? wp_login_url( get_permalink( $post->ID ) ) : get_permalink( $post->ID );
-
+if(strpos($rsvplink,'?') )
+	$rsvp_options["rsvplink"] = str_replace('?','&',$rsvp_options["rsvplink"]);
+	
 if(isset($deadline) && ($now  > $deadline  ) )
 	$content .= '<p class="rsvp_status">'.__('RSVP deadline is past','rsvpmaker').'</p>';
 elseif( ( $now > $last_time  ) )
@@ -1079,20 +1086,7 @@ foreach($per["unit"] as $index => $value)
 	$price = (int) $per["price"][$index];
 	if(!$price)
 		break;
-	$pf .= '<select name="payingfor['.$index.']">
-    <option value="0">0</option>
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
-    <option value="7">7</option>
-    <option value="8">8</option>
-    <option value="9">9</option>
-    <option value="10">10</option>
-  </select>
-<input type="hidden" name="unit['.$index.']" value="'.$value.'" />'.$value.' @ <input type="hidden" name="price['.$index.']" value="'.$price.'" />'.(($rsvp_options["paypal_currency"] == 'USD') ? '$' : $rsvp_options["paypal_currency"]).' '.number_format($price,2,$rsvp_options["currency_decimal"],$rsvp_options["currency_thousands"]).'<br />';
+	$pf .= '<div><select name="payingfor['.$index.']" class="tickets"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select><input type="hidden" name="unit['.$index.']" value="'.$value.'" />'.$value.' @ <input type="hidden" name="price['.$index.']" value="'.$price.'" />'.(($rsvp_options["paypal_currency"] == 'USD') ? '$' : $rsvp_options["paypal_currency"]).' '.number_format($price,2,$rsvp_options["currency_decimal"],$rsvp_options["currency_thousands"]).'</div>'."\n";
 	}
 
 if(!empty($pf))
@@ -1232,7 +1226,7 @@ JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->pre
 	$results = $wpdb->get_results($sql, ARRAY_A);
 
 	format_rsvp_details($results);
-
+		
 	if(isset($rsvp_options["debug"]))
 		{
 		echo "<p>DEBUG: $sql</p>";
@@ -1335,6 +1329,22 @@ function format_rsvp_details($results) {
 		
 		if(!isset($_GET["rsvp_print"]) && current_user_can('edit_others_posts'))
 			echo sprintf('<p><a href="%s&delete=%d">Delete record for: %s %s</a></p>',admin_url().'edit.php?post_type=rsvpmaker&page=rsvp',$row["id"],esc_attr($row["first"]),esc_attr($row["last"]) );
+		$userrsvps[] = $row["user_id"];
+		}
+
+	if($rsvp_options["missing_members"])
+		{
+		$blogusers = get_users('blog_id=1&orderby=nicename');
+			foreach ($blogusers as $user) {
+				if(in_array($user->ID,$userrsvps) )
+					continue;		
+			$userdata = get_userdata($user->ID);
+			$missing .= "<p>$userdata->display_name $userdata->user_email</p>\n";
+			}
+		}
+	if(!empty($missing))
+		{
+			echo "<hr /><h3>Members Who Have Not Responded</h3>".$missing;
 		}
 
 global $phpexcel_enabled; // set if excel extension is active

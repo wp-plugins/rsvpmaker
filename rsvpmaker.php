@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 2.7.5
+Version: 2.7.6
 Author URI: http://www.carrcommunications.com
 */
 
@@ -196,6 +196,7 @@ $sql = "CREATE TABLE `".$wpdb->prefix."rsvpmaker` (
   `guestof` varchar(255)   CHARACTER SET utf8 COLLATE utf8_general_ci  default NULL,
   `note` text   CHARACTER SET  utf8 COLLATE utf8_general_ci NOT NULL,
   `participants` INT NOT NULL DEFAULT '0',
+  `user_id` INT NOT NULL DEFAULT '0',
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
@@ -211,7 +212,7 @@ $sql = "CREATE TABLE `".$wpdb->prefix."rsvp_volunteer_time` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
 dbDelta($sql);
 
-$rsvp_options["dbversion"] = 4;
+$rsvp_options["dbversion"] = 5;
 update_option('RSVPMAKER_Options',$rsvp_options);
 
 global $wpdb;
@@ -246,5 +247,7 @@ if($rsvp_options["dbversion"] < 4)
 	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `details` `details` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ");	
 	$wpdb->query("ALTER TABLE `wp_rsvpmaker` CHANGE `note` `note` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ");
 	}
+if($rsvp_options["dbversion"] < 5)
+	cpevent_activate();
 
 ?>
