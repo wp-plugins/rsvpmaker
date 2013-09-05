@@ -344,20 +344,6 @@ if(isset($rsvp["email"]))
 	$rsvp_id = $wpdb->get_var($sql);
 	}
 
-// test for artificially random input
-$rtxt = implode('',$rsvp);
-$uppercount = preg_match_all('/[A-Z]/',$rtxt,$upper);
-$lowercount = preg_match_all('/[a-z]/',$rtxt,$lower);
-$diff = abs($uppercount - $lowercount);
-$diff = ($diff) ? $diff : 1;
-$diffratio = $diff / ($lowercount + $uppercount);
-
-if($diffratio < .6)
-	{
-	header('Location: '.$req_uri.'&err=Invalid input');
-	exit();
-	}
-
 if(isset($_POST["onfile"]))
 	{
 	$details = $wpdb->get_var("SELECT details FROM ".$wpdb->prefix."rsvpmaker WHERE email='".$rsvp["email"]."' ORDER BY id DESC");
