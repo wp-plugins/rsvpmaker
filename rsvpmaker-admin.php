@@ -1,198 +1,5 @@
 <?php
 
-function draw_eventdates() {
-
-global $post;
-global $wpdb;
-global $rsvp_options;
-
-$defaulthour = (isset($rsvp_options["defaulthour"])) ? ( (int) $rsvp_options["defaulthour"]) : 19;
-$defaultmin = (isset($rsvp_options["defaultmin"])) ? ( (int) $rsvp_options["defaultmin"]) : 0;
-$houropt = $minopt = '';
-
-for($i=0; $i < 24; $i++)
-	{
-	$selected = ($i == $defaulthour) ? ' selected="selected" ' : '';
-	$padded = ($i < 10) ? '0'.$i : $i;
-	if($i == 0)
-		$twelvehour = "12 a.m.";
-	elseif($i == 12)
-		$twelvehour = "12 p.m.";
-	elseif($i > 12)
-		$twelvehour = ($i - 12) ." p.m.";
-	else		
-		$twelvehour = $i." a.m.";
-
-	$houropt .= sprintf('<option  value="%s" %s>%s / %s:</option>',$padded,$selected,$twelvehour,$padded);
-	}
-
-for($i=0; $i < 60; $i += 5)
-	{
-	$selected = ($i == $defaultmin) ? ' selected="selected" ' : '';
-	$padded = ($i < 10) ? '0'.$i : $i;
-	$minopt .= sprintf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
-	}
-
-wp_nonce_field(-1,'add_date'.$i);
-
-$results = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."rsvp_dates WHERE postID=".$post->ID.' ORDER BY datetime',ARRAY_A);
-if($results)
-{
-$start = 2;
-foreach($results as $row)
-	{
-	echo "\n<div class=\"event_dates\"> \n";
-	$t = strtotime($row["datetime"]);
-	if($rsvp_options["long_date"]) echo date($rsvp_options["long_date"],$t);
-	$dur = $row["duration"];
-	if($dur != 'allday')
-		echo date(' '.$rsvp_options["time_format"],$t);
-	if(is_numeric($dur) )
-		echo " to ".date ($rsvp_options["time_format"],$dur);
-	echo sprintf(' <input type="checkbox" name="delete_date[]" value="%d" /> Delete',$row["id"]);
-	
-	$dateparts = split('[-: ]',$row["datetime"]);
-
-	if(is_numeric($dur) )
-		$diff = ( (((int) $dur) - $t) / 3600);
-	else
-		$diff = $row["duration"];
-	
-	
-	echo sprintf('<br />Year: <input type="text" size="6" name="edit_year[%d]" value="%s" /> Month: <input type="text" size="4" name="edit_month[%d]" value="%s" /> Day: <input type="text" size="4" name="edit_day[%d]" value="%s" /> Hour: <input size="4" type="text" name="edit_hour[%d]" value="%s" /> Minutes: <input type="text" size="4" name="edit_minutes[%d]" value="%s" /> Duration: <input type="text" size="4" name="edit_duration[%d]" value="%s" />',$row["id"],$dateparts[0],$row["id"],$dateparts[1],$row["id"],$dateparts[2],$row["id"],$dateparts[3],$row["id"],$dateparts[4],$row["id"],$diff);
-	
-	echo "</div>\n";
-	}
-
-	echo '<p><em>'.__('You can check &quot;delete&quot; to remove dates or edit date parameters. Time must be specified in military format (13:00 for 1 p.m.). Leave duration blank, or enter it as a number of hours (&quot;allday&quot; in duration field means time of day will not be displayed)','rsvpmaker').'</em> </p>';
-
-}
-else
-	echo '<p><em>'.__('Enter one or more dates. For an event starting at 1:30 p.m., you would select 1 p.m. (or 13: for 24-hour format) and then 30 minutes. Specifying the duration is optional.','rsvpmaker').'</em> </p>';
-
-if(!isset($start))
-	$start = 1;
-
-for($i=$start; $i < 6; $i++)
-{
-if($i == 2)
-	{
-	echo "<p><a onclick=\"document.getElementById('additional_dates').style.display='block'\" >".__('Add More Dates','rsvpmaker')."</a> </p>
-	<div id=\"additional_dates\" style=\"display: none;\">";
-	}
-
-if($i > 1)
-	$today = '<option value="">None</option>';
-else
-	{
-	$d = date('j');
-	$today = sprintf('<option value="%s">%s</option>',$d,$d);
-	}
-
-$m = date('n');
-$y = date('Y');
-$y2 = $y+1;
-
-;?>
-<div id="event_date<?php echo $i;?>" style="border-bottom: thin solid #888;">
-<table width="100%">
-<tr>
-            <td width="*"><div id="date_block"><?php echo __('Month:','rsvpmaker');?> 
-              <select name="event_month[<?php echo $i;?>]"> 
-              <option value="<?php echo $m;?>"><?php echo $m;?></option> 
-              <option value="1">1</option> 
-              <option value="2">2</option> 
-              <option value="3">3</option> 
-              <option value="4">4</option> 
-              <option value="5">5</option> 
-              <option value="6">6</option> 
-              <option value="7">7</option> 
-              <option value="8">8</option> 
-              <option value="9">9</option> 
-              <option value="10">10</option> 
-              <option value="11">11</option> 
-              <option value="12">12</option> 
-              </select> 
-            <?php echo __('Day:','rsvpmaker');?> 
-            <select name="event_day[<?php echo $i;?>]"> 
-              <?php echo $today;?>
-              <option value="1">1</option> 
-              <option value="2">2</option> 
-              <option value="3">3</option> 
-              <option value="4">4</option> 
-              <option value="5">5</option> 
-              <option value="6">6</option> 
-              <option value="7">7</option> 
-              <option value="8">8</option> 
-              <option value="9">9</option> 
-              <option value="10">10</option> 
-              <option value="11">11</option> 
-              <option value="12">12</option> 
-              <option value="13">13</option> 
-              <option value="14">14</option> 
-              <option value="15">15</option> 
-              <option value="16">16</option> 
-              <option value="17">17</option> 
-              <option value="18">18</option> 
-              <option value="19">19</option> 
-              <option value="20">20</option> 
-              <option value="21">21</option> 
-              <option value="22">22</option> 
-              <option value="23">23</option> 
-              <option value="24">24</option> 
-              <option value="25">25</option> 
-              <option value="26">26</option> 
-              <option value="27">27</option> 
-              <option value="28">28</option> 
-              <option value="29">29</option> 
-              <option value="30">30</option> 
-              <option value="31">31</option> 
-            </select> 
-            <?php echo __('Year','rsvpmaker');?>
-            <select name="event_year[<?php echo $i ;?>]"> 
-              <option value="<?php echo $y;?>"><?php echo $y;?></option> 
-              <option value="<?php echo $y2;?>"><?php echo $y2;?></option> 
-            </select> 
-</div> 
-            </td> 
-          </tr> 
-<tr> 
-<td><?php echo __('Hour:','rsvpmaker');?> <select name="event_hour[<?php echo $i;?>]"> 
-<?php echo $houropt;?>
-</select> 
- 
-<?php echo __('Minutes:','rsvpmaker');?> <select name="event_minutes[<?php echo $i;?>]"> 
-<?php echo $minopt;?>
-</select> -
-
-<?php echo __('Duration','rsvpmaker');?> <select name="event_duration[<?php echo $i;?>]">
-<option value=""><?php echo __('Not set (optional)','rsvpmaker');?></option>
-<option value="allday"><?php echo __("All day/don't show time in headline",'rsvpmaker');?></option>
-<?php for($h = 1; $h < 24; $h++) { ;?>
-<option value="<?php echo $h;?>"><?php echo $h;?> hours</option>
-<option value="<?php echo $h;?>:15"><?php echo $h;?>:15</option>
-<option value="<?php echo $h;?>:30"><?php echo $h;?>:30</option>
-<option value="<?php echo $h;?>:45"><?php echo $h;?>:45</option>
-<?php } ;?>
-</select>
-<br /> 
-</td> 
-          </tr> 
-</table>
-</div>
-<?php
-} // end for loop
-echo "\n</div><!--add dates-->\n";
-
-GetRSVPAdminForm($post->ID);
-
-}
-
-function my_events_menu() {
-add_meta_box( 'EventDatesBox', __('Event Dates, RSVP Options','rsvpmaker'), 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
-
-}
-
 function save_calendar_data($postID) {
 
 global $wpdb;
@@ -213,12 +20,11 @@ if(isset($_POST["event_month"]) )
 			if( $wpdb->get_var("SELECT id FROM ".$wpdb->prefix."rsvp_dates WHERE postID=$postID AND datetime='$cddate' ") )
 				continue;
 			
-			$dpart = explode(':',$_POST["event_duration"][$index]);			
-			
+			$dpart = explode(':',$_POST["event_duration"][$index]);
 			if( is_numeric($dpart[0]) )
 				{
 				$hour = $_POST["event_hour"][$index] + $dpart[0];
-				$minutes = $_POST["event_minutes"][$index] + $dpart[1];
+				$minutes = (isset($dpart[1]) ) ? $_POST["event_minutes"][$index] + $dpart[1] : $_POST["event_minutes"][$index];
 				$duration = mktime( $hour, $minutes,0,$_POST["event_month"][$index],$_POST["event_day"][$index],$year);
 				}
 			else
@@ -262,14 +68,24 @@ if(isset($_POST["edit_month"]))
 		{
 			$cddate = $year . "-" . $_POST["edit_month"][$index]  . "-" . $_POST["edit_day"][$index] . " " . $_POST["edit_hour"][$index] . ":" . $_POST["edit_minutes"][$index] . ":00";
 			
-			if( is_numeric($_POST["edit_duration"][$index]) )
+			if(strpos( $_POST["edit_duration"][$index],':' ))
 				{
+				$dpart = explode(':',$_POST["edit_duration"][$index]);
+				if( is_numeric($dpart[0]) )
+					{
+					$hour = $_POST["edit_hour"][$index] + $dpart[0];
+					$minutes = (isset($dpart[1]) ) ? $_POST["edit_minutes"][$index] + $dpart[1] : $_POST["edit_minutes"][$index];
+					$duration = mktime( $hour, $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year);
+					}
+				}
+			elseif( is_numeric($_POST["edit_duration"][$index]) )
+				{					
 				$minutes = $_POST["edit_minutes"][$index] + (60*$_POST["edit_duration"][$index]);
 				$duration = mktime( $_POST["edit_hour"][$index], $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year);
 				}
 			else
 				$duration = $_POST["edit_duration"][$index]; // empty or all day
-				
+			
 			$sql = "UPDATE ".$wpdb->prefix."rsvp_dates  SET datetime='$cddate',duration='$duration'  WHERE id=$index"; 
 			//echo $sql;
 			$wpdb->query($sql);
@@ -278,12 +94,169 @@ if(isset($_POST["edit_month"]))
 	
 }
 
+function rsvpmaker_date_option($datevar = NULL, $index = NULL) {
+
+global $rsvp_options;
+$prefix = "event_";
+
+if(is_array($datevar) )
+{
+	$datestring = $datevar["datetime"];
+	$duration = $datevar["duration"];
+	$prefix = "edit_";
+	$index = $datevar["id"];
+}
+else
+{
+	$datestring = $datevar;
+}
+
+if(strpos($datestring,'-'))
+	{
+	$t = strtotime($datestring);
+	$month =  (int) date('n',$t);
+	$year =  (int) date('Y',$t);
+	$day =  (int) date('j',$t);
+	$hour =  (int) date('G',$t);
+	$minutes =  (int) date('i',$t);
+	}
+elseif($datestring == 'today')
+	{
+	$month =  (int) date('n');
+	$year =  (int) date('Y');
+	$day =  (int) date('j');
+	$hour = (isset($rsvp_options["defaulthour"])) ? ( (int) $rsvp_options["defaulthour"]) : 19;
+	$minutes = (isset($rsvp_options["defaultmin"])) ? ( (int) $rsvp_options["defaultmin"]) : 0;
+	}
+else
+	{
+	$month = (int) date('n');
+	$year =  (int) date('Y');
+	$day = 0;
+	$hour = (isset($rsvp_options["defaulthour"])) ? ( (int) $rsvp_options["defaulthour"]) : 19;
+	$minutes = (isset($rsvp_options["defaultmin"])) ? ( (int) $rsvp_options["defaultmin"]) : 0;
+	}
+
+?>
+<div id="<?php echo $prefix; ?>date<?php echo $index;?>" style="border-bottom: thin solid #888;">
+<table width="100%">
+<tr>
+            <td width="*"><div id="date_block"><?php echo __('Month:','rsvpmaker');?> 
+<select name="<?php echo $prefix; ?>month[<?php echo $index;?>]"> 
+<?php
+for($i = 1; $i <= 12; $i++)
+{
+echo "<option ";
+	if($i == $month)
+		echo ' selected="selected" ';
+	echo 'value="'.$i.'">'.$i."</option>\n";
+}
+?>
+</select> 
+<?php echo __('Day:','rsvpmaker');?> 
+<select name="<?php echo $prefix; ?>day[<?php echo $index;?>]"> 
+<?php
+if($day == 0)
+	echo '<option value="0">Not Set</option>';
+for($i = 1; $i <= 31; $i++)
+{
+echo "<option ";
+	if($i == $day)
+		echo ' selected="selected" ';
+	echo 'value="'.$i.'">'.$i."</option>\n";
+}
+?>
+</select> 
+<?php echo __('Year','rsvpmaker');?>
+<select name="<?php echo $prefix; ?>year[<?php echo $index ;?>]"> 
+<?php
+$y = (int) date('Y');
+$limit = $y + 3;
+for($i = $y; $i < $limit; $i++)
+{
+echo "<option ";
+	if($i == $year)
+		echo ' selected="selected" ';
+	echo 'value="'.$i.'">'.$i."</option>\n";
+}
+?>
+</select> 
+</div> 
+            </td> 
+          </tr> 
+<tr> 
+<td><?php echo __('Hour:','rsvpmaker');?> <select name="<?php echo $prefix; ?>hour[<?php echo $index;?>]"> 
+<?php
+for($i=0; $i < 24; $i++)
+	{
+	$selected = ($i == $hour) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	if($i == 0)
+		$twelvehour = "12 a.m.";
+	elseif($i == 12)
+		$twelvehour = "12 p.m.";
+	elseif($i > 12)
+		$twelvehour = ($i - 12) ." p.m.";
+	else		
+		$twelvehour = $i." a.m.";
+
+	printf('<option  value="%s" %s>%s / %s:</option>',$padded,$selected,$twelvehour,$padded);
+	}
+?>
+</select> 
+ 
+<?php echo __('Minutes:','rsvpmaker');?> <select name="<?php echo $prefix; ?>minutes[<?php echo $index;?>]"> 
+<?php
+for($i=0; $i < 60; $i ++)
+	{
+	$selected = ($i == $minutes) ? ' selected="selected" ' : '';
+	$padded = ($i < 10) ? '0'.$i : $i;
+	printf('<option  value="%s" %s>%s</option>',$padded,$selected,$padded);
+	}
+?>
+</select> -
+
+<?php echo __('Duration','rsvpmaker');?> <select name="<?php echo $prefix; ?>duration[<?php echo $index;?>]">
+<option value=""><?php echo __('Not set (optional)','rsvpmaker');?></option>
+<option value="allday" <?php if(isset($duration) && ($duration == 'allday')) echo ' selected="selected" '; ?>><?php echo __("All day/don't show time in headline",'rsvpmaker');?></option>
+<?php
+if(isset($duration) && is_numeric($duration) )
+	{
+	$diff = (string) ( (((int) $duration) - $t) / 3600);
+	$dparts = explode('.',$diff);
+	$dh = (int) $dparts[0];
+	$decimal = (isset($dparts[1]) ) ? (int) $dparts[1] : 0;
+	}
+else
+	{
+		$dh = $decimal = NULL;
+	}
+for($h = 1; $h < 24; $h++) {
+	 ;?>
+<option value="<?php echo $h;?>" <?php if(($h == $dh) && ($decimal == 0) ) echo ' selected="selected" '; ?> ><?php echo $h;?> hours</option>
+<option value="<?php echo $h;?>:15" <?php if(($h == $dh) && ($decimal == 25) ) echo ' selected="selected" '; ?> ><?php echo $h;?>:15</option>
+<option value="<?php echo $h;?>:30"  <?php if(($h == $dh) && ($decimal == 5) ) echo ' selected="selected" '; ?> ><?php echo $h;?>:30</option>
+
+<option value="<?php echo $h;?>:45"  <?php if(($h == $dh) && ($decimal == 75) ) echo ' selected="selected" '; ?> ><?php echo $h;?>:45</option>
+<?php } ;?>
+</select>
+<br /> 
+</td> 
+          </tr> 
+</table>
+</div>
+<?php
+
+}
+
 function save_rsvp_meta($postID)
 {
 $setrsvp = $_POST["setrsvp"];
 
 if(!isset($setrsvp["show_attendees"])) $setrsvp["show_attendees"] = 0;
+if(!isset($setrsvp["count"])) $setrsvp["count"] = 0;
 if(!isset($setrsvp["captcha"])) $setrsvp["captcha"] = 0;
+if(!isset($setrsvp["yesno"])) $setrsvp["yesno"] = 0;
 
 if(isset($_POST["deadyear"]) && isset($_POST["deadmonth"]) && isset($_POST["deadday"]))
 	$setrsvp["deadline"] = strtotime($_POST["deadyear"].'-'.$_POST["deadmonth"].'-'.$_POST["deadday"].' 23:59:59');
@@ -299,15 +272,20 @@ foreach($setrsvp as $name => $value)
 	$field = '_rsvp_'.$name;
 	$single = true;
 	$current = get_post_meta($postID, $field, $single);
-	 
-	if($value && ($current == "") )
+	
+	if( (($current == "") || ($current == NULL)) )
+		{
 		add_post_meta($postID, $field, $value, true);
-	
+		}
 	elseif($value != $current)
+		{
 		update_post_meta($postID, $field, $value);
-	
+		}
 	elseif($value == "")
+		{
 		delete_post_meta($postID, $field, $current);
+		}
+
 	}
 
 if(isset($_POST["unit"]))
@@ -338,7 +316,6 @@ if(isset($_POST["unit"]))
 	
 	}
 }
-
 
 add_action('admin_menu', 'my_events_menu');
 
@@ -397,8 +374,12 @@ add_action('save_post','save_calendar_data');
               		
                   $newoptions = stripslashes_deep($_POST["option"]);
                   $newoptions["rsvp_on"] = (isset($_POST["option"]["rsvp_on"]) && $_POST["option"]["rsvp_on"]) ? 1 : 0;
+                  $newoptions["login_required"] = (isset($_POST["option"]["login_required"]) && $_POST["option"]["login_required"]) ? 1 : 0;
                   $newoptions["rsvp_captcha"] = (isset($_POST["option"]["rsvp_captcha"]) && $_POST["option"]["rsvp_captcha"]) ? 1 : 0;
+                  $newoptions["rsvp_yesno"] = (isset($_POST["option"]["rsvp_yesno"]) && $_POST["option"]["rsvp_yesno"]) ? 1 : 0;
+                  $newoptions["rsvp_count"] = (isset($_POST["option"]["rsvp_count"]) && $_POST["option"]["rsvp_count"]) ? 1 : 0;
                   $newoptions["show_attendees"] = (isset($_POST["option"]["show_attendees"]) && $_POST["option"]["show_attendees"]) ? 1 : 0;
+                  $newoptions["missing_members"] = (isset($_POST["option"]["missing_members"]) && $_POST["option"]["missing_members"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
 				  $newoptions["posttypecheck"] = $options["posttypecheck"];
 				if(isset($options["noeventpageok"]) ) $newoptions["noeventpageok"] = $options["noeventpageok"];
@@ -463,6 +444,12 @@ if(isset($_GET["reminder_reset"]))
 </div>
 
 	<h2>Calendar Options</h2>
+    
+    <?php
+if(file_exists(WP_PLUGIN_DIR."/rsvpmaker-custom.php") )
+	echo "<p><em>Note: This site also implements custom code in ".WP_PLUGIN_DIR."/rsvpmaker-custom.php.</em></p>";
+	?>
+    
 	<div id="poststuff" style="margin-top:10px;">
 
 	 <div id="mainblock" style="width:710px">
@@ -489,11 +476,23 @@ Minutes: <select name="option[defaultmin]">
 					<h3>RSVP On:</h3>
   <input type="checkbox" name="option[rsvp_on]" value="1" <?php if(isset($options["rsvp_on"]) && $options["rsvp_on"]) echo ' checked="checked" ';?> /> check to turn on by default
 	<br />
+					<h3>Login Required to RSVP:</h3>
+  <input type="checkbox" name="option[login_required]" value="1" <?php if(isset($options["login_required"]) && $options["login_required"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
 					<h3>RSVP TO:</h3> 
 					  <textarea rows="2" cols="80" name="option[rsvp_to]" id="rsvp_to"><?php if(isset($options["rsvp_to"])) echo $options["rsvp_to"];?></textarea>
 					<br />
 					<h3>RSVPs Attendees List Public:</h3>
   <input type="checkbox" name="option[show_attendees]" value="1" <?php if(isset($options["show_attendees"]) && $options["show_attendees"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
+					<h3>Show RSVP Count:</h3>
+  <input type="checkbox" name="option[rsvp_count]" value="1" <?php if(isset($options["rsvp_count"]) && $options["rsvp_count"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
+					<h3>Show RSVP Yes/No Radio Buttons:</h3>
+  <input type="checkbox" name="option[rsvp_yesno]" value="1" <?php if(isset($options["rsvp_yesno"]) && $options["rsvp_yesno"]) echo ' checked="checked" ';?> /> check to turn on by default
+	<br />
+					<h3>RSVP Form Shows Members Not Responding:</h3>
+  <input type="checkbox" name="option[missing_members]" value="1" <?php if(isset($options["missing_members"]) && $options["missing_members"]) echo ' checked="checked" ';?> /> if members log in to RSVP, this shows user accounts NOT associated with an RSVP (tracking WordPress user IDs).
 	<br />
 					<h3>RSVP CAPTCHA On:</h3>
   <input type="checkbox" name="option[rsvp_captcha]" value="1" <?php if(isset($options["rsvp_captcha"]) && $options["rsvp_captcha"]) echo ' checked="checked" ';?> /> check to turn on by default
@@ -504,13 +503,15 @@ Minutes: <select name="option[defaultmin]">
 					<h3>Confirmation Message:</h3>
   <textarea name="option[rsvp_confirm]"  rows="5" cols="80" id="rsvp_confirm"><?php if( isset($options["rsvp_confirm"]) ) echo $options["rsvp_confirm"];?></textarea>
 	<br />
-					<h3>Profile Table:</h3>
-  <textarea name="option[profile_table]"  rows="5" cols="80" id="profile_table"><?php if( isset($options["profile_table"]) ) echo $options["profile_table"];?></textarea>
-<br />This is the section of the RSVP form that asks for additional details, beyond name and email. You can add additional fields in HTML and they will be recorded as long as you follow the name=&quot;profile[fieldname]&quot; convention. The standard text field length is size=&quot;60&quot;
-	<br />
-					<h3>RSVP Form:</h3>
-  <textarea name="option[rsvp_form]"  rows="5" cols="80" id="profile_table"><?php if( isset($options["rsvp_form"]) ) echo htmlentities($options["rsvp_form"]);?></textarea>
+					<h3>RSVP Form (<a href="#" id="enlarge">Enlarge</a>):</h3>
+  <textarea name="option[rsvp_form]"  rows="5" cols="80" id="rsvpform"><?php if( isset($options["rsvp_form"]) ) echo htmlentities($options["rsvp_form"]);?></textarea>
 <br />This is a customizable template for the RSVP form, introduced as part of the Aug. 2012 update. With the exception of the yes/no radio buttons and the notes textarea, fields are represented by the shortcodes [rsvpfield textfield=&quot;fieldname&quot;] or [rsvpfield selectfield=&quot;fieldname&quot; options=&quot;option1,option2&quot;]. There is also a [rsvpprofiletable show_if_empty=&quot;phone&quot;] shortcode which is an optional block that will not be displayed if the required details (such as a phone number) are already &quot;on file&quot; from a prior RSVP. For this to work, there must also be a [/rsvpprofiletable] closing tag. The guest section of the form is represented by [rsvpguests] (no parameters). If you don't want the guest blanks to show up, you can remove this. The form code you supply will be wrapped in a form tag with the CSS ID of &quot;rsvpform&quot;.
+<script>
+jQuery('#enlarge').click(function() {
+  jQuery('#rsvpform').attr('rows','40');
+  return false;
+});
+</script>
 	<br />
 					<h3>RSVP Link:</h3>
   <textarea name="option[rsvplink]"  rows="5" cols="80" id="rsvplink"><?php if(isset($options["rsvplink"]) ) echo $options["rsvplink"];?></textarea>
@@ -592,10 +593,51 @@ echo "<br /><br />On your system, the base web directory is: <strong>".$_SERVER[
   <option value="edit_posts" <?php if(isset($options["menu_security"]) && ($options["menu_security"] == 'edit_posts')) echo ' selected="selected" ';?> >Contributor</option>
   </select> Security level required to access custom menus (RSVP Report, Documentation)
 <br />
+<h3>SMTP for Notifications</h3>
+<p>For more reliable delivery of email notifications, enable delivery through the SMTP email protocol. Standard server parameters will be used for Gmail and the SendGrid service, or specify the server port number and security protocol.</p>
+  <select name="option[smtp]" id="smtp">
+  <option value="" <?php if($options["smtp"] == '' ) {echo ' selected="selected" ';}?> >None - use PHP mail()</option>
+  <option value="gmail" <?php if($options["smtp"] == 'gmail') {echo ' selected="selected" ';}?> >Gmail</option>
+  <option value="sendgrid" <?php if($options["smtp"] == 'sendgrid') {echo ' selected="selected" ';}?> >SendGrid</option>
+  <option value="other" <?php if($options["smtp"] == 'other') {echo ' selected="selected" ';}?> >Other SMTP (specified below)</option>
+  </select> <?php echo $options["smtp"]; ?>
+<br />
+Email Account for Notifications
+<br />
+<input type="text" name="option[smtp_useremail]" value="<?php if(isset($options["smtp_useremail"])) echo $options["smtp_useremail"];?>" size="15" />
+<br />
+Email Username
+<br />
+<input type="text" name="option[smtp_username]" value="<?php if(isset($options["smtp_username"])) echo $options["smtp_username"];?>" size="15" />
+<br />
+Email Password
+<br />
+<input type="text" name="option[smtp_password]" value="<?php if(isset($options["smtp_password"])) echo $options["smtp_password"];?>" size="15" />
+<br />
+Server (parameters below not necessary if you specified Gmail or SendGrid)<br />
+<input type="text" name="option[smtp_server]" value="<?php if(isset($options["smtp_server"])) echo $options["smtp_server"];?>" size="15" />
+<br />
+SMTP Security Prefix (ssl or tls, leave blank for non-encrypted connections) 
+<br />
+<input type="text" name="option[smtp_prefix]" value="<?php if(isset($options["smtp_prefix"])) echo $options["smtp_prefix"];?>" size="15" />
+<br />
+SMTP Port
+<br />
+<input type="text" name="option[smtp_port]" value="<?php if(isset($options["smtp_port"])) echo $options["smtp_port"];?>" size="15" />
+<br />
+<?php 
+if($options["smtp"])
+	{
+?>
+<a href="<?php echo admin_url('?smtptest=1'); ?>">Send SMTP Test to RSVP To address</a>
+<?php
+	}
+?>
+
 					<div class="submit"><input type="submit" name="Submit" value="Update" /></div>
 			</form>
 
-<form action="options-general.php" method="get"><input type="hidden" name="page" value="rsvpmaker-admin.php" />RSVP Reminders scheduled for: <?php echo date('F jS, g:i A / H:i',wp_next_scheduled( 'rsvp_daily_reminder_event' )).' GMT offset '.get_option('gmt_offset').' hours'; // ?><br />
+<form action="../../../../wp-content/plugins/rsvpmaker/options-general.php" method="get"><input type="hidden" name="page" value="rsvpmaker-admin.php" />RSVP Reminders scheduled for: <?php echo date('F jS, g:i A / H:i',wp_next_scheduled( 'rsvp_daily_reminder_event' )).' GMT offset '.get_option('gmt_offset').' hours'; // ?><br />
 Set new time: <select name="reminder_reset">
 <?php echo $houropt;?>
 </select><input type="submit" name="submit" value="Set" /></form>
@@ -718,7 +760,7 @@ global $rsvp_options;
 
 <p>Use this form to enter multiple events quickly with basic formatting.</p>
 
-<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
+<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['../../../../wp-content/plugins/rsvpmaker/REQUEST_URI'];?>">
 <?php
 $today = '<option value="0">None</option>';
 for($i=0; $i < 10; $i++)
@@ -944,7 +986,7 @@ if(!isset($_GET["week"]))
 
 <p><em>Optional: Calculate dates for a recurring schedule ...</em></p>
 
-<form method="get" action="edit.php" id="recursked">
+<form method="get" action="<?php echo admin_url("edit.php");?>" id="recursked">
 
 <p>Regular schedule: 
 
@@ -1020,7 +1062,7 @@ echo "<p>Loading recurring series of dates for $week $dow. To omit a date in the
 
 <h3>Enter Recurring Events</h3>
 
-<form id="form1" name="form1" method="post" action="<?php echo $_SERVER['REQUEST_URI'];?>">
+<form id="form1" name="form1" method="post" action="<?php echo admin_url("edit.php?post_type=rsvpmaker&page=add_dates");?>">
 <p>Headline: <input type="text" name="recur-title" size="60" value="<?php if(isset($_POST["recur-title"])) echo stripslashes($_POST["recur-title"]);?>" /></p>
 <p><textarea name="recur-body" rows="5" cols="80"><?php echo (isset($_POST["recur-body"]) && $_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"];?></textarea></p>
 <?php
@@ -1143,7 +1185,8 @@ echo GetRSVPAdminForm(0);
 
 
 function rsvpmaker_doc () {
-;?>
+global $rsvp_options;
+?>
 <h2>Documentation</h2>
 <p>More detailed documentation at <a href="http://www.rsvpmaker.com/documentation/">http://www.rsvpmaker.com/documentation/</a></p>
 		    <h3>Shortcodes and Event Listing / Calendar Views</strong></h3>
@@ -1158,6 +1201,19 @@ function rsvpmaker_doc () {
             <img src="<?php echo plugins_url('/shortcode.png',__FILE__);?>" width="535" height="412" />
 <br /><em>Contents for an events page.</em>
             </div>
+<h3>RSVP Form</h3>
+<p>The RSVP from is also now formatted using shortcodes, which you can edit in the RSVP Form section of the Settings screen. You can also vary the form on a per-event basis, which can be handy for capturing an extra field. This is your current default form:</p>
+<pre>
+<?php echo(htmlentities($rsvp_options["rsvp_form"])); ?>
+</pre>
+<p>Explanation:</p>
+<p>[rsvpfield textfield=&quot;myfield&quot;] outputs a text field coded to capture data for &quot;myfield&quot;</p>
+<p>[rsvpfield textfield=&quot;myfield&quot; required=&quot;1&quot;] treats &quot;myfield&quot; as a required field.</p>
+<p>[rsvpfield selectfield=&quot;phonetype&quot; options=&quot;Work Phone,Mobile Phone,Home Phone&quot;] HTML select field with specified options</p>
+<p>[rsvpprofiletable show_if_empty=&quot;phone&quot;]CONDITIONAL CONTENT GOES HERE[/rsvpprofiletable] This section only shown if the required field is empty; otherwise displays a message that the info is &quot;on file&quot;. Because RSVPMaker is capable of looking up profile data based on an email address, you may want some data to be hidden for privacy reasons.</p>
+<p>[rsvpguests] Outputs the guest blanks.</p>
+
+<p>If you're having trouble with the form fields not being formatted correctly, <a href="../../../../wp-content/plugins/rsvpmaker/options-general.php?page=rsvpmaker-admin.php&amp;reset_form=1">Reset default RSVP Form</a></p>            
             
 <?php
 
@@ -1215,7 +1271,7 @@ if($_GET["author"])
 ;?>
 <h2>Debug</h2>
 <p>Use this screen to verify that RSVPMaker is recording data correctly or to share debugging information with the plugin author. If you send debugging info, follow up with a note to <a href="mailto:david@carrcommunications.com">david@carrcommunications.com</a> and explain what you need help with.</p>
-<form action="./edit.php" method="get">
+<form action="../../../../wp-content/plugins/rsvpmaker/edit.php" method="get">
 <input type="hidden" name="post_type" value="rsvpmaker" />
 <input name="page" type="hidden" value="rsvpmaker_debug" />
   <label>
@@ -1242,16 +1298,7 @@ Globals</label>
 <?php
 }
 
-function my_rsvp_menu() {
-global $rsvp_options;
-add_submenu_page('edit.php?post_type=rsvpmaker', "RSVP Report", "RSVP Report", $rsvp_options["menu_security"], "rsvp", "rsvp_report" );
-add_submenu_page('edit.php?post_type=rsvpmaker', "Recurring Event", "Recurring Event", 'manage_options', "add_dates", "add_dates" );
-add_submenu_page('edit.php?post_type=rsvpmaker', "Multiple Events", "Multiple Events", 'manage_options', "multiple", "multiple" );
-add_submenu_page('edit.php?post_type=rsvpmaker', "Documentation", "Documentation", $rsvp_options["menu_security"], "rsvpmaker_doc", "rsvpmaker_doc" );
-if(isset($rsvp_options["debug"]) && $rsvp_options["debug"])
-	add_submenu_page('edit.php?post_type=rsvpmaker', "Debug", "Debug", 'manage_options', "rsvpmaker_debug", "rsvpmaker_debug");
-}
-
+//my_events_rsvp function in rsvpmaker-pluggable.php
 add_action('admin_menu', 'my_rsvp_menu');
 
 add_filter('manage_posts_columns', 'rsvpmaker_columns');
@@ -1327,8 +1374,110 @@ if(isset($rsvp_options["profile_table"]) && !empty($rsvp_options["profile_table"
 		update_option('RSVPMAKER_Options',$rsvp_options);	
 		}
 
+	if(isset($_GET["smtptest"]))
+		{
+		$mail["to"] = $rsvp_options["rsvp_to"];
+	$mail["from"] = "david@carrcommunications.com";
+	$mail["fromname"] = "RSVPMaker";
+	$mail["subject"] = "Testing SMTP email notification";
+	$mail["html"] = ' <h1>SMTP Test</h1>
+<p>I hope you will find this is a more reliable way to send email notifications related to RSVP Events.</p>
+
+<p>In normal operation, RSVPMaker sends the event organizer a notification as people RSVP. It also sends attendees a confirmation message with the rsvp_to email address as the From email address.';
+	$result = rsvpmailer($mail);
+	echo '<div class="updated" style="background-color:#fee;">'."<strong>Sending test email $result </strong></div>";
+		}
 }
 
 add_action('admin_notices', 'rsvpmaker_admin_notice');
 
+function rsvpmailer($mail) {
+	
+	global $rsvp_options;	
+	
+	require_once ABSPATH . WPINC . '/class-phpmailer.php';
+	require_once ABSPATH . WPINC . '/class-smtp.php';
+	$rsvpmail = new PHPMailer();
+	
+	$rsvpmail->IsSMTP(); // telling the class to use SMTP
+
+	if($rsvp_options["smtp"] == "gmail") {
+		$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
+		$rsvpmail->SMTPSecure = "tls";                 // sets the prefix to the servier
+		$rsvpmail->Host       = "smtp.gmail.com";      // sets GMAIL as the SMTP server
+		$rsvpmail->Port       = 587;                   // set the SMTP port for the GMAIL server
+	}
+	elseif($rsvp_options["smtp"] == "sendgrid") {
+	$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
+	$mail->Host = 'smtp.sendgrid.net';
+	$mail->Port = 587; 
+	}
+	else {
+	$rsvpmail->Host = $rsvp_options["smtp_server"]; // SMTP server
+	$rsvpmail->SMTPAuth=true;
+	if(isset($rsvp_options["smtp_prefix"]) && $rsvp_options["smtp_prefix"] )
+		$rsvpmail->SMTPSecure = $rsvp_options["smtp_prefix"];                 // sets the prefix to the servier
+	$rsvpmail->Port=$rsvp_options["smtp_port"];
+	}
+ 
+ $rsvpmail->Username=$rsvp_options["smtp_username"];
+ $rsvpmail->Password=$rsvp_options["smtp_password"];
+ $rsvpmail->AddAddress($mail["to"]);
+ if(isset($mail["cc"]) )
+ 	$rsvpmail->AddCC($mail["cc"]);
+if(is_admin() && isset($_GET["debug"]))
+	$rsvpmail->SMTPDebug = 2;
+ $rsvpmail->SetFrom($rsvp_options["smtp_useremail"], $mail["fromname"]. ' (via '.$_SERVER['SERVER_NAME'].')');
+ $rsvpmail->ClearReplyTos();
+ $rsvpmail->AddReplyTo($mail["from"], $mail["fromname"]);
+ $rsvpmail->Subject = $mail["subject"];
+if($mail["html"])
+	{
+	if($mail["text"])
+		$rsvpmail->AltBody = $mail["text"];
+	else
+		$rsvpmail->AltBody = trim(strip_tags($mail["html"]) );
+	$rsvpmail->MsgHTML($mail["html"]);
+	}
+	else
+		{
+			$rsvpmail->Body = $mail["text"];
+			$rsvpmail->WordWrap = 50;
+		}
+	
+	try {
+		$rsvpmail->Send();
+	} catch (phpmailerException $e) {
+		echo $e->errorMessage();
+	} catch (Exception $e) {
+		echo $e->getMessage(); //Boring error messages from anything else!
+	}
+	return $rsvpmail->ErrorInfo;
+}
+
+function set_rsvpmaker_order_in_admin( $wp_query ) {
+  if ( is_admin() && $_GET["rsvpsort"]=="chronological") {
+//    $wp_query->set( 'orderby', 'title' );
+//    $wp_query->set( 'order', 'ASC' );
+add_filter('posts_join', 'rsvpmaker_join' );
+add_filter('posts_where', 'rsvpmaker_where' );
+add_filter('posts_groupby', 'rsvpmaker_groupby' );
+add_filter('posts_orderby', 'rsvpmaker_orderby' );
+add_filter('posts_distinct', 'rsvpmaker_distinct' );
+  }
+}
+add_filter('pre_get_posts', 'set_rsvpmaker_order_in_admin' );
+
+function rsvpmaker_sort_message() {
+	if((basename($_SERVER['SCRIPT_NAME']) == 'edit.php') && ($_GET["post_type"]=="rsvpmaker") && !isset($_GET["page"]))
+	{
+		echo '<div style="padding: 5px; margin: 2px; ">';
+		if($_GET["rsvpsort"] == 'chronological')
+			echo '<a href="'.admin_url('edit.php?post_type=rsvpmaker&rsvpsort=newest').'">'.__('Sort By Newest','rsvpmaker').'</a>';
+		else
+			echo '<a href="'.admin_url('edit.php?post_type=rsvpmaker&rsvpsort=chronological').'">'.__('Sort By Chronological','rsvpmaker').'</a>';
+		echo '</div>';
+	}
+}
+add_action('admin_notices','rsvpmaker_sort_message');
 ?>
