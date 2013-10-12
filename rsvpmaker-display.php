@@ -126,6 +126,8 @@ function cp_show_calendar($eventarray)
 {
 $cm = $_GET["cm"];
 $cy = $_GET["cy"];
+$self = $req_uri = get_permalink($event);
+$req_uri .= (strpos($req_uri,'?') ) ? '&' : '?';
 
 if (!isset($cm) || $cm == 0)
 	$nowdate = date("Y-m-d");
@@ -152,15 +154,16 @@ $eonext = date("Y-m-d",mktime(0, 0, 1, $cm+2, 0, $cy) );
 
 // Link to previous month (but do not link to too early dates)
 $lm = mktime(0, 0, 1, $cm, 0, $cy);
-   $prev_link = '<a href="' . $self . strftime('?cm=%m&amp;cy=%Y">%B, %Y</a>', $lm);
+   $prev_link = '<a href="' . $req_uri . strftime('cm=%m&cy=%Y">%B, %Y</a>', $lm);
 
 // Link to next month (but do not link to too early dates)
 $nm = mktime(0, 0, 1, $cm+1, 1, $cy);
-   $next_link = '<a href="' . $self . strftime('?cm=%m&amp;cy=%Y">%B %Y</a>', $nm);
+   $next_link = '<a href="' . $req_uri . strftime('cm=%m&cy=%Y">%B %Y</a>', $nm);
 
 $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
-   $next_link .= sprintf('<form action="%s" method="get"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" ></form>', $self,date('m',$monthafter),date('Y',$monthafter));
 
+	$page_id = (isset($_GET["page_id"])) ? '<input type="hidden" name="page_id" value="'. (int) $_GET["page_id"].'" />' : '';
+   $jump_form = sprintf('<form id="jumpform" action="%s" method="get"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" >%s</form>', $self,date('m',$monthafter),date('Y',$monthafter),$page_id);
 
 // $Id: cal.php,v 1.47 2003/12/31 13:04:27 goba Exp $
 
@@ -223,7 +226,7 @@ for (; $days % 7; $days++) {
 $content .= "\n<tbody>\n";
 
 // End HTML table of events
-$content .= "</tr>\n</table>\n";
+$content .= "</tr>\n</table>\n".$jump_form;
 
 return $content;
 }

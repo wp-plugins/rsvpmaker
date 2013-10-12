@@ -1,6 +1,12 @@
 <?php
 
-// start customizable functions, can be overriden by adding a custom.php file to rsvpmaker directory
+// start customizable functions, can be overriden by adding a rsvpmaker-custom.php file to the plugins directory (one level up from rsvpmaker directory)
+
+if(!function_exists('my_events_menu')) {
+function my_events_menu() {
+add_meta_box( 'EventDatesBox', __('Event Options','rsvpmaker'), 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
+}
+}
 
 if(!function_exists('draw_eventdates')) {
 function draw_eventdates() {

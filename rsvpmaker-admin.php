@@ -1,9 +1,5 @@
 <?php
 
-function my_events_menu() {
-add_meta_box( 'EventDatesBox', __('Event Dates, RSVP Options','rsvpmaker'), 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
-}
-
 function save_calendar_data($postID) {
 
 global $wpdb;
@@ -1066,7 +1062,7 @@ echo "<p>Loading recurring series of dates for $week $dow. To omit a date in the
 
 <h3>Enter Recurring Events</h3>
 
-<form id="form1" name="form1" method="post" action="<?php echo admin_url("edit.php");?>">
+<form id="form1" name="form1" method="post" action="<?php echo admin_url("edit.php?post_type=rsvpmaker&page=add_dates");?>">
 <p>Headline: <input type="text" name="recur-title" size="60" value="<?php if(isset($_POST["recur-title"])) echo stripslashes($_POST["recur-title"]);?>" /></p>
 <p><textarea name="recur-body" rows="5" cols="80"><?php echo (isset($_POST["recur-body"]) && $_POST["recur-body"]) ? stripslashes($_POST["recur-body"]) : $rsvp_options["default_content"];?></textarea></p>
 <?php
