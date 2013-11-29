@@ -1963,7 +1963,7 @@ if(isset($_POST["recur_check"]) )
 		}
 }
 
-	$sql = "SELECT ".$wpdb->prefix."rsvp_dates.*, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE()";
+	$sql = "SELECT ".$wpdb->prefix."rsvp_dates.*, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
 	$wpdb->show_errors();
 	$sched_result = $wpdb->get_results($sql);
 	if($sched_result)
@@ -1998,7 +1998,7 @@ else {
 				{
 				$datetext =  "$wtext $dayarray[$dow] ".date("F Y",$firstday);
 				$projected[$i] = strtotime($datetext);
-				printf('<p>%s %s</p>',$datetext,date('Y-m-d',$projected[$i]));
+				//printf('<p>%s %s</p>',$datetext,date('Y-m-d',$projected[$i]));
 				}
 		}
 	}
