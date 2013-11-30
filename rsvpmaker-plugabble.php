@@ -23,6 +23,14 @@ if(isset($custom_fields["_sked"][0]) || isset($_GET["new_template"]) )
 		GetRSVPAdminForm($post->ID);
 		return;
 	}
+
+if(isset($custom_fields["_meet_recur"][0]))
+	{
+		$t = (int) $custom_fields["_meet_recur"][0];
+
+printf('<p><a href="%s">%s</a> | <a href="%s">%s</a></p>',admin_url('post.php?action=edit&post='.$t),__('Edit Template','rsvpmaker'),admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$t),__('See Related Events','rsvpmaker'));
+	}
+	
 if(isset($post->ID) )
 	$results = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."rsvp_dates WHERE postID=".$post->ID.' ORDER BY datetime',ARRAY_A);
 else
@@ -91,9 +99,8 @@ $template["minutes"] = '00';
 }
 
 if(isset($post->ID))
-	printf('<p><a href="%s">%s</a></p>',admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$post->ID),__('View/add events based on this template','rsvpmaker'));
+	printf('<p><a href="%s">%s</a></p>',admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$post->ID),__('View/add/update events based on this template','rsvpmaker'));
 ?>
-<p><input type="checkbox" name="update_upcoming" value="1" checked="checked" /> <?php _e('Update upcoming events with this data','rsvpmaker'); ?></p>
 <p><em><strong><?php _e('Event Template','rsvpmaker'); ?>:</strong> <?php _e('This form is for entering generic / boilerplate information, not specific details for an event on a specific date. Groups that meet on a monthly basis can post their standard meeting schedule, location, and contact details to make entering the individual events easier. You can also post multiple future meetings using the generic template and update those event listings as needed when the event date grows closer.','rsvpmaker'); ?></em></p>
 <?php
 global $wpdb;
@@ -194,12 +201,6 @@ if(!isset($_POST["sked"]))
 		{
 		$postID = $parent_id;
 		}
-
-	if($_POST["update_upcoming"])
-	{
-	$sql = $wpdb->prepare("UPDATE $wpdb->posts p JOIN $wpdb->postmeta m ON p.ID = m.post_id SET p.post_content = %s, p.post_title = %s WHERE m.meta_key='_meet_recur' and m.meta_value='%d' ",$post->post_content,$post->post_title, $postID);
-	$wpdb->query($sql);
-	}
 
 	update_post_meta($postID, '_sked', $_POST["sked"]);
 
@@ -1879,7 +1880,8 @@ if(isset($_GET["t"]))
 $dayarray = Array(__("Sunday",'rsvpmaker'),__("Monday",'rsvpmaker'),__("Tuesday",'rsvpmaker'),__("Wednesday",'rsvpmaker'),__("Thursday",'rsvpmaker'),__("Friday",'rsvpmaker'),__("Saturday",'rsvpmaker'));
 $weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
 global $wpdb;
-$sql ="SELECT post_title, post_id, meta_value FROM `$wpdb->posts` JOIN `$wpdb->postmeta` ON `$wpdb->posts`.ID = `$wpdb->postmeta`.post_id WHERE `$wpdb->postmeta`.meta_key='_sked' order by `post_title`";
+$sql ="SELECT post_title, post_id, meta_value,post_status FROM `$wpdb->posts` JOIN `$wpdb->postmeta` ON `$wpdb->posts`.ID = `$wpdb->postmeta`.post_id WHERE `$wpdb->postmeta`.meta_key='_sked' AND 
+(post_status='publish' OR post_status='draft') order by `post_title`";
 $results = $wpdb->get_results($sql);
 if($results)
 {
@@ -1923,7 +1925,7 @@ $cm = date("m");
 $cd = date("j");
 
 $schedule = ($week == 0) ? __('Schedule varies','rsvpmaker') : $weekarray[$week].' '.$dayarray[$dow];
-printf('<p>%s:</p><h2>%s</h2><h3>%s</h3>%s',__('Selected template','rsvpmaker'),$post->post_title,$schedule,wpautop($post->post_content));
+printf('<p>%s:</p><h2>%s</h2><h3>%s</h3>%s<blockquote><a href="%s">%s</a></blockquote>',__('Selected template','rsvpmaker'),$post->post_title,$schedule,wpautop($post->post_content),admin_url('post.php?action=edit&post='.$t),__('Edit Template','rsvpmaker'));
 
 if(isset($_POST["recur_check"]) )
 {
@@ -1963,7 +1965,18 @@ if(isset($_POST["recur_check"]) )
 		}
 }
 
-	$sql = "SELECT ".$wpdb->prefix."rsvp_dates.*, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
+if(isset($_POST["update_from_template"]))
+	{
+		foreach($_POST["update_from_template"] as $target_id)
+			{
+				$sql = $wpdb->prepare("UPDATE $wpdb->posts SET post_title=%s, post_content=%s WHERE ID=%d",$post->post_title,$post->post_content,$target_id);
+				$wpdb->query($sql);
+				echo '<div class="updated">Updated: event #'.$target_id.' <a href="post.php?action=edit&post='.$target_id.'">Edit</a> / <a href="'.site_url().'/?p='.$postID.'">View</a></div>';	
+			}
+	}
+
+
+	$sql = "SELECT $wpdb->posts.post_title, ".$wpdb->prefix."rsvp_dates.*, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
 	$wpdb->show_errors();
 	$sched_result = $wpdb->get_results($sql);
 	if($sched_result)
@@ -1973,15 +1986,19 @@ if(isset($_POST["recur_check"]) )
 		$cy = date("Y",$thistime); // advance starting time
 		$cm = date("m",$thistime);
 		$cd = date("j",$thistime);
-		$editlist .= sprintf('<div>%s <a href="%s?post=%d&action=edit">(Edit)</a></div>',date('F d, Y',$thistime),admin_url("post.php"),$sched->postID);
+		$editlist .= sprintf('<tr><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td><a href="%s?post=%d&action=edit">(Edit)</a></td><td>%s</td><td>%s</td></tr>',$sched->postID,admin_url("post.php"),$sched->postID,date('F d, Y',$thistime),$sched->post_title);
 		}
 
 
 if($week == 6)
 	{
+	$stop = 26;
 	$projected[0] = strtotime($dayarray[$dow]);
-	for ($i = 1; $i <= 20; $i++)
-		$projected[$i] = $projected[$i - 1] + 604800; // add numeric value for 1 week
+	for ($i = 1; $i <= $stop; $i++)
+		{
+		$ts = $projected[$i - 1] + 604800;
+		$projected[$i] = $ts; // add numeric value for 1 week
+		}
 	}
 else {
 	//monthly
@@ -2084,11 +2101,26 @@ if(!isset($add_one))
 	$add_one = str_replace('type="checkbox"','type="hidden"',$add_date_checkbox);
 } // end for loop
 
-
-if($editlist)
-	echo "<strong>Already Scheduled:</strong><br /><br />".$editlist."<br />";
+$checkallscript = "<script>
+jQuery(function () {
+    jQuery('.checkall').on('click', function () {
+        jQuery(this).closest('fieldset').find(':checkbox').prop('checked', this.checked);
+    });
+});
+</script>
+";
 
 $action = admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$t);
+
+if($editlist)
+	echo '<strong>'.__('Already Scheduled','rsvpmaker').':</strong><br /><br /><form method="post" action="'.$action.'">
+<fieldset>
+<div><input type="checkbox" class="checkall"> Check all</div>
+<table>
+<tr><th></th><th>Edit</th><th>Date</th><th>Title</th></tr>
+'.$editlist.'</table>
+</fieldset>
+<input type="submit" value="'.__('Update Checked','rsvpmaker').'" /></form>'.'<p>'.__('Update function copies title and content of current template, replacing the existing content of checked posts.','rsvpmaker').'</p>';
 
 printf('<div class="group_add_date"><br />
 <form method="post" action="%s">
@@ -2099,11 +2131,15 @@ printf('<div class="group_add_date"><br />
 </form>
 <form method="post" action="%s">
 <br /><strong>Projected Dates:</strong>
+<fieldset>
+<div><input type="checkbox" class="checkall"> Check all</div>
 %s
+</fieldset>
 <br /><input type="submit" value="Add From Template" />
 <input type="hidden" name="template" value="%s" />
 </form>
-</div><br />',$action,$add_one,$t,$action,$add_date_checkbox,$t);
+</div><br />
+%s',$action,$add_one,$t,$action,$add_date_checkbox,$t,$checkallscript);
 
 }
 
