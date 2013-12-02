@@ -92,7 +92,7 @@ foreach($results as $row)
 	$dateline[$row["postID"]] .= date($date_format,$t);
 	if($row["current"] && !$eventlist[$row["postID"]])
 		$eventlist[$row["postID"]] = $row;
-	$cal[date('Y-m-d',$t)] .= '<div><a class="calendar_item" href="'.get_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
+	$cal[date('Y-m-d',$t)] .= '<div><a class="calendar_item" href="'.get_post_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
 	}
 
 if($atts["calendar"] || $atts["format"] == 'calendar')
@@ -106,7 +106,7 @@ foreach($eventlist as $event)
 	if($atts["permalinkhack"])
 		$permalink = site_url() ."?p=".$event["postID"];
 	else
-		$permalink = get_permalink($event["postID"]);
+		$permalink = get_post_permalink($event["postID"]);
 	$listings .= sprintf('<li><a href="%s">%s</a> %s</li>'."\n",$permalink,$event["post_title"],$dateline[$event["postID"]]);
 	}	
 
@@ -126,7 +126,7 @@ function cp_show_calendar($eventarray)
 {
 $cm = $_GET["cm"];
 $cy = $_GET["cy"];
-$self = $req_uri = get_permalink($event);
+$self = $req_uri = get_post_permalink($event);
 $req_uri .= (strpos($req_uri,'?') ) ? '&' : '?';
 
 if (!isset($cm) || $cm == 0)
@@ -272,7 +272,7 @@ ORDER BY datetime LIMIT 0, $limit";
 				else
 					{
 					$ev[$row["postID"]] = date($dateformat,strtotime($row["datetime"]) );
-					$plink[$row["postID"]] = get_permalink($row["postID"]);
+					$plink[$row["postID"]] = get_post_permalink($row["postID"]);
 					$evtitle[$row["postID"]] = $row["post_title"];  
 					}
 				}

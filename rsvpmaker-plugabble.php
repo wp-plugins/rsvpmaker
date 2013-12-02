@@ -446,7 +446,7 @@ $custom_fields = get_post_custom($post->ID);
 $rsvp_to = $custom_fields["_rsvp_to"][0];
 
 //if permalinks are not turned on, we need to append to query string not add our own ?
-$req_uri = get_permalink($event);
+$req_uri = get_post_permalink($event);
 $req_uri .= (strpos($req_uri,'?') ) ? '&' : '?';
 $req_uri .= 'e='.$rsvp["email"];
 
@@ -1153,7 +1153,7 @@ elseif(!isset($rsvp_count) || (isset($rsvp_count) && $rsvp_count)  )
 	$content .= '<p class="signed_up">'.$total.' '. __('signed up so far.','rsvpmaker').'</p>';
 
 $now = current_time('timestamp');
-$rsvplink = ($login_required) ? wp_login_url( get_permalink( $post->ID ) ) : get_permalink( $post->ID );
+$rsvplink = ($login_required) ? wp_login_url( get_post_permalink( $post->ID ) ) : get_post_permalink( $post->ID );
 if(strpos($rsvplink,'?') )
 	$rsvp_options["rsvplink"] = str_replace('?','&',$rsvp_options["rsvplink"]);
 	
@@ -1768,7 +1768,7 @@ else
 	{
 return '
 <p id="profiledetails">'. __('Profile details on file. To update profile, 
-or RSVP for someone else','rsvpmaker').' <a href="'.get_permalink().'">'. __('fetch a blank 
+or RSVP for someone else','rsvpmaker').' <a href="'.get_post_permalink().'">'. __('fetch a blank 
 form','rsvpmaker').'</a></p>
 <input type="hidden" name="onfile" value="1" />';
 	}
@@ -1986,7 +1986,7 @@ if(isset($_POST["update_from_template"]))
 		$cy = date("Y",$thistime); // advance starting time
 		$cm = date("m",$thistime);
 		$cd = date("j",$thistime);
-		$editlist .= sprintf('<tr><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td><a href="%s?post=%d&action=edit">(Edit)</a></td><td>%s</td><td>%s</td></tr>',$sched->postID,admin_url("post.php"),$sched->postID,date('F d, Y',$thistime),$sched->post_title);
+		$editlist .= sprintf('<tr><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td><a href="%s?post=%d&action=edit">Edit</a></td><td>%s</td><td><a href="%s">%s</a></td></tr>',$sched->postID,admin_url("post.php"),$sched->postID,date('F d, Y',$thistime),get_post_permalink($sched->postID),$sched->post_title);
 		}
 
 
@@ -2115,10 +2115,13 @@ $action = admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t
 if($editlist)
 	echo '<strong>'.__('Already Scheduled','rsvpmaker').':</strong><br /><br /><form method="post" action="'.$action.'">
 <fieldset>
-<div><input type="checkbox" class="checkall"> Check all</div>
-<table>
-<tr><th></th><th>Edit</th><th>Date</th><th>Title</th></tr>
-'.$editlist.'</table>
+<table  class="wp-list-table widefat fixed posts" cellspacing="0">
+<thead>
+<tr><th><input type="checkbox" class="checkall"> Check all</th><th>Edit</th><th>Date</th><th>Title</th></tr>
+</thead>
+<tbody>
+'.$editlist.'
+</tbody></table>
 </fieldset>
 <input type="submit" value="'.__('Update Checked','rsvpmaker').'" /></form>'.'<p>'.__('Update function copies title and content of current template, replacing the existing content of checked posts.','rsvpmaker').'</p>';
 
@@ -2142,5 +2145,40 @@ printf('<div class="group_add_date"><br />
 %s',$action,$add_one,$t,$action,$add_date_checkbox,$t,$checkallscript);
 
 }
+
+function rsvpmaker_updated_messages($messages) {
+global $post, $post_ID;
+
+if($post->post_type != 'rsvpmaker') return; // only for RSVPMaker
+
+$singular = __('Event','rsvpmaker');
+$link = sprintf(' <a href="%s">%s %s</a>',esc_url( get_post_permalink($post_ID)),__('View','rsvpmaker'), $singular );
+
+$sked = get_post_meta($post_ID,'_sked',true);
+if(!empty($sked) )
+	{
+		$singular = __('Event Template','rsvpmaker');
+		$link = sprintf(' <a href="%s">%s</a>',admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$post_ID),__('View/add/update events based on this template','rsvpmaker'));
+	}
+
+$messages['rsvpmaker'] = array(
+0 => '', // Unused. Messages start at index 1.
+1 => $singular.' '.__('updated','rsvpmaker').$link,
+2 => __('Custom field updated.'),
+3 => __('Custom field deleted.'),
+4 => $singular.' '.__('updated','rsvpmaker').$link,
+5 => isset($_GET['revision']) ? sprintf( __($singular.' restored to revision from %s'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+6 => $singular.' '.__('published','rsvpmaker').$link,
+7 => __('Page saved.'),
+8 => sprintf( __($singular.' submitted. <a target="_blank" href="%s">Preview '.strtolower($singular).'</a>'), esc_url( add_query_arg( 'preview', 'true', get_post_permalink($post_ID) ) ) ),
+9 => sprintf( __($singular.' scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview '.strtolower($singular).'</a>'), date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_post_permalink($post_ID) ) ),
+10 => sprintf( __($singular.' draft updated. <a target="_blank" href="%s">Preview '.strtolower($singular).'</a>'), esc_url( add_query_arg( 'preview', 'true', get_post_permalink($post_ID) ) ) ),
+);
+
+
+return $messages;
+}
+
+add_filter('post_updated_messages', 'rsvpmaker_updated_messages' );
 
 ?>

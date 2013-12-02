@@ -1430,7 +1430,7 @@ elseif(!isset($rsvp_options["eventpage"]) && !isset($rsvp_options["noeventpageok
 	$sql = "SELECT ID from $wpdb->posts WHERE post_status='publish' AND post_content LIKE '%[rsvpmaker_upcoming%' ";
 	if($id =$wpdb->get_var($sql))
 		{
-		$rsvp_options["eventpage"] = get_permalink($id);
+		$rsvp_options["eventpage"] = get_post_permalink($id);
 		update_option('RSVPMAKER_Options',$rsvp_options);
 		}
 	else
