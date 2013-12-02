@@ -1802,6 +1802,27 @@ elseif(isset($atts["selectfield"])) {
 		}
 		$output .= '</select>';
 	}
+elseif(isset($atts["checkbox"]))
+	{
+		$field = $atts["checkbox"];
+		$value = $atts["value"];
+		$output = '<input type="checkbox" name="profile['.$field.']" id="'.$field.'" value="'.$value.'" />';
+	}
+elseif(isset($atts["radio"]))
+	{
+	$field = $atts["radio"];
+	$sep = (isset($atts["sep"])) ? $atts["sep"] : '<br />';
+	if(isset($atts["options"]))
+		{
+			$o = explode(',',$atts["options"]);
+			foreach($o as $i)
+				{
+					$i = trim($i);
+					$radio[] .= '<input type="radio" name="profile['.$field.']" id="'.$field.$i.'" class="'.$field.'"  value="'.$i.'" /> '.$i;
+				}
+		}
+		$output = implode($sep,$radio);
+	}
 
 if(isset($atts["required"]) || isset($atts["require"]))
 	{

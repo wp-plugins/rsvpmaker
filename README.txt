@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.7.1
-Stable tag: 2.8.3
+Stable tag: 2.8.4
 
 Event scheduling and RSVP tracking.
 
@@ -77,6 +77,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.8.4 =
+
+Additional form customization shortcodes for checkbox and radio buttons. See [form customization](http://rsvpmaker.com/2012/07/rsvpmaker2-5/)
 
 = 2.8.3 =
 
