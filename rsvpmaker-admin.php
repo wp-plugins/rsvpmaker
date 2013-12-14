@@ -3,7 +3,6 @@
 function date_slug($data) {
 	if($data["post_status"] != 'publish')
 		return $data;
-    global $post_ID;
 
 	if(isset($_POST["event_month"][1]) )
 		{
@@ -13,7 +12,7 @@ function date_slug($data) {
 		$date = $y.'-'.$m.'-'.$d;
 	
 		if (empty($data['post_name']) || !strpos($data['post_name'],$date) ) {
-			$data['post_name'] = sanitize_title($data['post_title'], $post_ID);
+			$data['post_name'] = sanitize_title($data['post_title']);
 			$data['post_name'] .= '-' .$date;
 			}
 		}
@@ -419,6 +418,7 @@ add_action('save_post','save_calendar_data');
                   $newoptions["rsvp_count"] = (isset($_POST["option"]["rsvp_count"]) && $_POST["option"]["rsvp_count"]) ? 1 : 0;
                   $newoptions["show_attendees"] = (isset($_POST["option"]["show_attendees"]) && $_POST["option"]["show_attendees"]) ? 1 : 0;
                   $newoptions["missing_members"] = (isset($_POST["option"]["missing_members"]) && $_POST["option"]["missing_members"]) ? 1 : 0;
+                  $newoptions["additional_editors"] = (isset($_POST["option"]["additional_editors"]) && $_POST["option"]["additional_editors"]) ? 1 : 0;
 				  $newoptions["dbversion"] = $options["dbversion"]; // gets set by db upgrade routine
 				  $newoptions["posttypecheck"] = $options["posttypecheck"];
 				if(isset($options["noeventpageok"]) ) $newoptions["noeventpageok"] = $options["noeventpageok"];
@@ -469,6 +469,7 @@ if(isset($_GET["test"]))
 
 if(isset($_GET["reminder_reset"]))
 	rsvp_reminder_reset($_GET["reminder_reset"]);
+
 ?>
 
 <div class="wrap" style="max-width:950px !important;">
@@ -510,32 +511,29 @@ if(file_exists(WP_PLUGIN_DIR."/rsvpmaker-custom.php") )
 <?php echo $minopt;?>
 </select>
 <br />
+<strong><?php _e('RSVP TO','rsvpmaker'); ?>:</strong><br />
+<textarea rows="2" cols="80" name="option[rsvp_to]" id="rsvp_to"><?php if(isset($options["rsvp_to"])) echo $options["rsvp_to"];?></textarea>
+<br />
+<input type="checkbox" name="option[rsvp_on]" value="1" <?php if(isset($options["rsvp_on"]) && $options["rsvp_on"]) echo ' checked="checked" ';?> /> <strong><?php _e('RSVP On','rsvpmaker'); ?></strong>
+<?php _e('check to turn on by default','rsvpmaker'); ?>	<br />    
 
-					
-					<h3><?php _e('RSVP On','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[rsvp_on]" value="1" <?php if(isset($options["rsvp_on"]) && $options["rsvp_on"]) echo ' checked="checked" ';?> /> <?php _e('check to turn on by default','rsvpmaker'); ?>
+<input type="checkbox" name="option[rsvp_captcha]" value="1" <?php if(isset($options["rsvp_captcha"]) && $options["rsvp_captcha"]) echo ' checked="checked" ';?> /> <strong><?php _e('RSVP CAPTCHA On','rsvpmaker'); ?></strong> <?php _e('check to turn on by default','rsvpmaker'); ?><br />
+
+<input type="checkbox" name="option[login_required]" value="1" <?php if(isset($options["login_required"]) && $options["login_required"]) echo ' checked="checked" ';?> /> <strong><?php _e('Login Required to RSVP','rsvpmaker'); ?></strong> <?php _e('check to turn on by default','rsvpmaker'); ?>
+<br />
+
+  <input type="checkbox" name="option[show_attendees]" value="1" <?php if(isset($options["show_attendees"]) && $options["show_attendees"]) echo ' checked="checked" ';?> /> <strong><?php _e('RSVPs Attendees List Public','rsvpmaker'); ?></strong> <?php _e('check to turn on by default','rsvpmaker'); ?>
 	<br />
-					<h3><?php _e('Login Required to RSVP','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[login_required]" value="1" <?php if(isset($options["login_required"]) && $options["login_required"]) echo ' checked="checked" ';?> /> <?php _e('check to turn on by default','rsvpmaker'); ?>
+
+  <input type="checkbox" name="option[rsvp_count]" value="1" <?php if(isset($options["rsvp_count"]) && $options["rsvp_count"]) echo ' checked="checked" ';?> /> <strong><?php _e('Show RSVP Count','rsvpmaker'); ?></strong> <?php _e('check to turn on by default','rsvpmaker'); ?>
 	<br />
-					<h3><?php _e('RSVP TO','rsvpmaker'); ?>:</h3> 
-					  <textarea rows="2" cols="80" name="option[rsvp_to]" id="rsvp_to"><?php if(isset($options["rsvp_to"])) echo $options["rsvp_to"];?></textarea>
-					<br />
-					<h3><?php _e('RSVPs Attendees List Public','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[show_attendees]" value="1" <?php if(isset($options["show_attendees"]) && $options["show_attendees"]) echo ' checked="checked" ';?> /> <?php _e('check to turn on by default','rsvpmaker'); ?>
+
+  <input type="checkbox" name="option[rsvp_yesno]" value="1" <?php if(isset($options["rsvp_yesno"]) && $options["rsvp_yesno"]) echo ' checked="checked" ';?> /> <strong><?php _e('Show RSVP Yes/No Radio Buttons','rsvpmaker'); ?></strong> <?php _e('check to turn on by default','rsvpmaker'); ?>
 	<br />
-					<h3><?php _e('Show RSVP Count','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[rsvp_count]" value="1" <?php if(isset($options["rsvp_count"]) && $options["rsvp_count"]) echo ' checked="checked" ';?> /> <?php _e('check to turn on by default','rsvpmaker'); ?>
+
+  <input type="checkbox" name="option[missing_members]" value="1" <?php if(isset($options["missing_members"]) && $options["missing_members"]) echo ' checked="checked" ';?> /> <strong><?php _e('RSVP Form Shows Members Not Responding','rsvpmaker'); ?></strong><br /><em><?php _e('if members log in to RSVP, this shows user accounts NOT associated with an RSVP (tracking WordPress user IDs)','rsvpmaker'); ?>.</em>
 	<br />
-					<h3><?php _e('Show RSVP Yes/No Radio Buttons','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[rsvp_yesno]" value="1" <?php if(isset($options["rsvp_yesno"]) && $options["rsvp_yesno"]) echo ' checked="checked" ';?> /> <?php _e('check to turn on by default','rsvpmaker'); ?>
-	<br />
-					<h3><?php _e('RSVP Form Shows Members Not Responding','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[missing_members]" value="1" <?php if(isset($options["missing_members"]) && $options["missing_members"]) echo ' checked="checked" ';?> /> <?php _e('if members log in to RSVP, this shows user accounts NOT associated with an RSVP (tracking WordPress user IDs)','rsvpmaker'); ?>.
-	<br />
-					<h3><?php _e('RSVP CAPTCHA On','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[rsvp_captcha]" value="1" <?php if(isset($options["rsvp_captcha"]) && $options["rsvp_captcha"]) echo ' checked="checked" ';?> /> <?php _e('check to turn on by default','rsvpmaker'); ?>
-	<br />
+
 					<h3><?php _e('Instructions for Form','rsvpmaker'); ?>:</h3>
   <textarea name="option[rsvp_instructions]"  rows="5" cols="80" id="rsvp_instructions"><?php if(isset($options["rsvp_instructions"]) ) echo $options["rsvp_instructions"];?></textarea>
 	<br />
@@ -619,12 +617,7 @@ echo "<br /><br />".__('On your system, the base web directory is','rsvpmaker').
 
     
     <br />
-<h3><?php _e('Tweak Permalinks','rsvpmaker'); ?>Tweak Permalinks:</h3>
-  <input type="checkbox" name="option[flush]" value="1" <?php if(isset($options["flush"]) && $options["flush"]) echo ' checked="checked" ';?> /> <?php _e('Check here if you are getting &quot;page not found&quot; errors for event content (should not be necessary for most users).','rsvpmaker'); ?> 
-	<br />
-<h3><?php _e('Debug','rsvpmaker'); ?>:</h3>
-  <input type="checkbox" name="option[debug]" value="1" <?php if(isset($options["debug"]) && $options["debug"]) echo ' checked="checked" ';?> /> Check here to display debugging variables. 
-	<br />
+
 <h3><?php _e('Menu Security','rsvpmaker'); ?>:</h3>
   <select name="option[menu_security]" id="menu_security">
   <option value="manage_options" <?php if(isset($options["menu_security"]) && ($options["menu_security"] == 'manage_options')) echo ' selected="selected" ';?> >Administrator</option>
@@ -671,7 +664,17 @@ if($options["smtp"])
 <a href="<?php echo admin_url('?smtptest=1'); ?>"><?php _e('Send SMTP Test to RSVP To address','rsvpmaker'); ?></a>
 <?php
 	}
+
 ?>
+<h3><?php _e('Event Templates','rsvpmaker'); ?></h3>
+  <input type="checkbox" name="option[additional_editors]" value="1" <?php if(isset($options["additional_editors"]) && $options["additional_editors"]) echo ' checked="checked" ';?> /> <strong><?php _e('Additional Editors','rsvpmaker'); ?></strong> <em><?php _e('Allow users to share editing rights for event templates and related events.','rsvpmaker'); ?></em> 
+	<br />
+
+<h3><?php _e('Troubleshooting','rsvpmaker'); ?></h3>
+  <input type="checkbox" name="option[flush]" value="1" <?php if(isset($options["flush"]) && $options["flush"]) echo ' checked="checked" ';?> /> <strong><?php _e('Tweak Permalinks','rsvpmaker'); ?></strong> <?php _e('Check here if you are getting &quot;page not found&quot; errors for event content (should not be necessary for most users).','rsvpmaker'); ?> 
+	<br />
+  <input type="checkbox" name="option[debug]" value="1" <?php if(isset($options["debug"]) && $options["debug"]) echo ' checked="checked" ';?> /> <strong><?php _e('Debug','rsvpmaker'); ?>:</strong>
+	<br />
 
 					<div class="submit"><input type="submit" name="Submit" value="<?php _e('Update','rsvpmaker'); ?>" /></div>
 			</form>

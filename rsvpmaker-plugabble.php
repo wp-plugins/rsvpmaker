@@ -4,7 +4,10 @@
 
 if(!function_exists('my_events_menu')) {
 function my_events_menu() {
+global $rsvp_options;
 add_meta_box( 'EventDatesBox', __('Event Options','rsvpmaker'), 'draw_eventdates', 'rsvpmaker', 'normal', 'high' );
+if(isset($rsvp_options["additional_editors"]) && $rsvp_options["additional_editors"])
+	add_meta_box( 'ExtraEditorsBox', __('Additional Editors','rsvpmaker'), 'additional_editors', 'rsvpmaker', 'normal', 'high' );
 }
 }
 
@@ -204,20 +207,6 @@ if(!isset($_POST["sked"]))
 
 	update_post_meta($postID, '_sked', $_POST["sked"]);
 
-/*
-if(isset($_POST["rsvpmaker_multi"]))
-	{
-		//print_r($_POST["rsvpmaker_multi"]);
-		foreach($_POST["rsvpmaker_multi"] as $cindex => $ym)
-			{
-			$datetime = $ym . '-' . $_POST["rsvpmaker_multi_day"][$cindex].' '.$_POST["rsvpmaker_multi_hour"][$cindex].':'.$_POST["rsvpmaker_multi_minutes"][$cindex].':00';
-			$sql = "INSERT INTO ".$wpdb->prefix."rsvp_dates SET datetime='$datetime', postID=". $post->ID;
-			$wpdb->query($sql);
-			}
-	header("Location: ".admin_url("post.php?post=".$post->ID."&action=edit&multidates=1") );
-	exit();
-	}
-*/
 }
 
 if(!function_exists('rsvpmaker_roles') )
@@ -228,6 +217,10 @@ global $wp_roles;
 
 if(!isset($wp_roles) )
 	$wp_roles = new WP_Roles();
+// if roles persist from previous session, return
+if($wp_roles->roles["administrator"]["capabilities"]["edit_rsvpmakers"])
+	return;
+
 if(isset($wp_roles->roles))
 foreach ($wp_roles->roles as $role => $rolearray)
 	{
@@ -237,7 +230,6 @@ foreach ($wp_roles->roles as $role => $rolearray)
 				{
 					$fbcap = str_replace('post','rsvpmaker',$cap);
 					$wp_roles->add_cap( $role, $fbcap );
-					//echo "$role $fbcap<br />";
 				}
 		}
 	}
@@ -250,8 +242,6 @@ if(! function_exists('GetRSVPAdminForm') )
 function GetRSVPAdminForm($postID)
 {
 global $custom_fields;
-
-//print_r($custom_fields);
 
 if(isset($custom_fields["_rsvp_on"][0]) ) $rsvp_on = $custom_fields["_rsvp_on"][0];
 if(isset($custom_fields["_rsvp_login_required"][0]) ) $login_required = $custom_fields["_rsvp_login_required"][0];
@@ -1128,9 +1118,14 @@ foreach($results as $row)
 elseif(isset($custom_fields["_sked"][0]))
 	{
 		$sked = unserialize($custom_fields["_sked"][0]);
-		$dateblock = "Event template: ";
-		foreach($sked as $name => $value)
-			$dateblock .= ' <br />'.$name .' '.$value;
+		$dayarray = Array(__("Sunday",'rsvpmaker'),__("Monday",'rsvpmaker'),__("Tuesday",'rsvpmaker'),__("Wednesday",'rsvpmaker'),__("Thursday",'rsvpmaker'),__("Friday",'rsvpmaker'),__("Saturday",'rsvpmaker'));
+		$weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
+		if((int)$sked["week"] == 0)
+			$s = 'Schedule Varies';
+		else
+			$s = $weekarray[(int) $sked["week"]].' '.$dayarray[(int) $sked["dayofweek"]];	
+		$t = mktime($sked["hour"],$sked["minutes"]);
+		$dateblock = $s.' '.date($rsvp_options["time_format"],$t);
 	}
 
 $content = '<div class="dateblock">'.$dateblock."\n</div>\n".$rsvpconfirm.$content;
@@ -1782,6 +1777,10 @@ if(!function_exists('rsvpfield') )
 function rsvpfield($atts) {
 global $profile;
 global $rsvp_required_field;
+//synonyms
+if( isset($atts["text"]) && !isset($atts["textfield"])  ) $atts["textfield"] = $atts["text"];
+if( isset($atts["select"]) && !isset($atts["selectfield"])  ) $atts["selectfield"] = $atts["select"];
+
 if(isset($atts["textfield"])) {
 	$field = $atts["textfield"];
 	$size = ( isset($atts["size"]) ) ? ' size="'.$atts["size"].'" ' : '';
@@ -1790,35 +1789,46 @@ if(isset($atts["textfield"])) {
 	}
 elseif(isset($atts["selectfield"])) {
 	$field = $atts["selectfield"];
-	$output = '<select name="profile['.$field.']" id="'.$field.'" >';
+	$selected = (isset($atts["selected"])) ? trim($atts["selected"]) : '';
+	if( isset($profile[$field]) ) 
+		$selected = $profile[$field];
+	$output = '<select name="profile['.$field.']" id="'.$field.'" >'."\n";
 	if(isset($atts["options"]))
 		{
 			$o = explode(',',$atts["options"]);
 			foreach($o as $i)
 				{
 					$i = trim($i);
-					$output .= '<option value="'.$i.'">'.$i.'</option>';
+					$s = ($selected == $i) ? ' selected="selected" ' : '';
+					$output .= '<option value="'.$i.'" '.$s.'>'.$i.'</option>'."\n";
 				}
 		}
-		$output .= '</select>';
+		$output .= '</select>'."\n";
 	}
 elseif(isset($atts["checkbox"]))
 	{
 		$field = $atts["checkbox"];
 		$value = $atts["value"];
-		$output = '<input type="checkbox" name="profile['.$field.']" id="'.$field.'" value="'.$value.'" />';
+		$ischecked = (isset($atts["checked"])) ? ' checked="checked" ' : '';
+		if( isset($profile[$field]) ) 
+			$ischecked = ' checked="checked" ';
+		$output = '<input type="checkbox" name="profile['.$field.']" id="'.$field.'" value="'.$value.'" '.$ischecked.'/>';
 	}
 elseif(isset($atts["radio"]))
 	{
 	$field = $atts["radio"];
 	$sep = (isset($atts["sep"])) ? $atts["sep"] : '<br />';
+	$checked = (isset($atts["checked"])) ? trim($atts["checked"]) : '';
+	if( isset($profile[$field]) ) 
+		$checked = $profile[$field];
 	if(isset($atts["options"]))
 		{
 			$o = explode(',',$atts["options"]);
 			foreach($o as $i)
 				{
 					$i = trim($i);
-					$radio[] .= '<input type="radio" name="profile['.$field.']" id="'.$field.$i.'" class="'.$field.'"  value="'.$i.'" /> '.$i;
+					$ischecked = ($checked == $i) ? ' checked="checked" ' : '';					
+					$radio[] .= '<input type="radio" name="profile['.$field.']" id="'.$field.$i.'" class="'.$field.'"  value="'.$i.'"  '.$ischecked.'/> '.$i."\n";
 				}
 		}
 		$output = implode($sep,$radio);
@@ -1828,6 +1838,21 @@ if(isset($atts["required"]) || isset($atts["require"]))
 	{
 		$output = '<span class="required">'.$output.'</span>';
 		$rsvp_required_field[] = $field;
+	}
+
+if(isset($atts["demo"]))
+	{
+		$demo = "<div>Shortcode:</div>\n<p><strong>[</strong>rsvpfield";
+		foreach($atts as $name => $value)
+			{
+			if($name == "demo")
+				continue;
+			$demo .= ' '.$name.'="'.$value.'"';
+			}
+		$demo .= "<strong>]</strong></p>\n";
+		$demo .= "<div>HTML:</div>\n<pre>".htmlentities($output)."</pre>\n";
+		$demo .= "<div>Display:</div>\n<p>";
+		$output = $demo . $output."</p>";
 	}
 
 return $output;
@@ -1882,6 +1907,8 @@ return $title;
 
 add_filter('wp_title','date_title', 1, 3);
 
+if(!function_exists('rsvpmaker_template_list'))
+{
 function rsvpmaker_template_list () {
 
 ?>
@@ -1900,40 +1927,77 @@ if(isset($_GET["t"]))
 
 $dayarray = Array(__("Sunday",'rsvpmaker'),__("Monday",'rsvpmaker'),__("Tuesday",'rsvpmaker'),__("Wednesday",'rsvpmaker'),__("Thursday",'rsvpmaker'),__("Friday",'rsvpmaker'),__("Saturday",'rsvpmaker'));
 $weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
+
+global $post;
+global $wp_query;
 global $wpdb;
-$sql ="SELECT post_title, post_id, meta_value,post_status FROM `$wpdb->posts` JOIN `$wpdb->postmeta` ON `$wpdb->posts`.ID = `$wpdb->postmeta`.post_id WHERE `$wpdb->postmeta`.meta_key='_sked' AND 
-(post_status='publish' OR post_status='draft') order by `post_title`";
-$results = $wpdb->get_results($sql);
-if($results)
-{
-printf('<table  class="wp-list-table widefat fixed posts" cellspacing="0"><thead><tr><th>%s</th><th>%s</th><th>%s</th></tr></thead><tbody>',__('Title','rsvpmaker'),__('Schedule','rsvpmaker'),__('Projected Dates','rsvpmaker'));
-foreach($results as $row)
-	{
-		$template = unserialize($row->meta_value);
+
+$backup = $wp_query;
+add_filter('posts_fields', 'rsvpmaker_template_fields' );
+add_filter('posts_join', 'rsvpmaker_template_join' );
+add_filter('posts_where', 'rsvpmaker_template_where' );
+add_filter('posts_orderby', 'rsvpmaker_template_orderby' );
+
+$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+
+$querystring = "post_type=rsvpmaker&post_status=publish&paged=$paged&posts_per_page=50";
+
+$wpdb->show_errors();
+
+$wp_query = new WP_Query($querystring);
+
+// clean up so this doesn't interfere with other operations
+remove_filter('posts_join', 'rsvpmaker_template_fields' );
+remove_filter('posts_join', 'rsvpmaker_template_join' );
+remove_filter('posts_where', 'rsvpmaker_template_where' );
+remove_filter('posts_orderby', 'rsvpmaker_template_orderby' );
+
+if ( have_posts() ) {
+printf('<table  class="wp-list-table widefat fixed posts" cellspacing="0"><thead><tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr></thead><tbody>',__('Title','rsvpmaker'),__('Schedule','rsvpmaker'),__('Projected Dates','rsvpmaker'),__('Event','rsvpmaker'));
+while ( have_posts() ) : the_post();
+
+		$template = unserialize($post->sked);
 		if((int)$template["week"] == 0)
 			$s = 'Schedule Varies';
 		else
 			$s = $weekarray[(int) $template["week"]].' '.$dayarray[(int) $template["dayofweek"]];	
 		
-		$template_recur_url = admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$row->post_id);
-		$template_edit_url = admin_url('post.php?action=edit&post='.$row->post_id);
-		printf('<tr><td><a href="%s">%s</a></td><td>%s</td><td><a href="%s">Projected Dates</a></td></tr>'."\n",$template_edit_url,$row->post_title,$s,$template_recur_url);
-		//echo $row->post_title.' ';
-		//print_r($template);
-		//echo '<br />';
-	}
+		$template_recur_url = admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$post->ID);
+		if(($post->post_author = $current_user->ID) || current_user_can('edit_others_rsvpmakers') )
+			{
+			$template_edit_url = admin_url('post.php?action=edit&post='.$post->ID);
+			$title = sprintf('<a href="%s">%s</a>',$template_edit_url,$post->post_title);
+			}
+		else
+			$title = $post->post_title;
+
+		printf('<tr><td>%s</td><td>%s</td><td><a href="%s">'.__('Projected Dates','rsvpmaker').'</a></td><td>%s</td></tr>'."\n",$title,$s,$template_recur_url,next_or_recent($post->ID));
+endwhile;
 echo "</tbody></table>";
 }
 ?>
 </div>
 <?php
 }
+}// end if pluggable
 
+if(!function_exists('rsvp_template_checkboxes') )
+{
 function rsvp_template_checkboxes($t) {
 global $wpdb;
 global $current_user;
 
 $post = get_post($t);
+$template_editor = false;
+if(current_user_can('edit_others_rsvpmakers'))
+	$template_editor = true;
+else
+	{
+	$eds = get_post_meta($t,'_additional_editors',false);
+	$eds[] = $wpdb->get_var("SELECT post_author FROM $wpdb->posts WHERE ID = $t");
+	$template_editor = in_array($current_user->ID,$eds);		
+	}
+
 $template = get_post_meta($t,'_sked',true);
 $hour = (int) $template["hour"];
 $minutes = $template["minutes"];
@@ -1960,6 +2024,12 @@ if(isset($_POST["recur_check"]) )
 		{
 			$year = $_POST["recur_year"][$index];
 			$cddate = $year . "-" . $_POST["recur_month"][$index]  . "-" . $_POST["recur_day"][$index] . " " . $hour . ":" . $minutes . ":00";
+			$y = (int) $_POST["recur_year"][$index];
+			$m = (int) $_POST["recur_month"][$index];
+			$d = (int) $_POST["recur_day"][$index];
+			$date = $y.'-'.$m.'-'.$d;
+			$my_post['post_name'] = sanitize_title($my_post['post_title'] . '-' .$date );
+
 // Insert the post into the database
   			if($postID = wp_insert_post( $my_post ) )
 				{
@@ -1996,8 +2066,8 @@ if(isset($_POST["update_from_template"]))
 			}
 	}
 
-
-	$sql = "SELECT $wpdb->posts.post_title, ".$wpdb->prefix."rsvp_dates.*, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
+	global $current_user;
+	$sql = "SELECT $wpdb->posts.post_title, $wpdb->posts.post_author, ".$wpdb->prefix."rsvp_dates.*, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
 	$wpdb->show_errors();
 	$sched_result = $wpdb->get_results($sql);
 	if($sched_result)
@@ -2007,9 +2077,9 @@ if(isset($_POST["update_from_template"]))
 		$cy = date("Y",$thistime); // advance starting time
 		$cm = date("m",$thistime);
 		$cd = date("j",$thistime);
-		$editlist .= sprintf('<tr><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td><a href="%s?post=%d&action=edit">Edit</a></td><td>%s</td><td><a href="%s">%s</a></td></tr>',$sched->postID,admin_url("post.php"),$sched->postID,date('F d, Y',$thistime),get_post_permalink($sched->postID),$sched->post_title);
+		$edit = (($sched->post_author == $current_user->ID) || $template_editor) ? sprintf('<a href="%s?post=%d&action=edit">'.__('Edit','rsvpmaker').'</a>',admin_url("post.php"),$sched->postID) : '-';
+		$editlist .= sprintf('<tr><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',$sched->postID,$edit,date('F d, Y',$thistime),get_post_permalink($sched->postID),$sched->post_title);
 		}
-
 
 if($week == 6)
 	{
@@ -2146,6 +2216,7 @@ if($editlist)
 </fieldset>
 <input type="submit" value="'.__('Update Checked','rsvpmaker').'" /></form>'.'<p>'.__('Update function copies title and content of current template, replacing the existing content of checked posts.','rsvpmaker').'</p>';
 
+if(current_user_can('edit_rsvpmakers'))
 printf('<div class="group_add_date"><br />
 <form method="post" action="%s">
 <strong>Add One:</strong><br />
@@ -2166,7 +2237,10 @@ printf('<div class="group_add_date"><br />
 %s',$action,$add_one,$t,$action,$add_date_checkbox,$t,$checkallscript);
 
 }
+} // end function_exists
 
+if(!function_exists('rsvpmaker_updated_messages'))
+{
 function rsvpmaker_updated_messages($messages) {
 global $post, $post_ID;
 
@@ -2196,10 +2270,204 @@ $messages['rsvpmaker'] = array(
 10 => sprintf( __($singular.' draft updated. <a target="_blank" href="%s">Preview '.strtolower($singular).'</a>'), esc_url( add_query_arg( 'preview', 'true', get_post_permalink($post_ID) ) ) ),
 );
 
-
 return $messages;
 }
+} // end if function
+
+if( !function_exists('rsvpmaker_template_admin_title') )
+{
+function rsvpmaker_template_admin_title() {
+global $title;
+global $post;
+global $post_new_file;
+if($post->post_type != 'rsvpmaker')
+	return;
+if($_GET["new_template"] || get_post_meta($post->ID,'_sked',true))
+	{
+	$title .= ' '.__('Template','rsvpmaker');
+	if(isset($post_new_file))
+		$post_new_file = 'post-new.php?post_type=rsvpmaker&new_template=1';
+	}
+}
+}
+
+add_action('admin_head','rsvpmaker_template_admin_title');
+
+if(!function_exists('next_or_recent')) {
+function next_or_recent($template) {
+//echo "template: $template<br />";
+global $wpdb;
+global $rsvp_options;
+$event = '';
+$sql ="SELECT $wpdb->posts.post_title, ".$wpdb->prefix."rsvp_dates.* FROM `$wpdb->posts` JOIN $wpdb->postmeta ON `$wpdb->posts`.ID=$wpdb->postmeta.post_id JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID=".$wpdb->prefix."rsvp_dates.postID WHERE meta_key='_meet_recur'  AND meta_value= $template AND datetime > CURDATE() ORDER BY datetime LIMIT 0,1";
+if($row = $wpdb->get_row($sql) )
+{
+	$t = strtotime($row->datetime);
+	$neatdate = date($rsvp_options["long_date"],$t);
+	$event = sprintf('<a href="%s">%s: %s</a>',get_post_permalink($row->ID),__('Next Event','rsvpmaker'),$neatdate );
+}
+else {
+$sql ="SELECT $wpdb->posts.post_title, ".$wpdb->prefix."rsvp_dates.* FROM `$wpdb->posts` JOIN $wpdb->postmeta ON `$wpdb->posts`.ID=$wpdb->postmeta.post_id JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID=".$wpdb->prefix."rsvp_dates.postID WHERE meta_key='_meet_recur'  AND meta_value=$template AND datetime < CURDATE() ORDER BY datetime DESC LIMIT 0,1";
+	if($row = $wpdb->get_row($sql) )
+	{
+	$t = strtotime($row->datetime);
+	$neatdate = date($rsvp_options["long_date"],$t);
+	$event = sprintf('<a style="color:#333;" href="%s">%s: %s</a>',get_post_permalink($row->ID),__('Most Recent','rsvpmaker'),$neatdate );
+	}
+}
+return $event;
+}
+} // end if funnction
 
 add_filter('post_updated_messages', 'rsvpmaker_updated_messages' );
+
+if(isset($rsvp_options["additional_editors"]) && $rsvp_options["additional_editors"])
+	{
+		add_action('save_post','save_additional_editor');
+		add_filter( 'user_has_cap', 'rsvpmaker_cap_filter', 10, 3 );
+	}
+
+if(!function_exists('rsvpmaker_cap_filter') )
+{
+function rsvpmaker_cap_filter( $allcaps, $cap, $args ) {
+/**
+ * author_cap_filter()
+ *
+ * Filter on the current_user_can() function.
+ * This function is used to explicitly allow authors to edit contributors and other
+ * authors rsvpmakers if they are published or pending.
+ *
+ * @param array $allcaps All the capabilities of the user
+ * @param array $cap     [0] Required capability
+ * @param array $args    [0] Requested capability
+ *                       [1] User ID
+ *                       [2] Associated object ID
+ */
+
+global $post;
+	if($post->post_type != 'rsvpmaker')
+		return $allcaps;
+	$user = $args[1];
+	
+	if($allcaps[$cap[0]]) // if already true
+		return $allcaps;
+
+	$eds = get_additional_editors($post->ID);
+
+	if(!$eds)
+		return $allcaps;
+
+	if( in_array($user,$eds) )
+		$allcaps[$cap[0]] = true;
+
+	return $allcaps;
+}
+} // end function exists
+
+if(!function_exists('get_additional_editors') )
+{
+function get_additional_editors($post_id) {
+global $wpdb;
+$eds = false;
+	$recurid = get_post_meta($post_id,'_meet_recur',true);
+	if($recurid)
+	{
+		$eds = get_post_meta($recurid,'_additional_editors',false);
+		$eds[] = $wpdb->get_var("SELECT post_author FROM $wpdb->posts WHERE ID = $recurid");
+	}
+	else
+		$eds = get_post_meta($post_id,'_additional_editors',false);
+return $eds;
+}
+}// end if exists
+
+if(!function_exists('save_additional_editor') )
+{
+function save_additional_editor($postID) {
+
+if($_POST["additional_editor"] || $_POST["remove_editor"])
+	{
+	if($parent_id = wp_is_post_revision($postID))
+		{
+		$postID = $parent_id;
+		}
+	}
+if($_POST["additional_editor"])
+	{		
+	$ed = (int) $_POST["additional_editor"];
+	if($ed)
+		add_post_meta($postID,'_additional_editors',$ed,false);
+	}
+if($_POST["remove_editor"])
+	{		
+	foreach($_POST["remove_editor"] as $remove)
+		{
+			$remove = (int) $remove;
+			if($remove)
+				delete_post_meta($postID,'_additional_editors',$remove);
+		}
+	}
+}
+} // end function exists
+
+if(!function_exists('additional_editors') )
+{
+function rsvpmaker_editor_dropdown ($eds) {
+global $wpdb;
+
+$sql = "SELECT * FROM $wpdb->users ORDER BY user_login";
+$results = $wpdb->get_results($sql);
+print_r($eds);
+	foreach($results as $row)
+		{
+			if(in_array($row->ID,$eds) )
+				continue;
+			$member = get_userdata($row->ID);
+			$index = preg_replace('/[^a-zA-Z]/','',$member->last_name.$member->first_name.$row->user_login);
+			$sortmember[$index] = $member;
+		}
+	ksort($sortmember);
+	
+	foreach($sortmember as $index => $member)
+		{
+			if(isset($member->last_name) && !empty($member->last_name) )
+				$label = $member->first_name.' '.$member->last_name;
+			else
+				$label = $index;
+			if($member->ID == $assigned)
+				$s = ' selected="selected" ';
+			else
+				$s = '';
+			$options .= sprintf('<option %s value="%d">%s</option>',$s, $member->ID,$label);
+		}
+	return $options;
+}
+} // end function exists
+
+if(!function_exists('additional_editors') )
+{
+function additional_editors() {
+global $post;
+if($post->ID)
+$eds = get_post_meta($post->ID,'_additional_editors',false);
+if($eds)
+{
+echo "<strong>".__("Editors",'rsvpmaker').":</strong><br />";
+foreach($eds as $user_id)
+	{
+	$member = get_userdata($user_id);
+	if(isset($member->last_name) && !empty($member->last_name) )
+		$label = $member->first_name.' '.$member->last_name;
+	else
+		$label = $member->user_login;
+	echo $label.sprintf(' <strong>( <input type="checkbox" name="remove_editor[]" value="%d"> %s)</strong><br />',$user_id,__('Remove','rsvpmaker'));
+	}
+}
+//print_r($eds);
+?>
+<p><?php _e('Add Editor'); ?>: <select name="additional_editor" ><option value=""><?php _e('Select'); ?></option><?php echo rsvpmaker_editor_dropdown($eds); ?></select></p>
+<?php
+}
+} // function exists
 
 ?>

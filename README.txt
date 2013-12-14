@@ -6,8 +6,8 @@ Donate link: http://rsvpmaker.com/
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
-Tested up to: 3.7.1
-Stable tag: 2.8.4
+Tested up to: 3.8
+Stable tag: 2.8.5
 
 Event scheduling and RSVP tracking.
 
@@ -17,6 +17,8 @@ RSVPMaker is an event scheduling and RSVP tracking plugin for WordPress, using t
 
 Site editors and administrators have the option to request RSVPs for any given event and specify an email address for notifications when someone responds. RSVP Reports can also be run from the administrator's dashboard.
 
+For events that follow a recurring schedule, such as First Monday or Every Friday, you can set up a template that allows you to add multiple events along the projected schedule using the boilerplate details from the template. You still have the flexibility to customize individual events. For example, you might book a series of monthly events for the year and add the names of speakers or agenda details as you go along.
+
 If a fee is to be charged for the event, RSVPMaker can collect payments online using PayPal (requires manual setup of a PayPal account and creation of a configuration file with API credentials). RSVP reports can be viewed through the admin user interface.
 
 When used with an additional plugin, [RSVPMaker Excel](http://wordpress.org/extend/plugins/rsvpmaker-excel), RSVP reports can easily be downloaded to a spreadsheet, using the Excel functions from the [PHPExcel](http://www.phpexcel.net/) library.
@@ -24,6 +26,12 @@ When used with an additional plugin, [RSVPMaker Excel](http://wordpress.org/exte
 [__RSVPMaker.com__](http://www.rsvpmaker.com/)
 
 Related plugin: [__ChimpBlast__](http://wordpress.org/extend/plugins/chimpblast/) for sending event invites and other email broadcasts through the MailChimp broadcast email service.
+
+Translations:
+Spanish: Andrew Kurtis, [__WebHostingHub__](http://www.webhostinghub.com/)
+Polish: Jarosław Żeliński
+Norwegian: Thomas Nybø
+Thank you!
 
 == Installation ==
 
@@ -53,8 +61,9 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 
 == Screenshots ==
 
-1. screenshot-1.png
-1. screenshot-2.png
+1. Edit events like WordPress posts, setting date, time, and RSVP options.
+2. Example of an event listing with an RSVP Now! button (click to display a customizable form with info you want to collect).
+3. Event templates let you schedule multiple events that occur on a regular schedule, projecting future dates and adding them as a batch. You can also track events associated with the template. Individual events can still be customized as needed.
 
 == Credits ==
 
@@ -77,6 +86,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 2.8.5 =
+
+* Spanish language translation
+* Option to allow event authors to designate other users who can edit an event or, more importantly, an event template -- and all events derived from that template. This allows users who do not have full editing rights to be granted rights to edit specific events or series of events. Useful on community websites where several representatives of a group or club may wish to share editing rights, without the site owner having to make them editors of the entire site or of all events.
 
 = 2.8.4 =
 

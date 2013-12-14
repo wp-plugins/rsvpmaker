@@ -478,6 +478,38 @@ return ob_get_clean();
 
 add_shortcode("rsvpmaker_upcoming","rsvpmaker_upcoming");
 
+function rsvpmaker_template_fields($select) {
+  $select .= ", meta_value as sked";
+  return $select;
+}
+
+function rsvpmaker_template_join($join) {
+  global $wpdb;
+
+    $join .= " JOIN $wpdb->postmeta ON $wpdb->postmeta.post_id = $wpdb->posts.ID ";
+
+  return $join;
+}
+
+function rsvpmaker_template_where($where) {
+
+	return $where . " AND meta_key='_sked'";
+
+}
+
+function rsvpmaker_template_orderby($orderby) {
+  return " post_title ";
+}
+
+function rsvpmaker_template_events_where($where) {
+global $rsvptemplate;
+	if(isset($_GET["t"]))
+		$rsvptemplate = (int) $_GET["t"];
+	if(!$rsvptemplate)
+		return $where;
+	return $where . " AND meta_key='_meet_recur' AND meta_value=$rsvptemplate";
+}
+
 //utility function, template tag
 function is_rsvpmaker() {
 global $post;
