@@ -2012,6 +2012,13 @@ $cd = date("j");
 $schedule = ($week == 0) ? __('Schedule varies','rsvpmaker') : $weekarray[$week].' '.$dayarray[$dow];
 printf('<p>%s:</p><h2>%s</h2><h3>%s</h3>%s<blockquote><a href="%s">%s</a></blockquote>',__('Selected template','rsvpmaker'),$post->post_title,$schedule,wpautop($post->post_content),admin_url('post.php?action=edit&post='.$t),__('Edit Template','rsvpmaker'));
 
+if($_GET["trashed"])
+	{
+		$ids = (int) $_GET["ids"];
+		$message = '<a href="' . esc_url( wp_nonce_url( "edit.php?post_type=rsvpmaker&doaction=undo&action=untrash&ids=$ids", "bulk-posts" ) ) . '">' . __('Undo') . '</a>';
+		echo '<div id="message" class="updated"><p>' .__('Moved to trash','rsvpmaker'). ' '.$message . '</p></div>';
+	}
+
 if(isset($_POST["recur_check"]) )
 {
 	$my_post['post_title'] = $post->post_title;
@@ -2056,6 +2063,45 @@ if(isset($_POST["recur_check"]) )
 		}
 }
 
+if(isset($_POST["nomeeting"]) )
+{
+	$my_post['post_title'] = __('No Meeting','rsvpmaker').': '.$post->post_title;
+	$my_post['post_content'] = $_POST["nomeeting_note"];
+	$my_post['post_status'] = 'publish';
+	$my_post['post_author'] = $current_user->ID;
+	$my_post['post_type'] = 'rsvpmaker';
+	
+	if(!strpos($_POST["nomeeting"],'-'))
+		{ //update vs new post
+			$id = (int) $_POST["nomeeting"];
+			$sql = $wpdb->prepare("UPDATE $wpdb->posts SET post_title=%s, post_content=%s WHERE ID=%d",$my_post['post_title'],$my_post['post_content'],$id);
+			$wpdb->show_errors();
+			$return = $wpdb->query($sql);
+			if($return == false)
+				echo '<div class="updated">'."Error: $sql.</div>\n";
+			else
+				echo '<div class="updated">Updated: no meeting <a href="post.php?action=edit&post='.$postID.'">Edit</a> / <a href="'.site_url().'/?p='.$postID.'">View</a></div>';	
+		}
+	else
+		{
+			$cddate = $_POST["nomeeting"];
+			$my_post['post_name'] = sanitize_title($my_post['post_title'] . '-' .$cddate );
+
+// Insert the post into the database
+  			if($postID = wp_insert_post( $my_post ) )
+				{
+				$sql = "INSERT INTO ".$wpdb->prefix."rsvp_dates SET datetime='$cddate', duration='allday', postID=". $postID;
+				$wpdb->show_errors();
+				$return = $wpdb->query($sql);
+				if($return == false)
+					echo '<div class="updated">'."Error: $sql.</div>\n";
+				else
+					echo '<div class="updated">Posted: event for '.$cddate.' <a href="post.php?action=edit&post='.$postID.'">Edit</a> / <a href="'.site_url().'/?p='.$postID.'">View</a></div>';	
+				add_post_meta($postID,'_meet_recur',$t,true);
+				}
+		}		
+}
+
 if(isset($_POST["update_from_template"]))
 	{
 		foreach($_POST["update_from_template"] as $target_id)
@@ -2067,18 +2113,26 @@ if(isset($_POST["update_from_template"]))
 	}
 
 	global $current_user;
-	$sql = "SELECT $wpdb->posts.post_title, $wpdb->posts.post_author, ".$wpdb->prefix."rsvp_dates.*, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
+	$sql = "SELECT $wpdb->posts.ID postID, $wpdb->posts.post_title, $wpdb->posts.post_author, ".$wpdb->prefix."rsvp_dates.datetime, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
 	$wpdb->show_errors();
 	$sched_result = $wpdb->get_results($sql);
 	if($sched_result)
-	foreach($sched_result as $sched)
+	foreach($sched_result as $index => $sched)
 		{
+		$a = ($index % 2) ? "" : "alternate";
 		$thistime = strtotime($sched->datetime);
+		$nomeeting .= sprintf('<option value="%s">%s (%s)</option>',$sched->postID,date('F j, Y',$thistime), __('Already Scheduled','rsvpmaker'));
 		$cy = date("Y",$thistime); // advance starting time
 		$cm = date("m",$thistime);
 		$cd = date("j",$thistime);
+		if ( current_user_can( "delete_post", $sched->postID ) ) {
+				$delete_text = __('Move to Trash');
+			$d = '<a class="submitdelete deletion" href="'. get_delete_post_link($sched->postID) . '">'. $delete_text . '</a>';
+		}
+		else
+			$d = '-';
 		$edit = (($sched->post_author == $current_user->ID) || $template_editor) ? sprintf('<a href="%s?post=%d&action=edit">'.__('Edit','rsvpmaker').'</a>',admin_url("post.php"),$sched->postID) : '-';
-		$editlist .= sprintf('<tr><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',$sched->postID,$edit,date('F d, Y',$thistime),get_post_permalink($sched->postID),$sched->post_title);
+		$editlist .= sprintf('<tr class="%s"><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td>%s</td><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',$a,$sched->postID,$edit, $d,date('F d, Y',$thistime),get_post_permalink($sched->postID),$sched->post_title);
 		}
 
 if($week == 6)
@@ -2120,9 +2174,12 @@ $y = date('Y',$ts);
 $y2 = $y+1;
 
 ob_start();
+
 //echo "$ts $thistime<br />";
 if(isset($thistime) && ($ts <= $thistime))
 	continue; // omit dates past
+$nomeeting .= sprintf('<option value="%s">%s</option>',date('Y-m-d',$ts),date('F j, Y',$ts));
+
 ?>
 <div style="font-family:Courier, monospace"><input name="recur_check[<?php echo $i; ?>]" type="checkbox" value="1">
 <?php _e('Month','rsvpmaker'); ?>: 
@@ -2208,7 +2265,7 @@ if($editlist)
 <fieldset>
 <table  class="wp-list-table widefat fixed posts" cellspacing="0">
 <thead>
-<tr><th><input type="checkbox" class="checkall"> Check all</th><th>Edit</th><th>Date</th><th>Title</th></tr>
+<tr><th class="manage-column column-cb check-column" scope="col" ><input type="checkbox" class="checkall" title="Check all"></th><th>'.__('Edit').'</th><th>'.__('Move to Trash').'<th>'.__('Date').'</th><th>'.__('Title').'</th></tr>
 </thead>
 <tbody>
 '.$editlist.'
@@ -2235,6 +2292,18 @@ printf('<div class="group_add_date"><br />
 </form>
 </div><br />
 %s',$action,$add_one,$t,$action,$add_date_checkbox,$t,$checkallscript);
+
+if(current_user_can('edit_rsvpmakers'))
+printf('<div class="group_add_date"><br />
+<form method="post" action="%s">
+<strong>%s:</strong><br />
+%s: <select name="nomeeting">%s</select>
+<br />%s:<br /><textarea name="nomeeting_note" cols="60"></textarea>
+<input type="hidden" name="template" value="%s" />
+<br /><input type="submit" value="%s" />
+</form>
+</div><br />
+',$action,__('No Meeting','rsvpmaker'),__('Regularly Scheduled Date','rsvpmaker'),$nomeeting,__('Note (optional)','rsvpmaker'),$t,__('Submit','rsvpmaker'));
 
 }
 } // end function_exists
@@ -2295,11 +2364,10 @@ add_action('admin_head','rsvpmaker_template_admin_title');
 
 if(!function_exists('next_or_recent')) {
 function next_or_recent($template) {
-//echo "template: $template<br />";
 global $wpdb;
 global $rsvp_options;
 $event = '';
-$sql ="SELECT $wpdb->posts.post_title, ".$wpdb->prefix."rsvp_dates.* FROM `$wpdb->posts` JOIN $wpdb->postmeta ON `$wpdb->posts`.ID=$wpdb->postmeta.post_id JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID=".$wpdb->prefix."rsvp_dates.postID WHERE meta_key='_meet_recur'  AND meta_value= $template AND datetime > CURDATE() ORDER BY datetime LIMIT 0,1";
+$sql ="SELECT $wpdb->posts.*, ".$wpdb->prefix."rsvp_dates.datetime FROM `$wpdb->posts` JOIN $wpdb->postmeta ON `$wpdb->posts`.ID=$wpdb->postmeta.post_id JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID=".$wpdb->prefix."rsvp_dates.postID WHERE meta_key='_meet_recur'  AND meta_value= $template AND datetime > CURDATE() ORDER BY datetime LIMIT 0,1";
 if($row = $wpdb->get_row($sql) )
 {
 	$t = strtotime($row->datetime);
@@ -2307,7 +2375,7 @@ if($row = $wpdb->get_row($sql) )
 	$event = sprintf('<a href="%s">%s: %s</a>',get_post_permalink($row->ID),__('Next Event','rsvpmaker'),$neatdate );
 }
 else {
-$sql ="SELECT $wpdb->posts.post_title, ".$wpdb->prefix."rsvp_dates.* FROM `$wpdb->posts` JOIN $wpdb->postmeta ON `$wpdb->posts`.ID=$wpdb->postmeta.post_id JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID=".$wpdb->prefix."rsvp_dates.postID WHERE meta_key='_meet_recur'  AND meta_value=$template AND datetime < CURDATE() ORDER BY datetime DESC LIMIT 0,1";
+$sql ="SELECT $wpdb->posts.*, ".$wpdb->prefix."rsvp_dates.datetime FROM `$wpdb->posts` JOIN $wpdb->postmeta ON `$wpdb->posts`.ID=$wpdb->postmeta.post_id JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID=".$wpdb->prefix."rsvp_dates.postID WHERE meta_key='_meet_recur'  AND meta_value=$template AND datetime < CURDATE() ORDER BY datetime DESC LIMIT 0,1";
 	if($row = $wpdb->get_row($sql) )
 	{
 	$t = strtotime($row->datetime);
