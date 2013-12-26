@@ -294,15 +294,16 @@ $setrsvp = $_POST["setrsvp"];
 if(!isset($setrsvp["show_attendees"])) $setrsvp["show_attendees"] = 0;
 if(!isset($setrsvp["count"])) $setrsvp["count"] = 0;
 if(!isset($setrsvp["captcha"])) $setrsvp["captcha"] = 0;
-if(!isset($setrsvp["yesno"])) $setrsvp["yesno"] = 0;
+if(!isset($setrsvp["login_required"])) $setrsvp["login_required"] = 0;
+$setrsvp["yesno"] = (isset($setrsvp["yesno"]) && $setrsvp["yesno"]) ? 1 : 0;
 
-if(isset($_POST["deadyear"]) && isset($_POST["deadmonth"]) && isset($_POST["deadday"]))
+if(isset($_POST["deadyear"]) && isset($_POST["deadmonth"]) && isset($_POST["deadday"]) && $_POST["deadday"])
 	$setrsvp["deadline"] = strtotime($_POST["deadyear"].'-'.$_POST["deadmonth"].'-'.$_POST["deadday"].' 23:59:59');
 
-if(isset($_POST["startyear"]) && isset($_POST["startmonth"]) && isset($_POST["startday"]))
+if(isset($_POST["startyear"]) && isset($_POST["startmonth"]) && isset($_POST["startday"]) && $_POST["startday"])
 	$setrsvp["start"] = strtotime($_POST["startyear"].'-'.$_POST["startmonth"].'-'.$_POST["startday"].' 00:00:00');
 
-if(isset($_POST["remindyear"]) && isset($_POST["remindmonth"]) && isset($_POST["remindday"]))
+if(isset($_POST["remindyear"]) && isset($_POST["remindmonth"]) && isset($_POST["remindday"]) && $_POST["remindday"])
 	$setrsvp["reminder"] = date('Y-m-d',strtotime($_POST["remindyear"].'-'.$_POST["remindmonth"].'-'.$_POST["remindday"].' 00:00:00') );
 
 foreach($setrsvp as $name => $value)
@@ -315,15 +316,10 @@ foreach($setrsvp as $name => $value)
 		{
 		add_post_meta($postID, $field, $value, true);
 		}
-	elseif($value != $current)
+	else
 		{
 		update_post_meta($postID, $field, $value);
 		}
-	elseif($value == "")
-		{
-		delete_post_meta($postID, $field, $current);
-		}
-
 	}
 
 if(isset($_POST["unit"]))
@@ -350,7 +346,6 @@ if(isset($_POST["unit"]))
 	
 	elseif($value == "")
 		delete_post_meta($postID, $field, $current);
-
 	
 	}
 }

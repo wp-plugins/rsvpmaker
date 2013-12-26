@@ -16,7 +16,7 @@ ob_start();
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 $('#add_guests').click(function(){
-var guestline = '<div class="guest_blank">First Name: <input type="text" name="guestfirst[]" style="width:30%" /> Last Name: <input type="text" name="guestlast[]" style="width:30%"/><input type="hidden" name="guestid[]" value="0" /></div>';
+var guestline = '<div class="guest_blank"><?php _e('First Name','rsvpmaker'); ?>: <input type="text" name="guestfirst[]" style="width:30%" /> <?php _e('Last Name','rsvpmaker'); ?>: <input type="text" name="guestlast[]" style="width:30%"/><input type="hidden" name="guestid[]" value="0" /></div>';
 $('.add_one').append(guestline);});
 <?php
 if(isset($rsvp_required_field) )
@@ -178,13 +178,13 @@ $content .= '<table id="cpcalendar" width="100%" cellspacing="0" cellpadding="3"
 
 $content .= '<thead>
 <tr> 
-<th width="15%">Sunday</th> 
-<th width="14%">Monday</th> 
-<th width="14%">Tuesday</th> 
-<th width="14%">Wednesday</th> 
-<th width="14%">Thursday</th> 
-<th width="14%">Friday</th> 
-<th width="15%">Saturday</th> 
+<th width="15%">'.__('Sunday','rsvpmaker').'</th> 
+<th width="14%">'.__('Monday','rsvpmaker').'</th> 
+<th width="14%">'.__('Tuesday','rsvpmaker').'</th> 
+<th width="14%">'.__('Wednesday','rsvpmaker').'</th> 
+<th width="14%">'.__('Thursday','rsvpmaker').'</th> 
+<th width="14%">'.__('Friday','rsvpmaker').'</th> 
+<th width="15%">'.__('Saturday','rsvpmaker').'</th> 
 </tr><tr>
 </thead>';
 
