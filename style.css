@@ -16,3 +16,17 @@ padding-top: 1em; padding-bottom: 1em; font-weight: bold;
 a.calendar_item {
 font-size: x-small;  line-height: 1;
 }
+.rsvp_validation_error {
+color: #F00;
+font-weight: bold;
+}
+.rsvp_missing {
+margin-left: 20px;
+}
+#rsvpform table {
+margin: 0;
+}
+select.tickets
+{
+display: block; float: left; margin-right: 5px;
+}
