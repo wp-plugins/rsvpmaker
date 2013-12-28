@@ -2418,7 +2418,7 @@ global $rsvp_options;
 if(isset($rsvp_options["additional_editors"]) && $rsvp_options["additional_editors"])
 	{
 		add_action('save_post','save_additional_editor');
-		add_filter( 'user_has_cap', 'rsvpmaker_cap_filter', 10, 3 );
+		add_filter( 'user_has_cap', 'rsvpmaker_cap_filter', 99, 3 );
 	}
 }
 }
@@ -2427,7 +2427,13 @@ add_action('init','additional_editors_setup');
 
 if(!function_exists('rsvpmaker_cap_filter_test') )
 {
-function rsvpmaker_cap_filter_test(  ) {
+function rsvpmaker_cap_filter_test( $cap ) {
+	
+	if(strpos($cap,'rsvpmaker') )
+		return true;
+	else
+		return false;
+
  	global $post;
 	if($post->post_type == 'rsvpmaker')
 		return true;
@@ -2452,32 +2458,30 @@ function rsvpmaker_cap_filter( $allcaps, $cap, $args ) {
  *                       [1] User ID
  *                       [2] Associated object ID
  */
- 	if(!rsvpmaker_cap_filter_test())
+ 	if(!rsvpmaker_cap_filter_test($cap[0]))
 		return $allcaps;
-
+	global $eds;
+	global $update_rsvpmaker_test;
 	$user = $args[1];
 	$post_id = $args[2];
-	
+	if(!$post_id)
+		{
+			global $post;
+			$post_id = $post->ID;
+		}
 	if($allcaps[$cap[0]]) // if already true
 		return $allcaps;
-
-	$eds = get_additional_editors($post_id);
-
-	if(!$eds)
+	
+	if(!$eds[$post_id])
+	$eds[$post_id] = get_additional_editors($post_id);
+		
+	if(!$eds[$post_id])
 		return $allcaps;
 
-	if( in_array($user,$eds) )
+	if( in_array($user,$eds[$post_id]) )
 		{
 		foreach($cap as $value)
 			$allcaps[$value] = true;
-		if($_GET["debug"])
-			{
-			echo "<pre>";
-			print_r($cap);
-			echo "all \n";
-			print_r($allcaps);
-			echo "</pre>";
-			}
 		}
 	return $allcaps;
 }
@@ -2531,7 +2535,7 @@ if($_POST["remove_editor"])
 }
 } // end function exists
 
-if(!function_exists('additional_editors') )
+if(!function_exists('rsvpmaker_editor_dropdown') )
 {
 function rsvpmaker_editor_dropdown ($eds) {
 global $wpdb;
