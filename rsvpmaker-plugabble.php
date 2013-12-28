@@ -52,7 +52,7 @@ foreach($results as $row)
 		echo date(' '.$rsvp_options["time_format"],$t);
 	if(is_numeric($dur) )
 		echo " to ".date ($rsvp_options["time_format"],$dur);
-	echo sprintf(' <input type="checkbox" name="delete_date[]" value="%d" /> % <br />',$row["id"],__('Delete','rsvpmaker'));
+	echo sprintf(' <input type="checkbox" name="delete_date[]" value="%d" /> %s<br />',$row["id"],__('Delete','rsvpmaker'));
 	rsvpmaker_date_option($row);
 	echo "</div>\n";
 	}
@@ -1965,8 +1965,8 @@ while ( have_posts() ) : the_post();
 			$s = $weekarray[(int) $template["week"]].' '.$dayarray[(int) $template["dayofweek"]];	
 		
 		$template_recur_url = admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$post->ID);
-		$eds = get_additional_editors($post->ID);
-		if(($post->post_author == $current_user->ID) || in_array($current_user->ID,$eds) )
+		$eds = get_additional_editors($post->ID); 
+		if(($post->post_author == $current_user->ID) || in_array($current_user->ID,$eds) || current_user_can('edit_rsvpmaker',$post->ID) )
 			{
 			$template_edit_url = admin_url('post.php?action=edit&post='.$post->ID);
 			$title = sprintf('<a href="%s">%s</a>',$template_edit_url,$post->post_title);
@@ -2411,11 +2411,30 @@ return $event;
 
 add_filter('post_updated_messages', 'rsvpmaker_updated_messages' );
 
+if(!function_exists('additional_editors_setup') )
+{
+function additional_editors_setup() {
+global $rsvp_options;
 if(isset($rsvp_options["additional_editors"]) && $rsvp_options["additional_editors"])
 	{
 		add_action('save_post','save_additional_editor');
 		add_filter( 'user_has_cap', 'rsvpmaker_cap_filter', 10, 3 );
 	}
+}
+}
+
+add_action('init','additional_editors_setup');
+
+if(!function_exists('rsvpmaker_cap_filter_test') )
+{
+function rsvpmaker_cap_filter_test(  ) {
+ 	global $post;
+	if($post->post_type == 'rsvpmaker')
+		return true;
+	else
+		return false;
+}
+}
 
 if(!function_exists('rsvpmaker_cap_filter') )
 {
@@ -2433,21 +2452,16 @@ function rsvpmaker_cap_filter( $allcaps, $cap, $args ) {
  *                       [1] User ID
  *                       [2] Associated object ID
  */
- 	global $post;
-	if($_GET["debug"])
-	{
-	print_r($post);
-	print_r($cap);
-	}
-	if($post->post_type != 'rsvpmaker')
+ 	if(!rsvpmaker_cap_filter_test())
 		return $allcaps;
 
 	$user = $args[1];
+	$post_id = $args[2];
 	
 	if($allcaps[$cap[0]]) // if already true
 		return $allcaps;
 
-	$eds = get_additional_editors($post->ID);
+	$eds = get_additional_editors($post_id);
 
 	if(!$eds)
 		return $allcaps;

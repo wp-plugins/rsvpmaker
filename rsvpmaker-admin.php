@@ -1363,7 +1363,7 @@ add_action('admin_menu', 'my_rsvp_menu');
 
 add_filter('manage_posts_columns', 'rsvpmaker_columns');
 function rsvpmaker_columns($defaults) {
-	if(!$_GET["post_type"] == 'rsvpmaker')
+	if($_GET["post_type"] != 'rsvpmaker')
 		return $defaults;
     $defaults['event_dates'] = __('Event Dates');
     return $defaults;
@@ -1397,8 +1397,10 @@ if(isset($dateline)) echo $dateline;
 }
 else
 	{
-	echo "Template: ";
 $template = get_post_meta($post_id,'_sked',true);
+if(!$template)
+	return;
+echo __("Template",'rsvpmaker').": ";
 $week = (int) $template["week"];
 $dow = (int) $template["dayofweek"];
 $weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
