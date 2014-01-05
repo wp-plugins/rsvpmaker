@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RSVPMaker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-09-03 14:00+0100\n"
-"PO-Revision-Date: 2012-09-03 14:03+0100\n"
+"POT-Creation-Date: 2012-09-04 01:22+0100\n"
+"PO-Revision-Date: 2012-09-04 01:25+0100\n"
 "Last-Translator: Thomas <thomas@e-diver.org>\n"
 "Language-Team:  <david@carrcommunications.com>\n"
 "Language: en\n"
@@ -234,6 +234,14 @@ msgstr "Din påmelding"
 msgid "Pay by PayPal for"
 msgstr "Betal med PayPal for"
 
+#: ../rsvpmaker-plugabble.php:876
+msgid "Amount"
+msgstr "Mengde"
+
+#: ../rsvpmaker-plugabble.php:883
+msgid "Next"
+msgstr "Neste"
+
 #: ../rsvpmaker-plugabble.php:886
 msgid ""
 "Secure payment processing is provided by <strong>PayPal</strong>. After you "
@@ -243,6 +251,24 @@ msgstr ""
 "Sikker betalingsmetode er levert av <strong>PayPal</strong>. Etter du "
 "klikker  &quot;Neste,&quot; vil vi overføre deg til PayPal sin nettside hvor "
 "du kan betale med kredittkort eller bruke en PayPal-konto."
+
+#: ../rsvpmaker-plugabble.php:892 ../rsvpmaker-plugabble.php:1528
+msgid "Guests"
+msgstr "Gjester"
+
+#: ../rsvpmaker-plugabble.php:896 ../rsvpmaker-plugabble.php:1530
+#: ../rsvpmaker.php:51
+msgid "First Name"
+msgstr "Fornavn"
+
+#: ../rsvpmaker-plugabble.php:896 ../rsvpmaker-plugabble.php:1530
+#: ../rsvpmaker.php:54
+msgid "Last Name"
+msgstr "Etternavn"
+
+#: ../rsvpmaker-plugabble.php:896
+msgid "Remove"
+msgstr "Fjern"
 
 #: ../rsvpmaker-plugabble.php:948
 msgid "signed up so far. Limit: "
@@ -296,6 +322,10 @@ msgstr "Velg tid"
 msgid "Paying For"
 msgstr "Betaler for"
 
+#: ../rsvpmaker-plugabble.php:1073
+msgid "Submit"
+msgstr "Send inn"
+
 #: ../rsvpmaker-plugabble.php:1108
 msgid "Show Attendees"
 msgstr "Vis påmeldte"
@@ -327,34 +357,20 @@ msgid "Event Reminder for"
 msgstr "Hendelsespåminnelse for"
 
 #: ../rsvpmaker-plugabble.php:1528
-msgid "Guests"
-msgstr "Gjester"
-
-#: ../rsvpmaker-plugabble.php:1528
 msgid "If you are bringing guests, please enter their names here"
 msgstr "Hvis du tar med deg gjester, vennligst legg inn navnene deres her"
-
-#: ../rsvpmaker-plugabble.php:1530 ../rsvpmaker.php:51
-msgid "First Name"
-msgstr "Fornavn"
-
-#: ../rsvpmaker-plugabble.php:1530 ../rsvpmaker.php:54
-msgid "Last Name"
-msgstr "Etternavn"
 
 #: ../rsvpmaker-plugabble.php:1530
 msgid "Add more guests"
 msgstr "Legg til flere gjester"
 
 #: ../rsvpmaker-plugabble.php:1547
-#, fuzzy
 msgid ""
 "Profile details on file. To update profile, \n"
 "or RSVP for someone else"
 msgstr ""
-"Telefon #  på fil.<br />For å oppdatere profil,e, \n"
-"eller melde på noen andre <a href=\"%s\">hent et blankt \n"
-"skjema</a>"
+"Lagrede profildetaljer. For å oppdatere profil \n"
+"eller melde på noen andre"
 
 #: ../rsvpmaker-plugabble.php:1548
 msgid ""

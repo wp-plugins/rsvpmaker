@@ -3,9 +3,9 @@
 /*
 Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
-Description: Schedule events and solicit RSVPs. The editor is built around the custom post types feature introduced in WP 3.0, so you get all your familiar post editing tools with a few extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
+Description: Schedule events and solicit RSVPs. Events are implemented as custom post types, so you get all your familiar post editing tools with extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. Recurring events can be tracked according to a schedule such as "First Monday" or "Every Friday" at a specified time, and the software will calculate future dates according to that schedule and let you track them together. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 3.0
+Version: 3.0.1
 Author URI: http://www.carrcommunications.com
 */
 
@@ -24,7 +24,16 @@ $rsvp_options = get_option('RSVPMAKER_Options');
 
 //defaults
 if(!isset($rsvp_options["menu_security"]))
-	$rsvp_options["menu_security"] = 'manage_options';
+	$rsvp_options["menu_security"] = 'manage_options'; // rsvp report
+if(!isset($rsvp_options["rsvpmaker_template"]))
+	$rsvp_options["rsvpmaker_template"] = 'publish_rsvpmakers';
+if(!isset($rsvp_options["recurring_event"]))
+	$rsvp_options["recurring_event"] = 'publish_rsvpmakers';
+if(!isset($rsvp_options["multiple_events"]))
+	$rsvp_options["multiple_events"] = 'publish_rsvpmakers';
+if(!isset($rsvp_options["documentation"]))
+	$rsvp_options["documentation"] = 'edit_rsvpmakers';
+
 if(!isset($rsvp_options["rsvp_to"]))
 	$rsvp_options["rsvp_to"] = get_bloginfo('admin_email');
 if(!isset($rsvp_options["rsvp_confirm"]))
@@ -100,7 +109,7 @@ add_action( 'init', 'rsvpmaker_create_post_type' );
 
 function rsvpmaker_create_post_type() {
 global $rsvp_options;
-$menu_label = (isset($rsvp_options["menu_label"])) ? $rsvp_options["menu_label"] : __("RSVP Events");
+$menu_label = (isset($rsvp_options["menu_label"])) ? $rsvp_options["menu_label"] : __("RSVP Events",'rsvpmaker');
 $supports = ( isset($rsvp_options["rsvpmaker_supports"]) ) ? $rsvp_options["rsvpmaker_supports"] : array('title','editor','author','excerpt','custom-fields');
 
   register_post_type( 'rsvpmaker',

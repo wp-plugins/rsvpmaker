@@ -353,6 +353,20 @@ if(isset($_POST["unit"]))
 add_action('admin_menu', 'my_events_menu');
 
 add_action('save_post','save_calendar_data');
+
+function rsvpmaker_menu_security($label, $slug,$options) {
+
+echo $label;
+?>
+ <select name="option[<?php echo $slug; ?>]" id="<?php echo $slug; ?>">
+  <option value="manage_options" <?php if(isset($options[$slug]) && ($options[$slug] == 'manage_options')) echo ' selected="selected" ';?> >Administrator (manage_options)</option>
+  <option value="edit_others_rsvpmakers" <?php if(isset($options[$slug]) && ($options[$slug] == 'edit_others_rsvpmakers')) echo ' selected="selected" ';?> >Editor (edit_others_rsvpmakers)</option>
+  <option value="publish_rsvpmakers" <?php if(isset($options[$slug]) && ($options[$slug] == 'publish_rsvpmakers')) echo ' selected="selected" ';?> >Author (publish_rsvpmakers)</option>
+  <option value="edit_rsvpmakers" <?php if(isset($options[$slug]) && ($options[$slug] == 'edit_rsvpmakers')) echo ' selected="selected" ';?> >Contributor (edit_rsvpmakers)</option>
+  </select><br />
+<?php
+}
+
   
   // Avoid name collisions.
   if (!class_exists('RSVPMAKER_Options'))
@@ -608,18 +622,29 @@ echo "<br /><br />".__('On your system, the base web directory is','rsvpmaker').
 <option value=".|,"><?php echo number_format(1000.00, 2, '.',  ','); ?></option>
 <option value=",|."><?php echo number_format(1000.00, 2, ',',  '.'); ?></option>
 <option value=",| "><?php echo number_format(1000.00, 2, ',',  ' '); ?></option>
-</select>
-
-    
-    <br />
+</select>    
+<br />
 
 <h3><?php _e('Menu Security','rsvpmaker'); ?>:</h3>
-  <select name="option[menu_security]" id="menu_security">
-  <option value="manage_options" <?php if(isset($options["menu_security"]) && ($options["menu_security"] == 'manage_options')) echo ' selected="selected" ';?> >Administrator</option>
-  <option value="edit_others_posts" <?php if(isset($options["menu_security"]) && ($options["menu_security"] == 'edit_others_posts')) echo ' selected="selected" ';?> >Editor</option>
-  <option value="edit_posts" <?php if(isset($options["menu_security"]) && ($options["menu_security"] == 'edit_posts')) echo ' selected="selected" ';?> >Contributor</option>
-  </select> <?php _e('Security level required to access custom menus (RSVP Report, Documentation)','rsvpmaker'); ?>
+<?php
+rsvpmaker_menu_security( __("RSVP Report",'rsvpmaker'),  "menu_security", $options );
+rsvpmaker_menu_security(__("Event Templates",'rsvpmaker'),"rsvpmaker_template",$options );
+rsvpmaker_menu_security( __("Recurring Event",'rsvpmaker'), "recurring_event", $options );
+rsvpmaker_menu_security( __("Multiple Events",'rsvpmaker'), "multiple_events",$options );
+rsvpmaker_menu_security( __("Documentation",'rsvpmaker'), "documentation",$options );
+?>
+<p><em><?php _e('Security level required to access custom menus (RSVP Report, Documentation)','rsvpmaker'); ?></em></p>
+
+<h3>Dashboard</h3>
+<select name="option[dashboard]">
+<option value="">No Widget</option>
+<option value="show" <?php if($options["dashboard"] == 'show') echo ' selected="selected" '; ?> >Show Widget</option>
+<option value="top" <?php if($options["dashboard"] == 'top') echo ' selected="selected" '; ?> >Show Widget on Top</option>
+</select>
+<br /><?php _e('Note','rsvpmaker'); ?>
 <br />
+<textarea name="option[dashboard_message]" style="width:90%;"><?php echo $options["dashboard_message"]; ?></textarea>
+
 <h3><?php _e('SMTP for Notifications','rsvpmaker'); ?></h3>
 <p><?php _e('For more reliable delivery of email notifications, enable delivery through the SMTP email protocol. Standard server parameters will be used for Gmail and the SendGrid service, or specify the server port number and security protocol','rsvpmaker'); ?>.</p>
   <select name="option[smtp]" id="smtp">
@@ -778,12 +803,13 @@ add_filter('default_title','title_from_template');
 function multiple() {
 
 global $wpdb;
+global $current_user;
 
 if($_POST)
 {
 
-	$my_post['post_status'] = 'publish';
-	$my_post['post_author'] = 1;
+	$my_post['post_status'] = current_user_can('publish_rsvpmakers') ? 'publish' : 'draft';
+	$my_post['post_author'] = $current_user->ID;
 	$my_post['post_type'] = 'rsvpmaker';
 
 	foreach($_POST["recur_year"] as $index => $year)
@@ -943,6 +969,7 @@ wp_nonce_field(-1,'add_date'.$i);
 function add_dates() {
 
 global $wpdb;
+global $current_user;
 
 if($_POST)
 {
@@ -954,8 +981,8 @@ if($_POST["recur-title"])
 	{
 	$my_post['post_title'] = $_POST["recur-title"];
 	$my_post['post_content'] = $_POST["recur-body"];
-	$my_post['post_status'] = 'publish';
-	$my_post['post_author'] = 1;
+	$my_post['post_status'] = current_user_can('publish_rsvpmakers') ? 'publish' : 'draft';
+	$my_post['post_author'] = $current_user->ID;
 	$my_post['post_type'] = 'rsvpmaker';
 
 	foreach($_POST["recur_checked"] as $index => $on)
@@ -1273,8 +1300,7 @@ global $rsvp_options;
 <p>[rsvpprofiletable show_if_empty=&quot;phone&quot;]CONDITIONAL CONTENT GOES HERE[/rsvpprofiletable] This section only shown if the required field is empty; otherwise displays a message that the info is &quot;on file&quot;. Because RSVPMaker is capable of looking up profile data based on an email address, you may want some data to be hidden for privacy reasons.</p>
 <p>[rsvpguests] Outputs the guest blanks.</p>
 
-<p>If you're having trouble with the form fields not being formatted correctly, <a href="../../../../wp-content/plugins/rsvpmaker/options-general.php?page=rsvpmaker-admin.php&amp;reset_form=1">Reset default RSVP Form</a></p>            
-            
+<p>If you're having trouble with the form fields not being formatted correctly, <a href="<?php echo admin_url('options-general.php?page=rsvpmaker-admin.php&amp;reset_form=1');?>">Reset default RSVP Form</a></p>
 <?php
 
 }
