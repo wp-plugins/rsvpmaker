@@ -2645,13 +2645,14 @@ if(isset($rsvp_options["dashboard_message"]) && !empty($rsvp_options["dashboard_
 	echo '<div>'.$rsvp_options["dashboard_message"].'</div>';
 
 echo '<p><strong>'.__('My Events','rsvpmaker').'</strong><br /></p>';
-$sql = "SELECT $wpdb->posts.ID, $wpdb->posts.post_title, ".$wpdb->prefix."rsvp_dates.datetime FROM $wpdb->posts JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID = ".$wpdb->prefix."rsvp_dates.postID WHERE post_author=$current_user->ID AND datetime > CURDATE() ORDER BY datetime";
+$sql = "SELECT $wpdb->posts.ID, $wpdb->posts.post_title, $wpdb->posts.post_status, ".$wpdb->prefix."rsvp_dates.datetime FROM $wpdb->posts JOIN ".$wpdb->prefix."rsvp_dates ON $wpdb->posts.ID = ".$wpdb->prefix."rsvp_dates.postID WHERE post_author=$current_user->ID AND datetime > CURDATE()  AND (post_status='publish' OR post_status='draft') ORDER BY datetime ";
 $results = $wpdb->get_results($sql);
 if($results)
 	{
 		foreach ($results as $index => $row)
 		{
-			printf('<p><a href="%s">('.__('Edit','rsvpmaker').')</a> <a href="%s">%s %s</a></p>',admin_url('post.php?action=edit&post='.$row->ID),get_post_permalink($row->ID), $row->post_title, date($rsvp_options["long_date"],strtotime($row->datetime)) );
+			$draft = ($row->post_status == 'draft') ? ' (draft)' : '';
+			printf('<p><a href="%s">('.__('Edit','rsvpmaker').')</a> <a href="%s">%s %s%s</a></p>',admin_url('post.php?action=edit&post='.$row->ID),get_post_permalink($row->ID), $row->post_title, date($rsvp_options["long_date"],strtotime($row->datetime)), $draft );
 			if($index == 10)
 				{
 				printf('<p><a href="%s">&gt; &gt; '.__('More','rsvpmaker').'</a></p>',admin_url('edit.php?post_type=rsvpmaker&rsvpsort=chronological&author='.$current_user->ID) );
