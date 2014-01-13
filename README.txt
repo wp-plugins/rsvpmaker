@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.8
-Stable tag: 3.0.1
+Stable tag: 3.0.2
 
 Event scheduling and RSVP tracking.
 
@@ -28,9 +28,13 @@ When used with an additional plugin, [RSVPMaker Excel](http://wordpress.org/exte
 Related plugin: [__ChimpBlast__](http://wordpress.org/extend/plugins/chimpblast/) for sending event invites and other email broadcasts through the MailChimp broadcast email service.
 
 Translations:
+
 Spanish: Andrew Kurtis, [__WebHostingHub__](http://www.webhostinghub.com/)
+
 Polish: Jarosław Żeliński
+
 Norwegian: Thomas Nybø
+
 Thank you!
 
 == Installation ==
@@ -86,6 +90,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 3.0.2 =
+
+* Tweaked code to avoid overwriting event post slugs that have been set manually.
+* Updated translation for Norwegian
 
 = 3.0.1 =
 

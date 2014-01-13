@@ -17,24 +17,36 @@ function date_slug($data) {
 			}
 		}
 	
-	if(isset($_POST["edit_month"]) )
-		{
-		$each = each($_POST["edit_year"]);
-		$y = (int) $each["value"];
-		$m = (int) $_POST["edit_month"][$each["key"]];
-		$d = (int) $_POST["edit_day"][$each["key"]];
-		$date = $y.'-'.$m.'-'.$d;
-	
-		if (empty($data['post_name']) || !strpos($data['post_name'],$date) ) {
-			$data['post_name'] = sanitize_title($data['post_title'], $post_ID);
-			$data['post_name'] .= '-' .$date;
-			}
-		}
-
-    return $data;
+	return $data;
 }
 
 add_filter('wp_insert_post_data', 'date_slug', 10);
+
+function unique_date_slug($slug, $post_ID = 0, $post_status = '', $post_type = '', $post_parent = 0, $original_slug='' )
+	{
+	global $post;
+	global $wpdb;
+	if($post->post_type != 'rsvpmaker')
+		return $slug;
+	if($post->post_status != 'publish')
+		return $slug;
+	
+	if(!preg_match('/-[\d]{0,3}$/',$slug) )
+		return $slug;
+	
+	$sql = "SELECT DATE_FORMAT(datetime,'%Y-%c-%e') from ". $wpdb->prefix."rsvp_dates WHERE postID=$post->ID ORDER BY datetime";
+	$date = $wpdb->get_var($sql);
+	
+	$newslug = sanitize_title($post->post_title) .'-' .$date;
+	$check_sql = $wpdb->prepare("SELECT post_name FROM $wpdb->posts WHERE post_name = %s AND post_type = %s AND ID != %d LIMIT 1",$newslug, $post->post_type, $post->ID);
+	$post_name_check = $wpdb->get_var(  $check_sql );
+	if($post_name_check)
+		return $slug;
+	else
+		return $newslug;
+	}
+
+add_filter('wp_unique_post_slug','unique_date_slug',10);
 
 function save_calendar_data($postID) {
 
