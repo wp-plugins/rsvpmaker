@@ -993,6 +993,10 @@ $rsvpconfirm = '';
 if($post->post_type != 'rsvpmaker' )
 	return $content;
 
+if ( post_password_required( $post ) ) {
+    return $content;
+  }
+
 //On return from paypal payment process, show confirmation
 if(isset($_GET["PayerID"]))
 	return paypal_payment();
