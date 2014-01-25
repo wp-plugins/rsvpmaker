@@ -6,8 +6,8 @@ Donate link: http://rsvpmaker.com/
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
-Tested up to: 3.8
-Stable tag: 3.0.4
+Tested up to: 3.8.1
+Stable tag: 3.0.5
 
 Event scheduling and RSVP tracking.
 
@@ -90,6 +90,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 3.0.5 = 
+
+Additional rsvpmaker_upcoming attribute of one="next" or one="slug-here" or one="123" (post id) to [highlight a single event in a page or blog post](http://rsvpmaker.com/2014/01/embedding-a-single-event-in-a-page-or-post/).
 
 = 3.0.4 =
 

@@ -390,6 +390,8 @@ $no_events = (isset($atts["no_events"]) && $atts["no_events"]) ? $atts["no_event
 global $post;
 global $wp_query;
 global $wpdb;
+global $showbutton;
+$showbutton = true;
 
 $backup = $wp_query;
 
@@ -402,6 +404,15 @@ add_filter('posts_distinct', 'rsvpmaker_distinct' );
 $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
 $querystring = "post_type=rsvpmaker&post_status=publish&paged=$paged";
+
+if(isset($atts["one"]))
+	{
+	$querystring .= "&posts_per_page=1";
+	if(is_numeric($atts["one"]))
+		$querystring .= '&p='.$atts["one"];
+	elseif($atts["one"] != 'next')
+		$querystring .= '&name='.$atts["one"];
+	}
 if(isset($atts["type"]))
 	$querystring .= "&rsvpmaker-type=".$atts["type"];
 if(isset($atts["limit"]))
@@ -431,6 +442,8 @@ if(isset($atts["calendar"]) || (isset($atts["format"]) && ($atts["format"] == "c
 	$atts["format"] = "calendar";
 	echo event_listing($atts);
 	}
+
+echo '<div class="rsvpmaker_upcoming">';
 	
 if ( have_posts() ) {
 while ( have_posts() ) : the_post();?>
@@ -463,11 +476,13 @@ if(is_admin() )
 	}
 endwhile;
 ?>
-<p><?php 
-get_next_events_link(__('More Events','rsvpmaker'));
+<p><?php
+if(!isset($atts['one'])) 
+	get_next_events_link(__('More Events','rsvpmaker'));
 } 
 else
 	echo "<p>$no_events</p>\n";
+echo '</div>';
 $wp_query = $backup;
 
 wp_reset_postdata();

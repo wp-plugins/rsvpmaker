@@ -987,6 +987,7 @@ global $post;
 global $rsvp_options;
 global $profile;
 global $guestedit;
+global $showbutton;
 $rsvpconfirm = '';
 
 //If the post is not an event, leave it alone
@@ -1042,7 +1043,7 @@ if(isset($_GET["rsvp"]))
 ';
 	}
 
-if($e && is_single())
+if($e && is_single() && !$showbutton)
 	{
 	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=".$post->ID." AND email='".$e."'";
 	$rsvprow = $wpdb->get_row($sql, ARRAY_A);
@@ -1166,7 +1167,7 @@ elseif(($rsvp_on && is_admin()) ||  ($rsvp_on && isset($_GET["load"]))) // when 
 	$content .= sprintf($rsvp_options["rsvplink"],$rsvplink );
 elseif($rsvp_on && $login_required && !is_user_logged_in()) // show button, coded to require login
 	$content .= sprintf($rsvp_options["rsvplink"],$rsvplink );
-elseif($rsvp_on && !is_single()) // show button
+elseif($rsvp_on && (!is_single() || $showbutton ) ) // show button
 	$content .= sprintf($rsvp_options["rsvplink"],$rsvplink );
 elseif($rsvp_on && is_single() )
 	{
