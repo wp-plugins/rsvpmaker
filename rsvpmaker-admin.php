@@ -1463,12 +1463,15 @@ if(isset($_GET["noeventpageok"]) && $_GET["noeventpageok"])
 	$rsvp_options["noeventpageok"] = 1;
 	update_option('RSVPMAKER_Options',$options);
 	}
-elseif(!isset($rsvp_options["eventpage"]) && !isset($rsvp_options["noeventpageok"]))
+elseif( (!isset($rsvp_options["eventpage"]) || empty($rsvp_options["eventpage"]) ) && !isset($rsvp_options["noeventpageok"]))
 	{
 	$sql = "SELECT ID from $wpdb->posts WHERE post_status='publish' AND post_content LIKE '%[rsvpmaker_upcoming%' ";
+	$front = get_option('page_on_front');
+	if($front)
+		$sql .= " AND ID != $front ";
 	if($id =$wpdb->get_var($sql))
 		{
-		$rsvp_options["eventpage"] = get_post_permalink($id);
+		$rsvp_options["eventpage"] = get_permalink($id);
 		update_option('RSVPMAKER_Options',$rsvp_options);
 		}
 	else

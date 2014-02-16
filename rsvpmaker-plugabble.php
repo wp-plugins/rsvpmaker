@@ -988,6 +988,8 @@ global $rsvp_options;
 global $profile;
 global $guestedit;
 global $showbutton;
+global $events_displayed;
+$events_displayed[] = $post->ID;
 $rsvpconfirm = '';
 
 //If the post is not an event, leave it alone
@@ -1103,6 +1105,7 @@ if($results)
 $start = 2;
 $firstrow = NULL;
 $dateblock = '';
+global $last_time;
 foreach($results as $row)
 	{
 	if(!$firstrow)

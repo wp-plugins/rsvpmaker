@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 3.8.1
-Stable tag: 3.0.5
+Stable tag: 3.0.6
 
 Event scheduling and RSVP tracking.
 
@@ -90,6 +90,10 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 3.0.6 =
+
+Bug fix: correct handing of "More Events" link. The "events page" field on the RSVPMaker settings screen should be set to a full url like http://rsvpmaker.com/events/
 
 = 3.0.5 = 
 

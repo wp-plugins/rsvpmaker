@@ -326,6 +326,15 @@ function get_next_events_link( $label = '', $max_page = 0 ) {
 	global $paged, $wp_query;
 	global $rsvp_options;
 
+	if(isset($rsvp_options["eventpage"]) && !strpos($rsvp_options["eventpage"],'://') )
+		{ // hack for entries set as slug rather than full url
+		global $wpdb;
+		$id = $wpdb->get_var("SELECT ID from $wpdb->posts WHERE post_name='".$rsvp_options["eventpage"]."' AND post_status='publish'");
+		if($id)
+		$rsvp_options["eventpage"] = get_permalink($id);
+		update_option('RSVPMAKER_Options',$rsvp_options);
+		}
+
 	if ( !$max_page )
 		$max_page = $wp_query->max_num_pages;
 
@@ -336,14 +345,17 @@ function get_next_events_link( $label = '', $max_page = 0 ) {
 	$link = '';
 
 	if ( $nextpage > 2 ) {
-		$link = '<a href="' . site_url() . '/' . $rsvp_options["eventpage"] ."\">&laquo; " . __('Events Home','rsvpmaker') . '</a>';
+		$link = '<a href="' . $rsvp_options["eventpage"] ."\">&laquo; " . __('Events Home','rsvpmaker') . '</a>';
 	}
 
 	if ( !is_single() && ( $nextpage <= $max_page ) ) {
 		$attr = apply_filters( 'next_posts_link_attributes', '' );
 		if($link)
 			$link .= " | ";
-		$link .= '<a href="' . site_url() . '/' . $rsvp_options["eventpage"] .'/page/'.$nextpage."/\" $attr>" . $label . ' &raquo;</a>';
+		if( strpos($rsvp_options["eventpage"],'?') )
+			$link .= '<a href="' . $rsvp_options["eventpage"] .'&paged='.$nextpage."\" $attr>" . $label . ' &raquo;</a>';		
+		else 
+			$link .= '<a href="' . $rsvp_options["eventpage"] .'page/'.$nextpage."/\" $attr>" . $label . ' &raquo;</a>';
 	}
 	
 	if(isset($link))
@@ -361,8 +373,22 @@ function rsvpmaker_join($join) {
 
 function rsvpmaker_where($where) {
 
+global $startday;
+
 if(isset($_GET["cm"]))
 	return $where . " AND datetime > '".$_GET["cy"]."-".$_GET["cm"]."-0'";
+elseif(isset($startday) && $startday)
+	{
+		$t = strtotime($startday);
+		$d = date('Y-m-d',$t);
+		return $where . " AND datetime > '$d'";
+	}
+elseif(isset($_GET["startday"]))
+	{
+		$t = strtotime($_GET["startday"]);
+		$d = date('Y-m-d',$t);
+		return $where . " AND datetime > '$d'";
+	}
 else
 	return $where . " AND datetime > CURDATE( )";
 
@@ -391,6 +417,13 @@ global $post;
 global $wp_query;
 global $wpdb;
 global $showbutton;
+global $startday;
+
+if(isset($atts["startday"]))
+	{
+    $startday = $atts["startday"];
+	}
+
 $showbutton = true;
 
 $backup = $wp_query;
@@ -437,6 +470,20 @@ remove_filter('posts_distinct', 'rsvpmaker_distinct' );
 
 ob_start();
 
+if(isset($atts["demo"]))
+	{
+		$demo = "<div><strong>Shortcode:</strong></div>\n<code>[rsvpmaker_upcoming";
+		foreach($atts as $name => $value)
+			{
+			if($name == "demo")
+				continue;
+			$demo .= ' '.$name.'="'.$value.'"';
+			}
+		$demo .= "]</code>\n";
+		$demo .= "<div><strong>Output:</strong></div>\n";
+		echo $demo;
+	}
+
 if(isset($atts["calendar"]) || (isset($atts["format"]) && ($atts["format"] == "calendar") ) )
 	{
 	$atts["format"] = "calendar";
@@ -446,7 +493,8 @@ if(isset($atts["calendar"]) || (isset($atts["format"]) && ($atts["format"] == "c
 echo '<div class="rsvpmaker_upcoming">';
 	
 if ( have_posts() ) {
-while ( have_posts() ) : the_post();?>
+while ( have_posts() ) : the_post();
+?>
 
 <div id="post-<?php the_ID();?>" <?php post_class();?> itemscope itemtype="http://schema.org/Event" >  
 <h1 class="entry-title"><a href="<?php the_permalink(); ?>"  itemprop="url"><span itemprop="name"><?php the_title(); ?></span></a></h1>
@@ -532,6 +580,58 @@ if($post->post_type == 'rsvpmaker')
 	return true;
 else
 	return false;
+}
+
+add_shortcode('rsvpmaker_looking_ahead','rsvpmaker_looking_ahead');
+
+function rsvpmaker_looking_ahead($atts) {
+global $last_time;
+global $events_displayed;
+
+if(!$last_time)
+	return 'last time not found';
+global $wpdb;
+$sql = "SELECT *, $wpdb->posts.ID as postID
+FROM `".$wpdb->prefix."rsvp_dates`
+JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
+WHERE datetime > '".date('Y-m-d',$last_time)."' AND datetime < DATE_ADD('".date('Y-m-d',$last_time)."',INTERVAL 6 WEEK) AND $wpdb->posts.post_status = 'publish'
+ORDER BY datetime LIMIT 0,10";
+
+$results = $wpdb->get_results($sql,ARRAY_A);
+
+foreach($results as $row)
+	{
+	if(in_array($row["postID"], $events_displayed) )
+		continue;
+		
+	$t = strtotime($row["datetime"]);
+	if($dateline[$row["postID"]])
+		$dateline[$row["postID"]] .= ", ";
+	$dateline[$row["postID"]] .= date('M. j',$t);
+	$eventlist[$row["postID"]] = $row;
+	}
+
+//strpos test used to catch either "headline" or "headlines"
+if($eventlist)
+{
+foreach($eventlist as $event)
+	{
+	if($atts["permalinkhack"])
+		$permalink = site_url() ."?p=".$event["postID"];
+	else
+		$permalink = get_post_permalink($event["postID"]);
+	$listings .= sprintf('<li><a href="%s">%s</a> %s</li>'."\n",$permalink,$event["post_title"],$dateline[$event["postID"]]);
+	}
+
+	if($atts["limit"] && $rsvp_options["eventpage"])
+		$listings .= '<li><a href="'.$rsvp_options["eventpage"].'">'.__("Go to Events Page",'rsvpmaker')."</a></li>";
+
+	if($atts["title"])
+		$listings = "<p><strong>".$atts["title"]."</strong></p>\n<ul id=\"eventheadlines\">\n$listings</ul>\n";
+	else
+		$listings = "<ul id=\"eventheadlines\">\n$listings</ul>\n";
+}//end if $eventlist
+return $listings;
 }
 
 ?>
