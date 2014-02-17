@@ -124,9 +124,9 @@ foreach($eventlist as $event)
 
 function cp_show_calendar($eventarray) 
 {
-$cm = $_GET["cm"];
-$cy = $_GET["cy"];
-$self = $req_uri = get_post_permalink($event);
+$cm = $_REQUEST["cm"];
+$cy = $_REQUEST["cy"];
+$self = $req_uri = get_permalink();
 $req_uri .= (strpos($req_uri,'?') ) ? '&' : '?';
 
 if (!isset($cm) || $cm == 0)
@@ -163,7 +163,7 @@ $nm = mktime(0, 0, 1, $cm+1, 1, $cy);
 $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
 
 	$page_id = (isset($_GET["page_id"])) ? '<input type="hidden" name="page_id" value="'. (int) $_GET["page_id"].'" />' : '';
-   $jump_form = sprintf('<form id="jumpform" action="%s" method="get"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" >%s</form>', $self,date('m',$monthafter),date('Y',$monthafter),$page_id);
+   $jump_form = sprintf('<form id="jumpform" action="%s" method="post"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" >%s</form>', $self,date('m',$monthafter),date('Y',$monthafter),$page_id);
 
 // $Id: cal.php,v 1.47 2003/12/31 13:04:27 goba Exp $
 
@@ -174,7 +174,7 @@ $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
 //     '<td align="right" width="33%">' . $next_link . "</td></tr>\n</table>\n";
 
 // Begin the calendar table
-$content .= '<table id="cpcalendar" width="100%" cellspacing="0" cellpadding="3"><caption>'.strftime('<b>%B %Y</b></td>', $bom)."</caption>\n".'<tr>'."\n";
+$content .= '<table id="cpcalendar" width="100%" cellspacing="0" cellpadding="3"><caption>'.strftime('<b>%B %Y</b>', $bom)."</caption>\n".'<tr>'."\n";
 
 $content .= '<thead>
 <tr> 
@@ -375,8 +375,8 @@ function rsvpmaker_where($where) {
 
 global $startday;
 
-if(isset($_GET["cm"]))
-	return $where . " AND datetime > '".$_GET["cy"]."-".$_GET["cm"]."-0'";
+if(isset($_REQUEST["cm"]))
+	return $where . " AND datetime > '".$_REQUEST["cy"]."-".$_REQUEST["cm"]."-0'";
 elseif(isset($startday) && $startday)
 	{
 		$t = strtotime($startday);
