@@ -740,7 +740,7 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 		   	$invoice=$_REQUEST['invoice'];
 		   $_SESSION["invoice"] = $invoice;
 		   $desc=$_REQUEST['desc'];
-			$email = $_REQUEST['email'];
+			$_SESSION["payer_email"] = $email = $_REQUEST['email'];
 
 		 /* The returnURL is the location where buyers return when a
 			payment has been succesfully authorized.
@@ -855,6 +855,8 @@ if(!function_exists('paypal_payment') )
 {
 function paypal_payment() {
 
+ob_start();
+
 $resArray = $_SESSION["reshash"];
 
 	if($id = $_SESSION["invoice"])
@@ -864,8 +866,8 @@ $resArray = $_SESSION["reshash"];
 	$wpdb->query($sql);
 	}
 
-	return '<div id="paypal_thank_you">
-	<h1>Thank you for your payment!</h1>
+	$message = '<div id="paypal_thank_you">
+	<h1>Thank you for your payment!!</h1>
     <table>
         <tr>
             <td>
@@ -881,6 +883,8 @@ $resArray = $_SESSION["reshash"];
 	</div>
 ';
 
+do_action('log_paypal',$message);
+return $message;
 } } // end paypal payment
 
 if(!function_exists('paypal_error'))
@@ -888,21 +892,37 @@ if(!function_exists('paypal_error'))
 function paypal_error() {
 
 $resArray=$_SESSION['reshash']; 
-;?>
+ob_start();
+?>
 
 <h1><?php _e('PayPal Error','rsvpmaker'); ?></h1>
 <p>
-<?php  //it will print if any URL errors 
+<?php
+
+	if($id = $_SESSION["invoice"])
+	{
+	global $wpdb;
+	$sql = $wpdb->prepare("select * FROM ".$wpdb->prefix."rsvpmaker where id=%d",$id);
+	$row = $wpdb->get_row($sql);
+	$paid = (int) $row->amountpaid;
+	if($paid)
+		{
+		_e('Confirmed paid','rsvpmaker');
+		?>: <?php echo  $paid ;?><br />
+		<?php	
+		_e('Note: You may see this error message after a transaction has already gone through (Paypal is trying to avoid charging you twice).','rsvpmaker');
+		echo "<br /><br />\n";
+		}
+	}
+
+  //it will print if any URL errors 
 	if(isset($_SESSION['curl_error_no'])) { 
 			$errorCode= $_SESSION['curl_error_no'] ;
 			$errorMessage=$_SESSION['curl_error_msg'] ;	
 			session_unset();	
 ;?>
-
    
-<?php _e('Error Number','rsvpmaker'); ?>: <?php echo  $errorCode ;?><br />
-<?php _e('Error Message','rsvpmaker'); ?>:
-		<?php echo  $errorMessage ;?>
+<?php _e('Error Message','rsvpmaker'); ?>: <?php echo  $errorMessage ;?>
 	<br />
 	
 <?php } else {
@@ -912,16 +932,13 @@ $resArray=$_SESSION['reshash'];
    */
 ;?>
 
-		<?php _e('Ack Code','rsvpmaker'); ?>:
-		<?php echo  $resArray['ACK'] ;?>
+		<?php _e('Ack Code','rsvpmaker'); ?>: <?php echo  $resArray['ACK'] ;?>
 	<br />
 	
-		<?php _e('Correlation ID','rsvpmaker'); ?>:
-		<?php echo  $resArray['CORRELATIONID'] ;?>
+		<?php _e('Correlation ID','rsvpmaker'); ?>: <?php echo  $resArray['CORRELATIONID'] ;?>
 	<br />
 	
-		<?php _e('Version','rsvpmaker'); ?>:
-		<?php echo  $resArray['VERSION'];?>
+		<?php _e('Version','rsvpmaker'); ?>: <?php echo  $resArray['VERSION'];?>
 	<br />
 <?php
 	$count=0;
@@ -930,25 +947,23 @@ $resArray=$_SESSION['reshash'];
 		  $shortMessage = $resArray["L_SHORTMESSAGE".$count];
 		  $longMessage  = $resArray["L_LONGMESSAGE".$count]; 
 		  $count=$count+1; 
-;?>
+?>
 	
-		<?php _e('Error Number','rsvpmaker'); ?>:
-		<?php echo  $errorCode ;?>
+		<?php _e('Error Number','rsvpmaker'); ?>: <?php echo  $errorCode ;?>
 	<br />
 	
-		<?php _e('Short Message','rsvpmaker'); ?>:
-		<?php echo  $shortMessage ;?>
+		<?php _e('Short Message','rsvpmaker'); ?>: <?php echo  $shortMessage ;?>
 	<br />
 	
-		<?php _e('Long Message','rsvpmaker'); ?>:
-		<?php echo  $longMessage ;?>
+		<?php _e('Long Message','rsvpmaker'); ?>: <?php echo  $longMessage ;?>
 	<br />
 	
 <?php }//end while
 }// end else
 
-
-	return;
+$message = ob_get_clean();
+do_action('log_paypal',$message);
+return $message;
 } } // end paypal error
 
 if(!function_exists('event_scripts'))
@@ -1066,11 +1081,7 @@ if($e && is_single() && !$showbutton)
     </p>
   <p>Email: <input name="email" type="text" id="email" size="40"  value="'.$e.'" >
     </p>
-<input name="desc" type="hidden" id="desc" value="'.htmlentities($post->post_title).'" >
-<input name="invoice" type="hidden" id="invoice" value="'.$rsvprow["id"].'" >
-<input name="permalink" type="hidden" id="permalink" value="'.$permalink.'" >
-<input name="rsvp-pp-nonce" type="hidden" id="rsvp-pp-nonce" value="'.$nonce.'" >
-<input type="submit" name="Submit" value="'. __('Next','rsvpmaker').' &gt;&gt;">
+<p><input name="desc" type="hidden" id="desc" value="'.htmlentities($post->post_title).'" ><input name="invoice" type="hidden" id="invoice" value="'.$rsvprow["id"].'" ><input name="permalink" type="hidden" id="permalink" value="'.$permalink.'" ><input name="rsvp-pp-nonce" type="hidden" id="rsvp-pp-nonce" value="'.$nonce.'" ><input type="submit" name="Submit" value="'. __('Next','rsvpmaker').' &gt;&gt;"></p>
 </form> 
 
 <p>'.__('Secure payment processing is provided by <strong>PayPal</strong>. After you click &quot;Next,&quot; we will transfer you to the PayPal website, where you can pay by credit card or with a PayPal account.','rsvpmaker').' </p>';
@@ -1353,7 +1364,7 @@ if(isset($_GET["delete"]) && current_user_can('edit_others_posts'))
 
 if(isset($_GET["event"]))
 	{
-$eventid = (int) $_GET["event"];	
+$eventid = (int) $_GET["event"];
 $sql = "SELECT *
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."posts.ID WHERE ".$wpdb->prefix."posts.ID = $eventid";
@@ -1365,12 +1376,24 @@ JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->pre
 	echo "<h2>".__("RSVPs for",'rsvpmaker')." ".$title."</h2>\n";
 	if(!isset($_GET["rsvp_print"]))
 		{
-		echo '<div style="float: right; margin-left: 15px; margin-bottom: 15px;"><a href="edit.php?post_type=rsvpmaker&page=rsvp">Show Events List</a>
-<a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=alpha">Alpha Order</a> <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=timestamp">Most Recent First</a>		
+		echo '<div style="float: right; margin-left: 15px; margin-bottom: 15px;"><a href="edit.php?post_type=rsvpmaker&page=rsvp">Show Events List</a> |
+<a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=alpha">Alpha Order</a> <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=timestamp">Most Recent First</a> | <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=alpha">Alpha Order</a>
 		</div>';
 		echo '<p><a href="'.$_SERVER['REQUEST_URI'].'&rsvp_print='.wp_create_nonce('rsvp_print').'" target="_blank" >Format for printing</a></p>';	
+		echo '<p><a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&paypal_log=1">Show PayPal Log</a></p>';
 		echo '<p><a href="#excel">Download to Excel</a></p>';
 		}
+
+	if($_GET["paypal_log"])
+	{
+		$log = get_post_meta($eventid,"_paypal_log");
+		if($log)
+		{
+		echo '<div style="border: thin solid red; padding: 5px;"><strong>PayPal</strong><br />';
+		echo implode('',$log);
+		echo '</div>';
+		}
+	}
 
 	$rsvp_order = (isset($_GET["rsvp_order"]) && ($_GET["rsvp_order"] == 'alpha')) ? ' ORDER BY yesno DESC, last, first' : ' ORDER BY yesno DESC, timestamp DESC';
 	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid $rsvp_order";

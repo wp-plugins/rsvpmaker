@@ -70,13 +70,13 @@ elseif($_GET["cy"])
 	$sql = "SELECT *, $wpdb->posts.ID as postID, 1 as current
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
-WHERE datetime > '".$_GET["cy"] .'-'. $_GET["cm"].'-0'."' AND $wpdb->posts.post_status = 'publish'
+WHERE datetime >= '".$_GET["cy"] .'-'. $_GET["cm"].'-1'."' AND $wpdb->posts.post_status = 'publish'
 ORDER BY datetime";
 else
 	$sql = "SELECT *, $wpdb->posts.ID as postID, datetime > CURDATE( ) as current
 FROM `".$wpdb->prefix."rsvp_dates`
 JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
-WHERE datetime > '".date('Y-m-0')."' AND $wpdb->posts.post_status = 'publish'
+WHERE datetime >= '".date('Y-m')."-1' AND $wpdb->posts.post_status = 'publish'
 ORDER BY datetime";
 
 if($atts["limit"])
@@ -97,6 +97,9 @@ foreach($results as $row)
 
 if($atts["calendar"] || $atts["format"] == 'calendar')
 	$listings .= cp_show_calendar($cal);
+
+if($atts["css_calendar"])
+	$listings .= css_table_calendar($cal);
 
 //strpos test used to catch either "headline" or "headlines"
 if($eventlist && ( $atts["format"] == 'headline' || $atts["format"] == 'headlines') )
@@ -489,6 +492,8 @@ if(isset($atts["calendar"]) || (isset($atts["format"]) && ($atts["format"] == "c
 	$atts["format"] = "calendar";
 	echo event_listing($atts);
 	}
+if( isset($atts["css_calendar"]))
+	echo event_listing($atts);
 
 echo '<div class="rsvpmaker_upcoming">';
 	
@@ -505,7 +510,7 @@ while ( have_posts() ) : the_post();
 </div><!-- .entry-content -->
 
 <?php
-if(!$atts["hideauthor"])
+if(!isset($atts["hideauthor"]) || !$atts["hideauthor"])
 {
 $authorlink = sprintf( '<span class="author vcard"><a class="url fn n" href="%1$s" title="%2$s">%3$s</a></span>',
 	get_author_posts_url( get_the_author_meta( 'ID' ) ),

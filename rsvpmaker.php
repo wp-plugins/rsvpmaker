@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Events are implemented as custom post types, so you get all your familiar post editing tools with extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. Recurring events can be tracked according to a schedule such as "First Monday" or "Every Friday" at a specified time, and the software will calculate future dates according to that schedule and let you track them together. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 3.0.7
+Version: 3.0.8
 Author URI: http://www.carrcommunications.com
 */
 
@@ -110,7 +110,7 @@ add_action( 'init', 'rsvpmaker_create_post_type' );
 function rsvpmaker_create_post_type() {
 global $rsvp_options;
 $menu_label = (isset($rsvp_options["menu_label"])) ? $rsvp_options["menu_label"] : __("RSVP Events",'rsvpmaker');
-$supports = ( isset($rsvp_options["rsvpmaker_supports"]) ) ? $rsvp_options["rsvpmaker_supports"] : array('title','editor','author','excerpt','custom-fields');
+$supports = array('title','editor','author','excerpt','custom-fields','thumbnail');
 
   register_post_type( 'rsvpmaker',
     array(
@@ -274,5 +274,19 @@ if(!is_array($templates) && strpos($templates, 'single-rsvpmaker' ) )
 return $templates;
 }
 add_filter( 'single_template', 'rsvpmaker_template_order' );
+
+function log_paypal($message) {
+global $post;
+$id = $_SESSION["invoice"];
+$ts = date('r');
+$message .= "\n<br /><br />Post ID: ".$post->ID;
+$message .= "\n<br />Invoice: ".$id;
+$message .= "\n<br />Email: ".$_SESSION["payer_email"];
+$message .= "\n<br />Time: ".$ts;
+$resArray = $_SESSION["reshash"];
+add_post_meta($post->ID, '_paypal_log', $message);
+}
+
+add_action('log_paypal','log_paypal');
 
 ?>
