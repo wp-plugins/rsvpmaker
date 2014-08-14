@@ -1035,7 +1035,7 @@ if(isset($custom_fields["_rsvp_to"][0]))
 $rsvp_to = $custom_fields["_rsvp_to"][0];
 if(isset($custom_fields["_rsvp_max"][0]))
 $rsvp_max = $custom_fields["_rsvp_max"][0];
-$rsvp_count = (isset($custom_fields["_rsvp_count"][0])) ? $custom_fields["_rsvp_count"][0] : 1;
+$rsvp_count = (isset($custom_fields["_rsvp_count"][0]) && $custom_fields["_rsvp_count"][0]) ? 1 : 0;
 $rsvp_show_attendees = (isset($custom_fields["_rsvp_show_attendees"][0]) && $custom_fields["_rsvp_show_attendees"][0]) ? 1 : 0;
 if(isset($custom_fields["_rsvp_deadline"][0]) && $custom_fields["_rsvp_deadline"][0])
 	$deadline = (int) $custom_fields["_rsvp_deadline"][0];
@@ -2038,6 +2038,198 @@ else {
 return $dayarray[$index];
 }
 
+if(!function_exists('rsvp_template_update_checkboxes') )
+{
+function rsvp_template_update_checkboxes($t) {
+global $wpdb;
+global $current_user;
+
+$template = get_post_meta($t,'_sked',true);
+$hour = (int) $template["hour"];
+$minutes = $template["minutes"];
+$week = (int) $template["week"];
+$dow = (int) $template["dayofweek"];
+$cy = date("Y");
+$cm = date("m");
+$cd = date("j");
+
+$schedule = ($week == 0) ? __('Schedule Varies','rsvpmaker') : rsvpmaker_week($week).' '.rsvpmaker_day($dow);
+
+	global $current_user;
+	$sql = "SELECT $wpdb->posts.ID postID, $wpdb->posts.post_title, $wpdb->posts.post_author, ".$wpdb->prefix."rsvp_dates.datetime, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
+		
+	$wpdb->show_errors();
+	$sched_result = $wpdb->get_results($sql);
+	
+	if($sched_result)
+	foreach($sched_result as $index => $sched)
+		{
+		$a = ($index % 2) ? "" : "alternate";
+		$thistime = strtotime($sched->datetime);
+		$nomeeting .= sprintf('<option value="%s">%s (%s)</option>',$sched->postID,date('F j, Y',$thistime), __('Already Scheduled','rsvpmaker'));
+		$cy = date("Y",$thistime); // advance starting time
+		$cm = date("m",$thistime);
+		$cd = date("j",$thistime);
+		if ( current_user_can( "delete_post", $sched->postID ) ) {
+				$delete_text = __('Move to Trash');
+			$d = '<a class="submitdelete deletion" href="'. get_delete_post_link($sched->postID) . '">'. $delete_text . '</a>';
+		}
+		else
+			$d = '-';
+		$edit = (($sched->post_author == $current_user->ID) || $template_editor) ? sprintf('<a href="%s?post=%d&action=edit">'.__('Edit','rsvpmaker').'</a>',admin_url("post.php"),$sched->postID) : '-';
+		$editlist .= sprintf('<tr class="%s"><td><input type="checkbox" name="update_from_template[]" value="%s" /></td><td>%s</td><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',$a,$sched->postID,$edit, $d,date('F d, Y',$thistime),get_post_permalink($sched->postID),$sched->post_title);
+		$updatelist .= sprintf('<p class="%s"><input type="checkbox" name="update_from_template[]" value="%s" /><em>%s</em> %s %s</p>',$a,$sched->postID,__('Update','rsvpmaker'),$sched->post_title,date('F d, Y',$thistime) );
+
+		}
+
+if(isset($updatelist))
+	$updatelist = "<p>".__('Already Scheduled')."</p>\n".'<fieldset>
+<div><input type="checkbox" class="checkall"> '.__('Check all','rsvpmaker').'</div>'."\n"
+.$updatelist."\n</fieldset>\n";
+
+if($week == 6)
+	{
+	$stop = 26;
+	$projected[0] = strtotime(rsvpmaker_day($dow,'strtotime'));
+	for ($i = 1; $i <= $stop; $i++)
+		{
+		$ts = $projected[$i - 1] + 604800;
+		$projected[$i] = $ts; // add numeric value for 1 week
+		}
+	}
+else {
+	//monthly
+	$futuremonths = 12;
+	for($i =0; $i < $futuremonths; $i++)
+		$projected[$i] = mktime(0,0,0,$cm+$i,1,$cy); // first day of month
+	if($week > 0)
+		{
+			if($week == 5)
+				$wtext = 'Last';
+			else
+				$wtext = '+'. ($week - 1) .' week';
+			foreach($projected as $i => $firstday)
+				{
+				$datetext =  "$wtext ".rsvpmaker_day($dow,'strtotime')." ".date("F Y",$firstday);
+				$projected[$i] = strtotime($datetext);
+				//printf('<p>%s %s</p>',$datetext,date('Y-m-d',$projected[$i]));
+				}
+		}
+	}
+
+foreach($projected as $i => $ts)
+{
+ob_start();
+$today = date('d',$ts);
+$cm = date('n',$ts);
+$y = date('Y',$ts);
+
+$y2 = $y+1;
+
+//echo "$ts $thistime<br />";
+if(isset($thistime) && ($ts <= $thistime))
+	continue; // omit dates past
+$nomeeting .= sprintf('<option value="%s">%s</option>',date('Y-m-d',$ts),date('F j, Y',$ts));
+
+?>
+<div style="font-family:Courier, monospace"><input name="recur_check[<?php echo $i; ?>]" type="checkbox" value="1">
+<?php _e('Month','rsvpmaker'); ?>: 
+              <select name="recur_month[<?php echo $i;?>]"> 
+              <option value="<?php echo $cm;?>"><?php echo $cm;?></option> 
+              <option value="1">1</option> 
+              <option value="2">2</option> 
+              <option value="3">3</option> 
+              <option value="4">4</option> 
+              <option value="5">5</option> 
+              <option value="6">6</option> 
+              <option value="7">7</option> 
+              <option value="8">8</option> 
+              <option value="9">9</option> 
+              <option value="10">10</option> 
+              <option value="11">11</option> 
+              <option value="12">12</option> 
+              </select> 
+            <?php _e('Day','rsvpmaker'); ?> 
+            <select name="recur_day[<?php echo $i;?>]"> 
+<?php
+	echo sprintf('<option value="%s">%s</option>',$today,$today);
+?>
+              <option value="">Not Set</option>
+              <option value="1">1</option> 
+              <option value="2">2</option> 
+              <option value="3">3</option> 
+              <option value="4">4</option> 
+              <option value="5">5</option> 
+              <option value="6">6</option> 
+              <option value="7">7</option> 
+              <option value="8">8</option> 
+              <option value="9">9</option> 
+              <option value="10">10</option> 
+              <option value="11">11</option> 
+              <option value="12">12</option> 
+              <option value="13">13</option> 
+              <option value="14">14</option> 
+              <option value="15">15</option> 
+              <option value="16">16</option> 
+              <option value="17">17</option> 
+              <option value="18">18</option> 
+              <option value="19">19</option> 
+              <option value="20">20</option> 
+              <option value="21">21</option> 
+              <option value="22">22</option> 
+              <option value="23">23</option> 
+              <option value="24">24</option> 
+              <option value="25">25</option> 
+              <option value="26">26</option> 
+              <option value="27">27</option> 
+              <option value="28">28</option> 
+              <option value="29">29</option> 
+              <option value="30">30</option> 
+              <option value="31">31</option> 
+            </select> 
+            <?php _e('Year','rsvpmaker'); ?>
+            <select name="recur_year[<?php echo $i;?>]"> 
+              <option value="<?php echo $y;?>"><?php echo $y;?></option> 
+              <option value="<?php echo $y2;?>"><?php echo $y2;?></option> 
+            </select>
+</div>
+
+<?php
+$add_date_checkbox .= ob_get_clean();
+if(!isset($add_one))
+	$add_one = str_replace('type="checkbox"','type="hidden"',$add_date_checkbox);
+} // end for loop
+
+$checkallscript = "<script>
+jQuery(function () {
+    jQuery('.checkall').on('click', function () {
+        jQuery(this).closest('fieldset').find(':checkbox').prop('checked', this.checked);
+    });
+});
+</script>
+";
+
+$action = admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$t);
+
+if(current_user_can('edit_rsvpmakers'))
+return sprintf('<div class="group_add_date"><br />
+<form method="post" action="%s">
+%s
+<div><strong>'.__('Projected Dates','rsvpmaker').':</strong></div>
+<fieldset>
+<div><input type="checkbox" class="checkall"> '.__('Check all','rsvpmaker').'</div>
+%s
+</fieldset>
+<br /><input type="submit" value="'.__('Add From Template','rsvpmaker').'" />
+<input type="hidden" name="template" value="%s" />
+</form>
+</div><br />
+%s',$action,$updatelist,$add_date_checkbox,$t,$checkallscript);
+
+return ob_get_clean();
+}
+}
+
 if(!function_exists('rsvp_template_checkboxes') )
 {
 function rsvp_template_checkboxes($t) {
@@ -2065,7 +2257,7 @@ $cm = date("m");
 $cd = date("j");
 
 $schedule = ($week == 0) ? __('Schedule Varies','rsvpmaker') : rsvpmaker_week($week).' '.rsvpmaker_day($dow);
-printf('<p>%s:</p><h2>%s</h2><h3>%s</h3>%s<blockquote><a href="%s">%s</a></blockquote>',__('Template','rsvpmaker'),$post->post_title,$schedule,wpautop($post->post_content),admin_url('post.php?action=edit&post='.$t),__('Edit Template','rsvpmaker'));
+printf('<p>%s:</p><h2>%s</h2><h3>%s</h3><blockquote><a href="%s">%s</a></blockquote>',__('Template','rsvpmaker'),$post->post_title,$schedule,admin_url('post.php?action=edit&post='.$t),__('Edit Template','rsvpmaker'));
 
 if($_GET["trashed"])
 	{
@@ -2073,6 +2265,24 @@ if($_GET["trashed"])
 		$message = '<a href="' . esc_url( wp_nonce_url( "edit.php?post_type=rsvpmaker&doaction=undo&action=untrash&ids=$ids", "bulk-posts" ) ) . '">' . __('Undo') . '</a>';
 		echo '<div id="message" class="updated"><p>' .__('Moved to trash','rsvpmaker'). ' '.$message . '</p></div>';
 	}
+
+
+if(isset($_POST["update_from_template"]))
+	{
+		foreach($_POST["update_from_template"] as $target_id)
+			{
+				if(!current_user_can('publish_rsvpmakers'))
+					{
+						echo '<div class="updated">Error</div>';
+						break;
+					}
+				
+				$sql = $wpdb->prepare("UPDATE $wpdb->posts SET post_title=%s, post_content=%s WHERE ID=%d",$post->post_title,$post->post_content,$target_id);
+				$wpdb->query($sql);
+				echo '<div class="updated">Updated: event #'.$target_id.' <a href="post.php?action=edit&post='.$target_id.'">Edit</a> / <a href="'.get_post_permalink($target_id).'">View</a></div>';	
+			}
+	}
+
 
 if(isset($_POST["recur_check"]) )
 {
@@ -2159,22 +2369,6 @@ if(isset($_POST["nomeeting"]) )
 				}
 		}		
 }
-
-if(isset($_POST["update_from_template"]))
-	{
-		foreach($_POST["update_from_template"] as $target_id)
-			{
-				if(!current_user_can('publish_rsvpmakers'))
-					{
-						echo '<div class="updated">Error</div>';
-						break;
-					}
-				
-				$sql = $wpdb->prepare("UPDATE $wpdb->posts SET post_title=%s, post_content=%s WHERE ID=%d",$post->post_title,$post->post_content,$target_id);
-				$wpdb->query($sql);
-				echo '<div class="updated">Updated: event #'.$target_id.' <a href="post.php?action=edit&post='.$target_id.'">Edit</a> / <a href="'.get_post_permalink($target_id).'">View</a></div>';	
-			}
-	}
 
 	global $current_user;
 	$sql = "SELECT $wpdb->posts.ID postID, $wpdb->posts.post_title, $wpdb->posts.post_author, ".$wpdb->prefix."rsvp_dates.datetime, DATE_FORMAT(".$wpdb->prefix."rsvp_dates.datetime,'%Y%m') as month, ".$wpdb->prefix."posts.ID as rsvp_id FROM ".$wpdb->prefix."rsvp_dates JOIN `".$wpdb->prefix."postmeta` ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->prefix."postmeta.post_id JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."posts.ID = ".$wpdb->prefix."postmeta.post_id WHERE post_status='publish' AND `meta_key` = '_meet_recur' AND meta_value=".$t." and datetime > CURDATE() ORDER BY datetime";
@@ -2337,6 +2531,7 @@ if($editlist)
 </fieldset>
 <input type="submit" value="'.__('Update Checked','rsvpmaker').'" /></form>'.'<p>'.__('Update function copies title and content of current template, replacing the existing content of checked posts.','rsvpmaker').'</p>';
 
+
 if(current_user_can('edit_rsvpmakers'))
 printf('<div class="group_add_date"><br />
 <form method="post" action="%s">
@@ -2356,6 +2551,7 @@ printf('<div class="group_add_date"><br />
 </form>
 </div><br />
 %s',$action,$add_one,$t,$action,$add_date_checkbox,$t,$checkallscript);
+
 
 if(current_user_can('edit_rsvpmakers'))
 printf('<div class="group_add_date"><br />
@@ -2386,7 +2582,8 @@ $sked = get_post_meta($post_ID,'_sked',true);
 if(!empty($sked) )
 	{
 		$singular = __('Event Template','rsvpmaker');
-		$link = sprintf(' <a href="%s">%s</a>',admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$post_ID),__('View/add/update events based on this template','rsvpmaker'));
+		$link = "<br />".rsvp_template_update_checkboxes($post_ID);
+		//$link = sprintf(' <a href="%s">%s</a>',admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list&t='.$post_ID),__('View/add/update events based on this template','rsvpmaker'));
 	}
 
 $messages['rsvpmaker'] = array(

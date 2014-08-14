@@ -6,8 +6,8 @@ Donate link: http://rsvpmaker.com/
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
-Tested up to: 3.9
-Stable tag: 3.0.8
+Tested up to: 3.9.2
+Stable tag: 3.0.9
 
 Event scheduling and RSVP tracking.
 
@@ -90,6 +90,11 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 3.0.9 =
+
+* Clearer prompt to update existing events based on a template, or add new events on the schedule set in the template, after a template is created or updated.
+* Fix for bug with setting to display or hide the count of people who have RSVP'ed for an event.
 
 = 3.0.8 =
 
