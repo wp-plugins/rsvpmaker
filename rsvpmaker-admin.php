@@ -1,6 +1,10 @@
 <?php
 
 function date_slug($data) {
+	
+	if($_POST["override"])
+		return $data; // don't do this for template override
+	
 	if($data["post_status"] != 'publish')
 		return $data;
 
@@ -30,6 +34,8 @@ function unique_date_slug($slug, $post_ID = 0, $post_status = '', $post_type = '
 		return $slug;
 	if($post->post_status != 'publish')
 		return $slug;
+	if($_POST["override"])
+		return $slug; // don't do this for template override
 	
 	if(!preg_match('/-[\d]{0,3}$/',$slug) )
 		return $slug;

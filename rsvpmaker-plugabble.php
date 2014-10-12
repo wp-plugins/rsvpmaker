@@ -1314,10 +1314,85 @@ $content .= '<p><button class="rsvpmaker_show_attendees" onclick="'."jQuery.get(
 <div id="attendees-'.$post->ID.'"></div>';
 	}
 
+if(isset($_GET["renew"]) && isset($custom_fields["_sked"][0]))
+	{
+		$content .= template_renew($custom_fields);
+	}
+
 return $content;
 } } // end event content
 
+if(!function_exists('template_renew') ){
+	function template_renew($custom) {
+ob_start();
+global $post;
+global $wpdb;
 
+$template = unserialize($custom["_sked"][0]);
+// default values
+if(!isset($template["hour"])){
+$template["hour"] = 19;
+$template["minutes"] = '00';
+}
+
+$dayarray = Array(__("Sunday",'rsvpmaker'),__("Monday",'rsvpmaker'),__("Tuesday",'rsvpmaker'),__("Wednesday",'rsvpmaker'),__("Thursday",'rsvpmaker'),__("Friday",'rsvpmaker'),__("Saturday",'rsvpmaker'));
+$weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
+
+$weekselect = $weekarr[(int) $template["week"]];
+$weekselect .= implode("",$weekarr); 
+$dayselect = $dayarr[(int) $template["dayofweek"]];
+$dayselect .= implode("",$dayarr);
+
+$h = (int) $template["hour"];
+$minutes = $template["minutes"];
+?>
+<table border="0">
+<tr><td><?php _e("Time",'rsvpmaker'); ?>:</td>
+<td><?php _e("Hour",'rsvpmaker'); ?>: <select name="sked[hour]" id="hour">
+<?php
+for($hour = 0; $hour < 24; $hour++)
+{
+
+if($hour == $h)
+	$selected = ' selected = "selected" ';
+else
+	$selected = '';
+
+	if($hour > 12)
+		$displayhour .= "\n<option $selected " . 'value="' . $hour . '">' . ($hour - 12) . ' p.m.</option>';
+	elseif($hour == 12)
+		$displayhour .= "\n<option $selected " . 'value="' . $hour . '">12 p.m.</option>';
+	elseif($hour == 0)
+		$displayhour .= "\n<option $selected " . 'value="00">12 a.m.</option>';
+	else
+		$displayhour .= "\n<option $selected " . 'value="' . $hour . '">' . $hour . ' a.m.</option>';
+}
+echo $displayhour;
+?>
+</select>
+
+<?php _e("Minutes",'rsvpmaker'); ?>: <select id="minutes" name="sked[minutes]">
+<?php
+$displayminutes = '
+<option value="'.$minutes.'">'.$minutes.'</option>
+<option value="00">00</option>
+<option value="15">15</option>
+<option value="30">30</option>
+<option value="45">45</option>
+</select>';
+echo $displayminutes;
+?>
+<em><?php _e("For an event starting at 12:30 p.m., you would select 12 p.m. and 30 minutes",'rsvpmaker'); ?>.</em>
+</td>
+
+          </tr>
+</table>
+
+<?php
+return ob_get_clean();
+
+	}
+}
 
 if(!function_exists('rsvp_report') )
 {
@@ -1820,6 +1895,12 @@ if(isset($atts["textfield"])) {
 	$data = ( isset($profile[$field]) ) ? ' value="'.$profile[$field].'" ' : '';
 	$output = '<input type="text" name="profile['.$field.']" id="'.$field.'" '.$size.$data.' />';
 	}
+if(isset($atts["hidden"])) {
+	$field = $atts["hidden"];
+	$size = ( isset($atts["size"]) ) ? ' size="'.$atts["size"].'" ' : '';
+	$data = ( isset($profile[$field]) ) ? ' value="'.$profile[$field].'" ' : '';
+	$output = '<input type="hidden" name="profile['.$field.']" id="'.$field.'" '.$size.$data.' />';
+	}
 elseif(isset($atts["selectfield"])) {
 	$field = $atts["selectfield"];
 	$selected = (isset($atts["selected"])) ? trim($atts["selected"]) : '';
@@ -2003,6 +2084,7 @@ while ( have_posts() ) : the_post();
 			{
 			$template_edit_url = admin_url('post.php?action=edit&post='.$post->ID);
 			$title = sprintf('<a href="%s">%s</a>',$template_edit_url,$post->post_title);
+			$template_options .= sprintf('<option value="%d">%s</option>',$post->ID,$post->post_title);
 			}
 		else
 			{
@@ -2011,6 +2093,41 @@ while ( have_posts() ) : the_post();
 		printf('<tr><td>%s</td><td>%s</td><td><a href="%s">'.__('Projected Dates','rsvpmaker').'</a></td><td>%s</td></tr>'."\n",$title,$s,$template_recur_url,next_or_recent($post->ID));
 endwhile;
 echo "</tbody></table>";
+
+if(isset($template_options))
+	{
+if($_POST["override"])
+{
+	$override = (int) $_POST["override"];
+	$overridden = (int) $_POST["overridden"];
+	$opost = get_post($override);
+	$target = get_post($overridden);
+	$newpost = array('ID' => $overridden, 'post_title' => $opost->post_title, 'post_content' => $opost->post_content, 'post_name' => $target->post_name);
+	wp_update_post($newpost);
+	update_post_meta($overridden, '_meet_recur', $override );
+	printf('<p>View <a href="%s">updated post</a></p>',get_permalink($overridden));
+}
+
+		echo "<h3>Apply Template to Existing Event</h3>";
+		
+		$sql = "SELECT *, $wpdb->posts.ID as postID, datetime > CURDATE( ) as current
+FROM `".$wpdb->prefix."rsvp_dates`
+JOIN $wpdb->posts ON ".$wpdb->prefix."rsvp_dates.postID = $wpdb->posts.ID
+WHERE datetime >= '".date('Y-m')."-1' AND $wpdb->posts.post_status = 'publish'
+ORDER BY datetime LIMIT 0,100";
+		$results = $wpdb->get_results($sql);
+		foreach ($results as $r)
+			{
+			$event_options .= sprintf('<option value="%d">%s %s</option>',$r->postID,$r->post_title,$r->datetime);
+			}
+			
+		$action = admin_url('edit.php?post_type=rsvpmaker&page=rsvpmaker_template_list');
+		
+		printf('<form method="post" action="%s"><p>Apply <select name="override">%s</select> to <select name="overridden">%s</select></p>',$action, $template_options, $event_options);
+		submit_button();
+		echo '</form>';
+	}
+
 }
 ?>
 </div>

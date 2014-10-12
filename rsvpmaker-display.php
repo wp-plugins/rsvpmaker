@@ -413,7 +413,7 @@ function rsvpmaker_distinct($distinct){
 
 function rsvpmaker_upcoming ($atts)
 {
-
+	
 $no_events = (isset($atts["no_events"]) && $atts["no_events"]) ? $atts["no_events"] : 'No events currently listed.';
 
 global $post;

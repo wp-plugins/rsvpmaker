@@ -6,8 +6,8 @@ Donate link: http://rsvpmaker.com/
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
-Tested up to: 3.9.2
-Stable tag: 3.0.9
+Tested up to: 4.0
+Stable tag: 3.1
 
 Event scheduling and RSVP tracking.
 
@@ -90,6 +90,12 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 3.1 =
+
+* Updating for WordPress 4.0
+* Fixed a bug with form templates (support for hidden fields)
+* Event Template screen now includes an option to apply a template to an existing event.
 
 = 3.0.9 =
 
