@@ -758,7 +758,9 @@ if(! wp_verify_nonce($_POST["rsvp-pp-nonce"],'pp-nonce') )
 		  
 		   $nvpstr="&Amt=".$paymentAmount."&PAYMENTACTION=".$paymentType."&RETURNURL=".$returnURL."&CANCELURL=".$cancelURL ."&CURRENCYCODE=".$currencyCodeType.'&EMAIL='.$email;
 		   
-		   $nvpstr.="&INVNUM=" . $invoice . "&SOLUTIONTYPE=Sole&LANDING=Billing&DESC=" . urlencode($desc);
+		   if($rsvp_options["paypal_invoiceno"])
+				$nvpstr.="&INVNUM=" . $invoice;
+		   $nvpstr.= "&SOLUTIONTYPE=Sole&LANDING=Billing&DESC=" . urlencode($desc);
 			
 		   $resArray=hash_call("SetExpressCheckout",$nvpstr);
 

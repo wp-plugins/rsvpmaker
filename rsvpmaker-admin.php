@@ -632,6 +632,11 @@ echo "<br /><br />".__('On your system, the base web directory is','rsvpmaker').
 ?>
     </em>
 
+<br /><h3><?php _e('Track RSVP as &quot;invoice&quot; number','rsvpmaker'); ?>:</h3>
+<br />
+<input type="radio" name="option[paypal_invoiceno]" value ="1" <?php if($options["paypal_invoiceno"]) echo ' checked="checked" ' ?> /> Yes
+<input type="radio" name="option[paypal_invoiceno]" value ="0" <?php if(!$options["paypal_invoiceno"]) echo ' checked="checked" ' ?> /> No
+<br /><em>Must be enabled for RSVPMaker to track payments</em>
 <br /><h3><?php _e('PayPal Currency','rsvpmaker'); ?>:</h3>
 <input type="text" name="option[paypal_currency]" value="<?php if(isset($options["paypal_currency"])) echo $options["paypal_currency"];?>" size="5" /> <a href="https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_nvp_currency_codes">(list of codes)</a>
 
