@@ -61,6 +61,8 @@ foreach($results as $row)
 else
 	echo '<p><em>'.__('Enter one or more dates. For an event starting at 1:30 p.m., you would select 1 p.m. (or 13: for 24-hour format) and then 30 minutes. Specifying the duration is optional.','rsvpmaker').'</em> </p>';
 
+
+
 if(!isset($start))
 	{
 	$start = 1;
@@ -70,6 +72,7 @@ for($i=$start; $i < 6; $i++)
 {
 if($i == 2)
 	{
+	do_action('rsvpmaker_datebox_message');
 	echo "<p><a onclick=\"document.getElementById('additional_dates').style.display='block'\" >".__('Add More Dates','rsvpmaker')."</a> </p>
 	<div id=\"additional_dates\" style=\"display: none;\">";
 	$date = NULL;
