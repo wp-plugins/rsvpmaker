@@ -1,4 +1,4 @@
-=== RSVPmaker ===
+﻿=== RSVPmaker ===
 Contributors: davidfcarr
 Donate: http://www.rsvpmaker.com
 Tags: event, calendar, rsvp, custom post type, paypal
@@ -6,8 +6,8 @@ Donate link: http://rsvpmaker.com/
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
-Tested up to: 4.0
-Stable tag: 3.1.2
+Tested up to: 4.1
+Stable tag: 3.2
 
 Event scheduling and RSVP tracking.
 
@@ -90,6 +90,12 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 3.2 =
+
+* More responsive calendar display, works better in themes with a narrow content area (including Twenty Fifteen) or on mobile devices.
+* Option to display RSVP Report in a table, similar to the excel export format
+* Fixed a bug in event template projected dates
 
 = 3.1.1 =
 

@@ -93,13 +93,11 @@ foreach($results as $row)
 	if($row["current"] && !$eventlist[$row["postID"]])
 		$eventlist[$row["postID"]] = $row;
 	$cal[date('Y-m-d',$t)] .= '<div><a class="calendar_item" href="'.get_post_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
+	$caldetail[date('Y-m-d',$t)] .= '<div>'.date($date_format,$t).': <a href="'.get_post_permalink($row["postID"]).'">'.$row["post_title"]."</a></div>\n";
 	}
 
 if($atts["calendar"] || $atts["format"] == 'calendar')
-	$listings .= cp_show_calendar($cal);
-
-if($atts["css_calendar"])
-	$listings .= css_table_calendar($cal);
+	$listings .= cp_show_calendar($cal,$caldetail);
 
 //strpos test used to catch either "headline" or "headlines"
 if($eventlist && ( $atts["format"] == 'headline' || $atts["format"] == 'headlines') )
@@ -125,7 +123,7 @@ foreach($eventlist as $event)
 	return $listings;
 }
 
-function cp_show_calendar($eventarray) 
+function cp_show_calendar($eventarray, $caldetail) 
 {
 $cm = $_REQUEST["cm"];
 $cy = $_REQUEST["cy"];
@@ -157,7 +155,7 @@ $eonext = date("Y-m-d",mktime(0, 0, 1, $cm+2, 0, $cy) );
 
 // Link to previous month (but do not link to too early dates)
 $lm = mktime(0, 0, 1, $cm, 0, $cy);
-   $prev_link = '<a href="' . $req_uri . strftime('cm=%m&cy=%Y">%B, %Y</a>', $lm);
+   $prev_link = '<a href="' . $req_uri . strftime('cm=%m&cy=%Y">%B %Y</a>', $lm);
 
 // Link to next month (but do not link to too early dates)
 $nm = mktime(0, 0, 1, $cm+1, 1, $cy);
@@ -166,7 +164,7 @@ $nm = mktime(0, 0, 1, $cm+1, 1, $cy);
 $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
 
 	$page_id = (isset($_GET["page_id"])) ? '<input type="hidden" name="page_id" value="'. (int) $_GET["page_id"].'" />' : '';
-   $jump_form = sprintf('<form id="jumpform" action="%s" method="post"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><input type="submit" value="Go" >%s</form>', $self,date('m',$monthafter),date('Y',$monthafter),$page_id);
+   $jump_form = sprintf('<form id="jumpform" action="%s" method="post"> Month/Year <input type="text" name="cm" value="%s" size="4" />/<input type="text" name="cy" value="%s" size="4" /><button>Go</button>%s</form>', $self,date('m',$monthafter),date('Y',$monthafter),$page_id);
 
 // $Id: cal.php,v 1.47 2003/12/31 13:04:27 goba Exp $
 
@@ -177,25 +175,25 @@ $monthafter = mktime(0, 0, 1, $cm+2, 1, $cy);
 //     '<td align="right" width="33%">' . $next_link . "</td></tr>\n</table>\n";
 
 // Begin the calendar table
-$content .= '<table id="cpcalendar" width="100%" cellspacing="0" cellpadding="3"><caption>'.strftime('<b>%B %Y</b>', $bom)."</caption>\n".'<tr>'."\n";
+$content .= '
+
+<table id="cpcalendar" width="100%" cellspacing="0" cellpadding="3"><caption>'.strftime('<b>%B %Y</b>', $bom)."</caption>\n".'<tr>'."\n";
 
 $content .= '<thead>
 <tr> 
-<th width="15%">'.__('Sunday','rsvpmaker').'</th> 
-<th width="14%">'.__('Monday','rsvpmaker').'</th> 
-<th width="14%">'.__('Tuesday','rsvpmaker').'</th> 
-<th width="14%">'.__('Wednesday','rsvpmaker').'</th> 
-<th width="14%">'.__('Thursday','rsvpmaker').'</th> 
-<th width="14%">'.__('Friday','rsvpmaker').'</th> 
-<th width="15%">'.__('Saturday','rsvpmaker').'</th> 
-</tr><tr>
-</thead>';
+<th>'.__('Sunday','rsvpmaker').'</th> 
+<th>'.__('Monday','rsvpmaker').'</th> 
+<th>'.__('Tuesday','rsvpmaker').'</th> 
+<th>'.__('Wednesday','rsvpmaker').'</th> 
+<th>'.__('Thursday','rsvpmaker').'</th> 
+<th>'.__('Friday','rsvpmaker').'</th> 
+<th>'.__('Saturday','rsvpmaker').'</th> 
+</tr>
+</thead>
+';
 
-$content .= "\n<tbody>\n";
-
-$content .= "\n<tfoot><tr>". '<td align="left" colspan="3">'. $prev_link. '</td>'.
-     '<td colspan="4" align="right">' . $next_link . "</td></tr></tfoot>";
-	 
+$content .= "\n<tbody><tr id=\"rsvprow1\">\n";
+$rowcount = 1;
 // Generate the requisite number of blank days to get things started
 for ($days = $i = date("w",$bom); $i > 0; $i--) {
    $content .= '<td class="notaday">&nbsp;</td>';
@@ -210,15 +208,44 @@ for ($i = 1; $i <= date("t",$bom); $i++) {
    if(!empty($eventarray[$thisdate]) )
    {
    $content .= $i;
-
    $content .= $eventarray[$thisdate];
+   $t = strtotime($thisdate);
+   $detailrow .= $caldetail[$thisdate]; 
    }
    else
    	$content .= "<div class=\"day\">" . $i . "</div><p>&nbsp;</p>";
    $content .= '</td>';
   
    // Break HTML table row if at end of week
-   if (++$days % 7 == 0) $content .= "</tr>\n<tr>";
+   if (++$days % 7 == 0)
+   	{
+		$content .= "</tr>\n";
+		if(!empty($detailrow))
+			{
+			$content .= '<tr id="detailrow'.$rowcount.'"><td colspan="7">'.$detailrow.'</td></tr>';	
+			$calj .= ' $("#detailrow'.$rowcount.'" ).hide();
+
+	$("#rsvprow'.$rowcount.'").hover(function(e) {
+    $("#detailrow'.$rowcount.'").show();
+	}
+	,function(e){
+		 $("#detailrow'.$rowcount.'" ).hide();
+	}
+	);
+
+		$("#detailrow'.$rowcount.'").hover(function(e) {
+		$("#detailrow'.$rowcount.'").show();
+		},
+	function(e) {
+		$("#detailrow'.$rowcount.'").hide();
+		});	
+
+';
+			}
+		$rowcount++;
+		$content .= '<tr id="rsvprow'.$rowcount.'">';
+		$detailrow = "";
+	}
 }
 
 // Generate the requisite number of blank days to wrap things up
@@ -226,10 +253,47 @@ for (; $days % 7; $days++) {
    $content .= '<td class="notaday">&nbsp;</td>';
 }
 
-$content .= "\n<tbody>\n";
+$content .= "\n</tr>";
+
+		if(!empty($detailrow))
+			{
+			$content .= '<tr id="detailrow'.$rowcount.'"><td colspan="7">'.$detailrow.'</td></tr>';	
+			$calj .= ' $("#detailrow'.$rowcount.'" ).hide();
+
+	$("#rsvprow'.$rowcount.'").hover(function(e) {
+    $("#detailrow'.$rowcount.'").show();
+	}
+	,function(e){
+		 $("#detailrow'.$rowcount.'" ).hide();
+	}
+	);
+
+		$("#detailrow'.$rowcount.'").hover(function(e) {
+		$("#detailrow'.$rowcount.'").show();
+		},
+	function(e) {
+		$("#detailrow'.$rowcount.'").hide();
+		});	
+
+';
+			}
+$content .= "<tbody>\n";
+
+$content .= "\n<tfoot><tr>". '<td align="left" colspan="3">'. $prev_link. '</td>'.
+     '<td colspan="4" align="right">' . $next_link . "</td></tr></tfoot>";
 
 // End HTML table of events
-$content .= "</tr>\n</table>\n".$jump_form;
+$content .= "\n</table>\n".$jump_form;
+
+if(!empty($calj))
+	{
+$content .= '<script>
+jQuery(document).ready(function($) {
+'.$calj.'
+});
+</script>
+';
+	}
 
 return $content;
 }

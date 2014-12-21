@@ -33,3 +33,12 @@ display: block; float: left; margin-right: 5px;
 #rsvpform input, #rsvpform textarea {
 max-width: 90%;
 }
+#cpcalendar td, #cpcalendar th {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+	width: 14%;
+	overflow: hidden;
+}
+#jumpform input {
+	width: 100px;
+}

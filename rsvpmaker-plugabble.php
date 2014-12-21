@@ -1412,6 +1412,13 @@ $wpdb->show_errors();
 <h2><?php _e('RSVP Report','rsvpmaker'); ?></h2> 
 <?php
 
+if($_GET["fields"])
+	{
+		rsvp_report_table();
+		echo "</div>";
+		return;
+	}
+
 if(isset($_POST["deletenow"]) && current_user_can('edit_others_posts'))
 	{
 	
@@ -1608,11 +1615,7 @@ if($fields && !isset($_GET["rsvp_print"]))
 	$fields[]='note'; 
 ;?>
 <div id="excel" name="excel" style="padding: 10px; border: thin dotted #333; width: 300px;margin-top: 30px;">
-<?php
-if(isset($phpexcel_enabled))
-{
-?>
-<h3><?php _e('Download to Excel','rsvpmaker'); ?></h3>
+<h3><?php _e('Data Table / Spreadsheet','rsvpmaker'); ?></h3>
 <form method="get" action="edit.php">
 <?php
 foreach($_GET as $name => $value)
@@ -1620,15 +1623,18 @@ foreach($_GET as $name => $value)
 
 foreach($fields as $field)
 	echo '<input type="checkbox" name="fields[]" value="'.$field.'" checked="checked" /> '.$field . "<br />\n";
-wp_nonce_field('rsvpexcel','rsvpexcel');
-?>
-<button><?php _e('Get Spreadsheet','rsvpmaker'); ?></button>
-</form>
-<?php
+
+if(isset($phpexcel_enabled))
+{
+$rsvpexcel = wp_create_nonce('rsvpexcel');
+printf('<input type="checkbox" name="rsvpexcel" value="%s" checked="checked" /><strong>Download To Excel</strong> - if not checked, data will be displayed in an HTML table',$rsvpexcel);
 }
 else
 	_e("Additional RSVPMaker Excel plugin required for download to Excel function.",'rsvpmaker');
+
 ?>
+<br /><button><?php _e('Get Data','rsvpmaker'); ?></button>
+</form>
 </div>
 <?php
 	}
@@ -1657,6 +1663,65 @@ rsvp_report();
 echo "</body></html>";
 exit();
 } } // end rsvp_print
+
+function rsvp_report_table () {
+?>
+<style>
+table#rsvptable {
+    border-collapse: collapse;
+}
+table#rsvptable td, table#rsvptable td {
+border: thin solid #555;
+padding: 3px;
+text-align: left;
+}
+</style>
+<?php
+
+global $wpdb;
+$fields = $_GET["fields"];
+$eventid = (int) $_GET["event"];
+	
+	$sql = "SELECT post_title FROM ".$wpdb->posts." WHERE ID = $eventid";
+	$title = $wpdb->get_var($sql);
+
+echo "<h2>$title</h2>\n<table id=\"rsvptable\"><tr>\n";
+// Create new PHPExcel object
+
+foreach($fields as $column => $name )
+{
+echo "<th>$name</th>";
+}
+echo "</tr>";
+
+	$sql = "SELECT * FROM ".$wpdb->prefix."rsvpmaker WHERE event=$eventid ORDER BY yesno DESC, last, first";
+	$results = $wpdb->get_results($sql, ARRAY_A);
+	$rows = sizeof($results);
+	//$maxcol = col2chr(sizeof($fields));
+	$phonecells = $phonecol.'1:'.$phonecol.($rows+1);
+		
+	foreach($results as $row)
+		{
+		$index++;
+		$row["yesno"] = ($row["yesno"]) ? "YES" : "NO";
+		if($row["details"])
+			{
+			$details = unserialize($row["details"]);
+			$row = array_merge($row,$details);
+			}
+		echo "<tr>";
+		foreach($fields as $column => $name )
+			{
+				if(isset($row[$name]) )
+					printf('<td>%s</td>',$row[$name]);
+				else
+					echo "<td></td>";
+			}
+			 //$worksheet->write($index, $column, $row[$name], $format_wrap);
+		echo "</tr>";
+		}
+		echo "</table>";
+}
 
 add_action('admin_init','rsvp_print');
 
@@ -2163,6 +2228,7 @@ return $dayarray[$index];
 if(!function_exists('rsvp_template_update_checkboxes') )
 {
 function rsvp_template_update_checkboxes($t) {
+
 global $wpdb;
 global $current_user;
 
@@ -2242,6 +2308,7 @@ else {
 foreach($projected as $i => $ts)
 {
 ob_start();
+
 $today = date('d',$ts);
 $cm = date('n',$ts);
 $y = date('Y',$ts);
@@ -2249,7 +2316,8 @@ $y = date('Y',$ts);
 $y2 = $y+1;
 
 //echo "$ts $thistime<br />";
-if(isset($thistime) && ($ts <= $thistime))
+//if(isset($thistime) && ($ts <= $thistime))
+if($ts > mktime())
 	continue; // omit dates past
 $nomeeting .= sprintf('<option value="%s">%s</option>',date('Y-m-d',$ts),date('F j, Y',$ts));
 
@@ -2342,7 +2410,7 @@ return sprintf('<div class="group_add_date"><br />
 <div><input type="checkbox" class="checkall"> '.__('Check all','rsvpmaker').'</div>
 %s
 </fieldset>
-<br /><input type="submit" value="'.__('Add From Template','rsvpmaker').'" />
+<br /><input type="submit" value="'.__('Add/Update From Template','rsvpmaker').'" />
 <input type="hidden" name="template" value="%s" />
 </form>
 </div><br />
@@ -2370,10 +2438,10 @@ else
 	}
 
 $template = get_post_meta($t,'_sked',true);
-$hour = (int) $template["hour"];
-$minutes = $template["minutes"];
-$week = (int) $template["week"];
-$dow = (int) $template["dayofweek"];
+$hour = (isset($template["hour"]) ) ? (int) $template["hour"] : 17;
+$minutes = isset($template["minutes"]) ? $template["minutes"] : '00';
+$week = isset($template["week"]) ? (int) $template["week"] : 1;
+$dow = isset($template["dayofweek"]) ? (int) $template["dayofweek"] : 0;
 $cy = date("Y");
 $cm = date("m");
 $cd = date("j");
@@ -2502,9 +2570,7 @@ if(isset($_POST["nomeeting"]) )
 		$a = ($index % 2) ? "" : "alternate";
 		$thistime = strtotime($sched->datetime);
 		$nomeeting .= sprintf('<option value="%s">%s (%s)</option>',$sched->postID,date('F j, Y',$thistime), __('Already Scheduled','rsvpmaker'));
-		$cy = date("Y",$thistime); // advance starting time
-		$cm = date("m",$thistime);
-		$cd = date("j",$thistime);
+		$donotproject[] = date('Y-m-j',$thistime);
 		if ( current_user_can( "delete_post", $sched->postID ) ) {
 				$delete_text = __('Move to Trash');
 			$d = '<a class="submitdelete deletion" href="'. get_delete_post_link($sched->postID) . '">'. $delete_text . '</a>';
@@ -2555,9 +2621,11 @@ $y2 = $y+1;
 
 ob_start();
 
-//echo "$ts $thistime<br />";
-if(isset($thistime) && ($ts <= $thistime))
+if($ts < time() )
 	continue; // omit dates past
+if(is_array($donotproject) && in_array(date('Y-m-j',$ts), $donotproject) )
+	continue;
+
 $nomeeting .= sprintf('<option value="%s">%s</option>',date('Y-m-d',$ts),date('F j, Y',$ts));
 
 ?>
@@ -2903,7 +2971,6 @@ global $wpdb;
 
 $sql = "SELECT * FROM $wpdb->users ORDER BY user_login";
 $results = $wpdb->get_results($sql);
-print_r($eds);
 	foreach($results as $row)
 		{
 			if(in_array($row->ID,$eds) )

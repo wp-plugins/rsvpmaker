@@ -5,7 +5,7 @@ Plugin Name: RSVPMaker
 Plugin URI: http://www.rsvpmaker.com
 Description: Schedule events and solicit RSVPs. Events are implemented as custom post types, so you get all your familiar post editing tools with extra options for setting dates and RSVP options. PayPal payments can be added with a little extra configuration. Recurring events can be tracked according to a schedule such as "First Monday" or "Every Friday" at a specified time, and the software will calculate future dates according to that schedule and let you track them together. <a href="options-general.php?page=rsvpmaker-admin.php">Options</a> / <a href="edit.php?post_type=rsvpmaker&page=rsvpmaker_doc">Shortcode documentation</a>. Note that if you delete RSVPMaker from the control panel, all associated data will be deleted automatically including contact info of RSVP respondents. To delete data more selectively, use the <a href="/wp-content/plugins/rsvpmaker/cleanup.php">cleanup utility</a> in the plugin directory.
 Author: David F. Carr
-Version: 3.1.2
+Version: 3.2
 Author URI: http://www.carrcommunications.com
 */
 
@@ -261,7 +261,6 @@ if($rsvp_options["dbversion"] < 4)
 if($rsvp_options["dbversion"] < 5)
 	cpevent_activate();
 
-
 function rsvpmaker_template_order( $templates='' )
 {
 global $post;
@@ -298,5 +297,34 @@ if(!empty($timezone) )
 }
 
 add_action('init','fix_timezone');
+
+if(!function_exists('rsvpmaker_permalink_query') )
+{
+function rsvpmaker_permalink_query ($id, $query = '') {
+
+$key = "pquery_".$id;
+$p = wp_cache_get($key);
+if(!$p)
+	{
+		$p = get_post_permalink($id);
+		$p .= strpos($p,'?') ? '&' : '?';
+		wp_cache_set($key,$p);
+	}
+
+if(is_array($query) )
+	{
+		foreach($query as $name => $value)
+			$qstring .= $name.'='.$value.'&';
+	}
+else
+	{
+		$qstring = $query;
+	}
+	
+	return $p.$qstring;
+	
+}
+} // end function exists
+
 
 ?>
