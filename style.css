@@ -36,9 +36,13 @@ max-width: 90%;
 #cpcalendar td, #cpcalendar th {
     text-overflow: ellipsis;
     white-space: nowrap;
-	width: 14%;
+	width: 10%;
+	max-width: 40px;
 	overflow: hidden;
 }
 #jumpform input {
 	width: 100px;
+}
+table#cpcalendar {
+width: 100%;
 }
