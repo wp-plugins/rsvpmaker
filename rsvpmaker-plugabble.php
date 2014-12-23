@@ -1405,6 +1405,9 @@ function rsvp_report() {
 
 global $wpdb;
 global $rsvp_options;
+
+$print_nonce = wp_create_nonce('rsvp_print');
+
 $wpdb->show_errors();
 ?>
 <div class="wrap"> 
@@ -1466,7 +1469,7 @@ JOIN ".$wpdb->prefix."posts ON ".$wpdb->prefix."rsvp_dates.postID = ".$wpdb->pre
 		echo '<div style="float: right; margin-left: 15px; margin-bottom: 15px;"><a href="edit.php?post_type=rsvpmaker&page=rsvp">Show Events List</a> |
 <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=alpha">Alpha Order</a> <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=timestamp">Most Recent First</a> | <a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&rsvp_order=alpha">Alpha Order</a>
 		</div>';
-		echo '<p><a href="'.$_SERVER['REQUEST_URI'].'&rsvp_print='.wp_create_nonce('rsvp_print').'" target="_blank" >Format for printing</a></p>';	
+		echo '<p><a href="'.$_SERVER['REQUEST_URI'].'&print_rsvp_report=1&rsvp_print='.$print_nonce.'" target="_blank" >Format for printing</a></p>';	
 		echo '<p><a href="edit.php?post_type=rsvpmaker&page=rsvp&event='.$eventid.'&paypal_log=1">Show PayPal Log</a></p>';
 		echo '<p><a href="#excel">Download to Excel</a></p>';
 		}
@@ -1557,6 +1560,7 @@ if(!function_exists('format_rsvp_details') )
 function format_rsvp_details($results) {
 	
 	global $rsvp_options;
+	$print_nonce = wp_create_nonce('rsvp_print');
 	
 	if($results)
 	$fields = array('yesno','first','last','email','guestof','amountpaid');
@@ -1616,7 +1620,7 @@ if($fields && !isset($_GET["rsvp_print"]))
 ;?>
 <div id="excel" name="excel" style="padding: 10px; border: thin dotted #333; width: 300px;margin-top: 30px;">
 <h3><?php _e('Data Table / Spreadsheet','rsvpmaker'); ?></h3>
-<form method="get" action="edit.php">
+<form method="get" action="edit.php" target="_blank">
 <?php
 foreach($_GET as $name => $value)
 	echo sprintf('<input type="hidden" name="%s" value="%s" />',$name,$value);
@@ -1624,16 +1628,21 @@ foreach($_GET as $name => $value)
 foreach($fields as $field)
 	echo '<input type="checkbox" name="fields[]" value="'.$field.'" checked="checked" /> '.$field . "<br />\n";
 
+printf('<input type="hidden" name="rsvp_print" value="%s" />',$print_nonce);
+
 if(isset($phpexcel_enabled))
 {
 $rsvpexcel = wp_create_nonce('rsvpexcel');
-printf('<input type="checkbox" name="rsvpexcel" value="%s" checked="checked" /><strong>Download To Excel</strong> - if not checked, data will be displayed in an HTML table',$rsvpexcel);
+printf('<button name="rsvpexcel" value="%s" />Download to Excel</button>&nbsp;',$rsvpexcel);
+//printf('<input type="checkbox" name="rsvpexcel" value="%s" checked="checked" /> <strong>Download To Excel</strong> - if not checked, data will be displayed in an HTML table',$rsvpexcel);
+
 }
 else
+	{
 	_e("Additional RSVPMaker Excel plugin required for download to Excel function.",'rsvpmaker');
-
+	}
 ?>
-<br /><button><?php _e('Get Data','rsvpmaker'); ?></button>
+<button name="print_rsvp_report" value="1" >Print Report</button>
 </form>
 </div>
 <?php
@@ -1644,8 +1653,9 @@ echo "</div>\n";
 
 if(!function_exists('rsvp_print') ) {
 function rsvp_print() {
-if(!isset($_GET["rsvp_print"]))
-	return;
+
+if(isset($_GET["print_rsvp_report"]) )
+{
 
 if(!wp_verify_nonce($_GET["rsvp_print"],'rsvp_print') )
 	die("Security error");
@@ -1662,6 +1672,8 @@ echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www
 rsvp_report();
 echo "</body></html>";
 exit();
+}
+
 } } // end rsvp_print
 
 function rsvp_report_table () {
@@ -2072,7 +2084,7 @@ if(isset($rsvp_options["debug"]) && $rsvp_options["debug"])
 
 if(!function_exists('date_title') )
 {
-function date_title( $title, $sep, $seplocation ) {
+function date_title( $title, $sep = '&raquo;', $seplocation = 'left' ) {
 global $post;
 global $wpdb;
 if($post->post_type == 'rsvpmaker')
