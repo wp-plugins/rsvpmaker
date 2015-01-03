@@ -28,7 +28,7 @@ margin: 0;
 }
 select.tickets
 {
-display: block; float: left; margin-right: 5px;
+display: inline-block; margin: 0; margin-right: 5px;
 }
 #rsvpform input, #rsvpform textarea {
 max-width: 90%;
