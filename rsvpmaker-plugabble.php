@@ -435,6 +435,7 @@ $post = get_post($event);
 //get rsvp_to
 $custom_fields = get_post_custom($post->ID);
 $rsvp_to = $custom_fields["_rsvp_to"][0];
+$rsvp_confirm = (isset($custom_fields["_rsvp_confirm"][0])) ? $custom_fields["_rsvp_confirm"][0] : NULL;
 
 //if permalinks are not turned on, we need to append to query string not add our own ?
 $req_uri = get_post_permalink($event);
@@ -635,8 +636,7 @@ if($_POST["note"])
 	$cleanmessage .= 'Note: '.stripslashes($_POST["note"]);
 
 $cleanmessage .= "\n\nUse this link to update: \n". $req_uri;	
-
-rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage);
+rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage,$rsvp_confirm);
 
 	header('Location: '.$req_uri.'&rsvp='.$rsvp_id.'&e='.$rsvp["email"]);
 	exit();
@@ -646,7 +646,7 @@ rsvp_notifications ($rsvp,$rsvp_to,$subject,$cleanmessage);
 
 if(!function_exists('rsvp_notifications') )
 {
-function rsvp_notifications ($rsvp,$rsvp_to,$subject,$message) {
+function rsvp_notifications ($rsvp,$rsvp_to,$subject,$message, $rsvp_confirm = '') {
 
 global $rsvp_options;
 
@@ -658,6 +658,12 @@ if(isset($rsvp_options["smtp"]) && !empty($rsvp_options["smtp"]) )
 	$mail["subject"] = $subject;
 	$mail["text"] = $message;
 	rsvpmailer($mail);
+
+	if(!empty($rsvp_confirm))
+	{
+	$mail["text"] = $rsvp_confirm . "\n\n".$message;
+	}
+
 	$mail["to"] = $rsvp["email"];
 	$mail["from"] = $rsvp_to;
 	$mail["fromname"] = get_bloginfo('name');
@@ -688,6 +694,10 @@ mail($rsvp_to,'=?UTF-8?B?'.base64_encode($subject).'?=',$message,$headers);
   $headers .= "X-Priority: 3\n";
   $headers .= "X-Mailer: PHP ". phpversion() ."\n"; 
 
+if(!empty($rsvp_confirm))
+{
+$message = $rsvp_confirm . "\n\n".$message;
+}
 mail($rsvp["email"],"Confirming ".$subject,$message,$headers);
 	}
 	
@@ -1567,7 +1577,8 @@ function format_rsvp_details($results) {
 	foreach($results as $index => $row)
 		{
 		$row["yesno"] = ($row["yesno"]) ? "YES" : "NO";
-		
+		if($row["yesno"])
+			$emails[] = $row["email"];
 		echo '<h3>'.$row["yesno"]." ".esc_attr($row["first"])." ".esc_attr($row["last"])." ".$row["email"];
 		if($row["guestof"])
 			echo " (". __('guest of','rsvpmaker')." ".esc_attr($row["guestof"]).")";
@@ -1611,6 +1622,13 @@ function format_rsvp_details($results) {
 	if(!empty($missing))
 		{
 			echo "<hr /><h3>".__('Members Who Have Not Responded','rsvpmaker')."</h3>".$missing;
+		}
+
+	if(isset($emails) && is_array($emails))
+		{
+			$attendees = implode(', ',$emails);
+			$label = __('Email Attendees','rsvpmaker');
+			printf('<p><a href="mailto:%s">%s: %s</a>',$attendees,$label,$attendees);
 		}
 
 global $phpexcel_enabled; // set if excel extension is active
@@ -2266,6 +2284,7 @@ $schedule = ($week == 0) ? __('Schedule Varies','rsvpmaker') : rsvpmaker_week($w
 		{
 		$a = ($index % 2) ? "" : "alternate";
 		$thistime = strtotime($sched->datetime);
+		$donotproject[] = date('Y-m-j',$thistime);
 		$nomeeting .= sprintf('<option value="%s">%s (%s)</option>',$sched->postID,date('F j, Y',$thistime), __('Already Scheduled','rsvpmaker'));
 		$cy = date("Y",$thistime); // advance starting time
 		$cm = date("m",$thistime);
@@ -2327,10 +2346,11 @@ $y = date('Y',$ts);
 
 $y2 = $y+1;
 
-//echo "$ts $thistime<br />";
-//if(isset($thistime) && ($ts <= $thistime))
-if($ts > mktime())
+if($ts < time() )
 	continue; // omit dates past
+if(is_array($donotproject) && in_array(date('Y-m-j',$ts), $donotproject) )
+	continue;
+
 $nomeeting .= sprintf('<option value="%s">%s</option>',date('Y-m-d',$ts),date('F j, Y',$ts));
 
 ?>
