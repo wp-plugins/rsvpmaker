@@ -738,7 +738,6 @@ $current_event_date = $wpdb->get_var("select datetime from ".$wpdb->prefix."rsvp
 $wparts = explode('p.post_type',$where);//
 
 $where = "WHERE ".$wpdb->prefix."rsvp_dates.datetime $op '$current_event_date' AND p.post_type".$wparts[1];
-mail("david@carrcommunications.com",'adjacent where',$where);
 return $where;
 }
 
