@@ -1626,6 +1626,7 @@ function format_rsvp_details($results) {
 
 	if(isset($emails) && is_array($emails))
 		{
+			$emails = array_filter($emails); // removes empty elements
 			$attendees = implode(', ',$emails);
 			$label = __('Email Attendees','rsvpmaker');
 			printf('<p><a href="mailto:%s">%s: %s</a>',$attendees,$label,$attendees);
@@ -1634,7 +1635,8 @@ function format_rsvp_details($results) {
 global $phpexcel_enabled; // set if excel extension is active
 if($fields && !isset($_GET["rsvp_print"]))
 	{
-	$fields[]='note'; 
+	$fields[]='note';
+	$fields[]='timestamp';	 
 ;?>
 <div id="excel" name="excel" style="padding: 10px; border: thin dotted #333; width: 300px;margin-top: 30px;">
 <h3><?php _e('Data Table / Spreadsheet','rsvpmaker'); ?></h3>
