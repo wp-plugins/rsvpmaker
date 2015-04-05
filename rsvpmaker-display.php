@@ -703,4 +703,46 @@ foreach($eventlist as $event)
 return $listings;
 }
 
+function get_adjacent_rsvp_join($join) {
+global $post;
+if($post->post_type != 'rsvpmaker')
+	return $join;
+global $wpdb;
+return $join .' JOIN '.$wpdb->prefix.'rsvp_dates ON p.ID='.$wpdb->prefix.'rsvp_dates.postID';
+}
+
+add_filter('get_previous_post_join','get_adjacent_rsvp_join');
+add_filter('get_next_post_join','get_adjacent_rsvp_join');
+
+function get_adjacent_rsvp_sort($sort) {
+global $post;
+if($post->post_type != 'rsvpmaker')
+	return $sort;
+global $wpdb;
+$sort = str_replace('p.post_date',$wpdb->prefix.'rsvp_dates.datetime',$sort);
+
+return $sort;
+}
+add_filter('get_previous_post_sort','get_adjacent_rsvp_sort');
+add_filter('get_next_post_sort','get_adjacent_rsvp_sort');
+
+
+function get_adjacent_rsvp_where($where) {
+global $post;
+if($post->post_type != 'rsvpmaker')
+	return $where;
+global $wpdb;
+$op = strpos($where, '>') ? '>' : '<';
+$current_event_date = $wpdb->get_var("select datetime from ".$wpdb->prefix."rsvp_dates WHERE postID=".$post->ID);
+//split and modify
+$wparts = explode('p.post_type',$where);//
+
+$where = "WHERE ".$wpdb->prefix."rsvp_dates.datetime $op '$current_event_date' AND p.post_type".$wparts[1];
+mail("david@carrcommunications.com",'adjacent where',$where);
+return $where;
+}
+
+add_filter('get_previous_post_where','get_adjacent_rsvp_where');
+add_filter('get_next_post_where','get_adjacent_rsvp_where');
+
 ?>
