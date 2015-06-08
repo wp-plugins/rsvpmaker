@@ -737,7 +737,7 @@ $current_event_date = $wpdb->get_var("select datetime from ".$wpdb->prefix."rsvp
 //split and modify
 $wparts = explode('p.post_type',$where);//
 
-$where = "WHERE ".$wpdb->prefix."rsvp_dates.datetime $op '$current_event_date' AND p.post_type".$wparts[1];
+$where = "WHERE ".$wpdb->prefix."rsvp_dates.datetime $op '$current_event_date' AND p.ID != $post->ID AND p.post_type".$wparts[1];
 return $where;
 }
 
