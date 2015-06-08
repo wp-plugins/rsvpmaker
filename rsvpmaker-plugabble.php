@@ -48,6 +48,8 @@ foreach($results as $row)
 	$t = strtotime($row["datetime"]);
 	if($rsvp_options["long_date"]) echo date($rsvp_options["long_date"],$t);
 	$dur = $row["duration"];
+	if(strpos($dur,':'))
+		$dur = strtotime($dur);
 	if($dur != 'allday')
 		echo date(' '.$rsvp_options["time_format"],$t);
 	if(is_numeric($dur) )
@@ -134,6 +136,7 @@ $dayselect .= implode("",$dayarr);
 
 $h = (int) $template["hour"];
 $minutes = $template["minutes"];
+$duration = $template["duration"];
 ?>
 <p><?php _e("Regular Schedule",'rsvpmaker'); ?>: 
 <select name="sked[week]" id="week">
@@ -176,10 +179,32 @@ $displayminutes = '
 <option value="15">15</option>
 <option value="30">30</option>
 <option value="45">45</option>
-</select>';
+</select> - ';
 echo $displayminutes;
-?>
-<em><?php _e("For an event starting at 12:30 p.m., you would select 12 p.m. and 30 minutes",'rsvpmaker'); ?>.</em>
+
+echo __('Duration','rsvpmaker');?> <select name="<?php echo $prefix; ?>sked[duration]">
+<option value=""><?php echo __('Not set (optional)','rsvpmaker');?></option>
+<option value="allday" <?php if(isset($duration) && ($duration == 'allday')) echo ' selected="selected" '; ?>><?php echo __("All day/don't show time in headline",'rsvpmaker');?></option>
+<?php
+if(!empty($duration) && ($duration != 'allday') )
+	{
+	if(strpos($duration,':'))
+		$hlabel = '';
+	else
+		$hlabel = 'hours';	
+	printf('<option value="%s" selected="selected">%s %s</option>',$duration, $duration, $hlabel);
+	}
+for($h = 1; $h < 24; $h++) {
+	 ;?>
+<option value="<?php echo $h;?>" ><?php echo $h;?> hours</option>
+<option value="<?php echo $h;?>:15" ><?php echo $h;?>:15</option>
+<option value="<?php echo $h;?>:30" ><?php echo $h;?>:30</option>
+
+<option value="<?php echo $h;?>:45" ><?php echo $h;?>:45</option>
+<?php } ;?>
+</select>
+<br />
+<em><?php echo $debug; _e("For an event starting at 12:30 p.m., you would select 12 p.m. and 30 minutes",'rsvpmaker'); ?>.</em>
 </td>
           </tr>
 </table>
@@ -1142,8 +1167,11 @@ foreach($results as $row)
 	$dur = $row["duration"];
 	if($dur != 'allday')
 		$dateblock .= date(' '.$rsvp_options["time_format"],$t);
+	// dchange
+	if(strpos($dur,':'))
+		$dur = strtotime($dur);
 	if(is_numeric($dur) )
-		$dateblock .= " to ".date ($rsvp_options["time_format"],$dur);
+		$dateblock .= " ".__('to','rsvpmaker')." ".date ($rsvp_options["time_format"],$dur);
 	$dateblock .= "</div>\n";
 	}
 }
@@ -1218,8 +1246,7 @@ elseif($rsvp_on && is_single() )
 
 if($dur && ( $slotlength = $custom_fields["_rsvp_timeslots"][0] ))
 {
-;?>
-
+?>
 <div><?php echo __('Number of Participants','rsvpmaker');?>: <select name="participants">
     <option value="1">1</option>
     <option value="2">2</option>
@@ -1237,6 +1264,8 @@ if($dur && ( $slotlength = $custom_fields["_rsvp_timeslots"][0] ))
 <?php
 $t = strtotime($firstrow["datetime"]);
 $dur = $firstrow["duration"];
+if(strpos($dur,':'))
+	$dur = strtotime($dur);
 $day = date('j',$t);
 $month = date('n',$t);
 $year = date('Y',$t);
@@ -1282,6 +1311,7 @@ if(isset($custom_fields["_rsvp_captcha"][0]) && $custom_fields["_rsvp_captcha"][
 <input maxlength="10" size="10" name="captcha" type="text" />
 </p>
 <?php
+do_action('rsvpmaker_after_captcha');
 }
 global $rsvp_required_field;
 if(isset($rsvp_required_field) )
@@ -1626,6 +1656,7 @@ function format_rsvp_details($results) {
 
 	if(isset($emails) && is_array($emails))
 		{
+			$emails = array_filter($emails); // removes empty elements
 			$attendees = implode(', ',$emails);
 			$label = __('Email Attendees','rsvpmaker');
 			printf('<p><a href="mailto:%s">%s: %s</a>',$attendees,$label,$attendees);
@@ -1634,7 +1665,8 @@ function format_rsvp_details($results) {
 global $phpexcel_enabled; // set if excel extension is active
 if($fields && !isset($_GET["rsvp_print"]))
 	{
-	$fields[]='note'; 
+	$fields[]='note';
+	$fields[]='timestamp';	 
 ;?>
 <div id="excel" name="excel" style="padding: 10px; border: thin dotted #333; width: 300px;margin-top: 30px;">
 <h3><?php _e('Data Table / Spreadsheet','rsvpmaker'); ?></h3>
@@ -2474,6 +2506,16 @@ $hour = (isset($template["hour"]) ) ? (int) $template["hour"] : 17;
 $minutes = isset($template["minutes"]) ? $template["minutes"] : '00';
 $week = isset($template["week"]) ? (int) $template["week"] : 1;
 $dow = isset($template["dayofweek"]) ? (int) $template["dayofweek"] : 0;
+
+$terms = get_the_terms( $t, 'rsvpmaker-type' );						
+if ( $terms && ! is_wp_error( $terms ) ) { 
+	$rsvptypes = array();
+
+	foreach ( $terms as $term ) {
+		$rsvptypes[] = $term->term_id;
+	}
+}
+
 $cy = date("Y");
 $cm = date("m");
 $cd = date("j");
@@ -2488,7 +2530,6 @@ if($_GET["trashed"])
 		echo '<div id="message" class="updated"><p>' .__('Moved to trash','rsvpmaker'). ' '.$message . '</p></div>';
 	}
 
-
 if(isset($_POST["update_from_template"]))
 	{
 		foreach($_POST["update_from_template"] as $target_id)
@@ -2501,6 +2542,23 @@ if(isset($_POST["update_from_template"]))
 				
 				$sql = $wpdb->prepare("UPDATE $wpdb->posts SET post_title=%s, post_content=%s WHERE ID=%d",$post->post_title,$post->post_content,$target_id);
 				$wpdb->query($sql);
+
+				$dpart = explode(':',$template["duration"]);			
+				if( is_numeric($dpart[0]) )
+					{
+					$t = $wpdb->get_var("SELECT datetime from ".$wpdb->prefix."rsvp_dates WHERE postID=".$target_id);
+					$t = strtotime($t);
+					$y = date('Y',$t);
+					$m = date('m',$m);
+					$d = date('d',$t);
+					$h = date('h',$t);
+					$m = date('i',$t);
+					$duration = date('Y-m-d H:i:s',mktime( $hour + $dpart[0], $minutes + $dpart[1],0,$m,$d,$y));
+					}
+				else
+					$duration = $template["duration"];
+				$wpdb->query("UPDATE ".$wpdb->prefix."rsvp_dates SET duration = '$duration' WHERE postID=".$target_id);
+
 				echo '<div class="updated">Updated: event #'.$target_id.' <a href="post.php?action=edit&post='.$target_id.'">Edit</a> / <a href="'.get_post_permalink($target_id).'">View</a></div>';	
 			}
 	}
@@ -2508,6 +2566,7 @@ if(isset($_POST["update_from_template"]))
 
 if(isset($_POST["recur_check"]) )
 {
+
 	$my_post['post_title'] = $post->post_title;
 	$my_post['post_content'] = $post->post_content;
 	$my_post['post_status'] = current_user_can('publish_rsvpmakers') ? 'publish' : 'draft';
@@ -2522,6 +2581,11 @@ if(isset($_POST["recur_check"]) )
 			$m = (int) $_POST["recur_month"][$index];
 			$d = (int) $_POST["recur_day"][$index];
 			$date = $y.'-'.$m.'-'.$d;
+			$dpart = explode(':',$template["duration"]);			
+			if( is_numeric($dpart[0]) )
+				$duration = date('Y-m-d H:i:s',mktime( $hour + $dpart[0], $minutes + $dpart[1],0,$m,$d,$y));
+			else
+				$duration = $template["duration"];
 			$my_post['post_name'] = sanitize_title($my_post['post_title'] . '-' .$date );
 			$singular = __('Event','rsvpmaker');
 // Insert the post into the database
@@ -2538,6 +2602,9 @@ if(isset($_POST["recur_check"]) )
 					echo '<div class="updated">Draft for '.$cddate.' <a href="post.php?action=edit&post='.$postID.'">Edit</a> / <a href="'.get_post_permalink($postID).'">Preview</a></div>';
 				
 				add_post_meta($postID,'_meet_recur',$t,true);
+
+				wp_set_object_terms( $postID, $rsvptypes, 'rsvpmaker-type', true );
+
 				$results = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_key LIKE '_rsvp%' AND post_id=".$t);
 				if($results)
 				foreach($results as $row)
@@ -3183,5 +3250,9 @@ $wp_meta_boxes['dashboard']['normal']['core'] = $sorted_dashboard;
 
 if(isset($rsvp_options["dashboard"]) && !empty($rsvp_options["dashboard"]) )
 	add_action('wp_dashboard_setup', 'rsvpmaker_add_dashboard_widgets' );
+
+
+
+add_shortcode('volunteer_report','volunteer_report');
 
 ?>

@@ -79,7 +79,9 @@ if(isset($_POST["event_month"]) )
 				{
 				$hour = $_POST["event_hour"][$index] + $dpart[0];
 				$minutes = (isset($dpart[1]) ) ? $_POST["event_minutes"][$index] + $dpart[1] : $_POST["event_minutes"][$index];
-				$duration = mktime( $hour, $minutes,0,$_POST["event_month"][$index],$_POST["event_day"][$index],$year);
+				// dchange $duration = mktime( $hour, $minutes,0,$_POST["event_month"][$index],$_POST["event_day"][$index],$year);
+				$t = mktime( $hour, $minutes,0,$_POST["event_month"][$index],$_POST["event_day"][$index],$year);
+				$duration = date('Y-m-d H:i:s',$t);
 				}
 			else
 				$duration = $_POST["event_duration"][$index]; // empty or all day
@@ -123,13 +125,15 @@ if(isset($_POST["edit_month"]))
 					{
 					$hour = $_POST["edit_hour"][$index] + $dpart[0];
 					$minutes = (isset($dpart[1]) ) ? $_POST["edit_minutes"][$index] + $dpart[1] : $_POST["edit_minutes"][$index];
-					$duration = mktime( $hour, $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year);
+					//dchange
+					$duration = date('Y-m-d H:i:s',mktime( $hour, $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year));
 					}
 				}
 			elseif( is_numeric($_POST["edit_duration"][$index]) )
 				{					
 				$minutes = $_POST["edit_minutes"][$index] + (60*$_POST["edit_duration"][$index]);
-				$duration = mktime( $_POST["edit_hour"][$index], $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year);
+				//dchange - can this be removed?
+				$duration = date('Y-m-d H:i:s',mktime( $_POST["edit_hour"][$index], $minutes,0,$_POST["edit_month"][$index],$_POST["edit_day"][$index],$year));
 				}
 			else
 				$duration = $_POST["edit_duration"][$index]; // empty or all day
@@ -158,7 +162,10 @@ $prefix = "event_";
 if(is_array($datevar) )
 {
 	$datestring = $datevar["datetime"];
+	//dchange - check this
 	$duration = $datevar["duration"];
+	if(strpos($duration,':'))
+		$duration = strtotime($duration);
 	$prefix = "edit_";
 	$index = $datevar["id"];
 }
@@ -1021,7 +1028,8 @@ if($_POST["recur-title"])
 				{
 				$hour = $_POST["event_hour"] + $dpart[0];
 				$minutes = $_POST["event_minutes"] + $dpart[1];
-				$duration = mktime( $hour, $minutes,0,$_POST["recur_month"][$index],$_POST["recur_day"][$index],$year);
+				//dchange
+				$duration = date('Y-m-d H:i:s',mktime( $hour, $minutes,0,$_POST["recur_month"][$index],$_POST["recur_day"][$index],$year));
 				}
 			else
 				$duration = $_POST["event_duration"]; // empty or all day
@@ -1539,9 +1547,10 @@ function rsvpmailer($mail) {
 		$rsvpmail->Port       = 587;                   // set the SMTP port for the GMAIL server
 	}
 	elseif($rsvp_options["smtp"] == "sendgrid") {
-	$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
-	$mail->Host = 'smtp.sendgrid.net';
-	$mail->Port = 587; 
+		$rsvpmail->SMTPAuth   = true;                  // enable SMTP authentication
+		$rsvpmail->SMTPSecure = "tls";                 // sets the prefix to the servier
+		$rsvpmail->Host = 'smtp.sendgrid.net';
+		$rsvpmail->Port = 587; 
 	}
 	else {
 	$rsvpmail->Host = $rsvp_options["smtp_server"]; // SMTP server
@@ -1550,6 +1559,14 @@ function rsvpmailer($mail) {
 		$rsvpmail->SMTPSecure = $rsvp_options["smtp_prefix"];                 // sets the prefix to the servier
 	$rsvpmail->Port=$rsvp_options["smtp_port"];
 	}
+
+if($_GET["debug"])
+printf('<p>Auth: %s<br />
+Secure: %s<br />
+Host: %s<br />
+Port: %s<br />
+RSVP SMTP: %s<br />
+</p>',$rsvpmail->SMTPAuth,$rsvpmail->SMTPSecure, $rsvpmail->Host,$rsvpmail->Port,$rsvp_options["smtp"]);
  
  $rsvpmail->Username=$rsvp_options["smtp_username"];
  $rsvpmail->Password=$rsvp_options["smtp_password"];
