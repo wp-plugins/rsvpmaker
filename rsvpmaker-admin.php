@@ -150,7 +150,9 @@ if(isset($_POST["edit_month"]))
 		delete_post_meta($postID, '_rsvp_on', '1');
 
 	if(isset($_POST["sked"]["week"]))
+		{
 		save_rsvp_template_meta($postID);
+		}
 
 }
 
@@ -449,6 +451,7 @@ echo $label;
                   $newoptions["login_required"] = (isset($_POST["option"]["login_required"]) && $_POST["option"]["login_required"]) ? 1 : 0;
                   $newoptions["rsvp_captcha"] = (isset($_POST["option"]["rsvp_captcha"]) && $_POST["option"]["rsvp_captcha"]) ? 1 : 0;
                   $newoptions["rsvp_yesno"] = (isset($_POST["option"]["rsvp_yesno"]) && $_POST["option"]["rsvp_yesno"]) ? 1 : 0;
+                  $newoptions["calendar_icons"] = (isset($_POST["option"]["calendar_icons"]) && $_POST["option"]["calendar_icons"]) ? 1 : 0;
                   $newoptions["rsvp_count"] = (isset($_POST["option"]["rsvp_count"]) && $_POST["option"]["rsvp_count"]) ? 1 : 0;
                   $newoptions["show_attendees"] = (isset($_POST["option"]["show_attendees"]) && $_POST["option"]["show_attendees"]) ? 1 : 0;
                   $newoptions["missing_members"] = (isset($_POST["option"]["missing_members"]) && $_POST["option"]["missing_members"]) ? 1 : 0;
@@ -563,6 +566,9 @@ if(file_exists(WP_PLUGIN_DIR."/rsvpmaker-custom.php") )
 	<br />
 
   <input type="checkbox" name="option[rsvp_yesno]" value="1" <?php if(isset($options["rsvp_yesno"]) && $options["rsvp_yesno"]) echo ' checked="checked" ';?> /> <strong><?php _e('Show RSVP Yes/No Radio Buttons','rsvpmaker'); ?></strong> <?php _e('check to turn on by default','rsvpmaker'); ?>
+	<br />
+
+  <input type="checkbox" name="option[calendar_icons]" value="1" <?php if(isset($options["calendar_icons"]) && $options["calendar_icons"]) echo ' checked="checked" ';?> /> <strong><?php _e('Show Add to Google / Download to Outlook (iCal) icons','rsvpmaker'); ?></strong> 
 	<br />
 
   <input type="checkbox" name="option[missing_members]" value="1" <?php if(isset($options["missing_members"]) && $options["missing_members"]) echo ' checked="checked" ';?> /> <strong><?php _e('RSVP Form Shows Members Not Responding','rsvpmaker'); ?></strong><br /><em><?php _e('if members log in to RSVP, this shows user accounts NOT associated with an RSVP (tracking WordPress user IDs)','rsvpmaker'); ?>.</em>
@@ -1026,10 +1032,12 @@ if($_POST["recur-title"])
 			
 			if( is_numeric($dpart[0]) )
 				{
-				$hour = $_POST["event_hour"] + $dpart[0];
-				$minutes = $_POST["event_minutes"] + $dpart[1];
-				//dchange
-				$duration = date('Y-m-d H:i:s',mktime( $hour, $minutes,0,$_POST["recur_month"][$index],$_POST["recur_day"][$index],$year));
+				$dtext = $cddate.' +'.$dpart[0].' hours';
+				if($dpart[1])
+					$dtext .= ' +'.$dpart[1].' minutes';
+				$dt = strtotime($dtext);
+				$duration = date('Y-m-d H:i:s',$dt);
+				//printf('<p>%s %s</p>',$dtext,$duration);
 				}
 			else
 				$duration = $_POST["event_duration"]; // empty or all day
@@ -1037,8 +1045,7 @@ if($_POST["recur-title"])
 // Insert the post into the database
   			if($postID = wp_insert_post( $my_post ) )
 				{
-				$sql = "INSERT INTO ".$wpdb->prefix."rsvp_dates SET datetime='$cddate', duration='$duration', postID=". $postID;
-				
+				$sql = "INSERT INTO ".$wpdb->prefix."rsvp_dates SET datetime='$cddate', duration='$duration', postID=". $postID;				
 				$wpdb->show_errors();
 				$return = $wpdb->query($sql);
 				if($return == false)
@@ -1458,14 +1465,41 @@ $template = get_post_meta($post_id,'_sked',true);
 if(!$template)
 	return;
 echo __("Template",'rsvpmaker').": ";
-$week = (int) $template["week"];
-$dow = (int) $template["dayofweek"];
-$weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
-$dayarray = Array(__("Sunday",'rsvpmaker'),__("Monday",'rsvpmaker'),__("Tuesday",'rsvpmaker'),__("Wednesday",'rsvpmaker'),__("Thursday",'rsvpmaker'),__("Friday",'rsvpmaker'),__("Saturday",'rsvpmaker'));
-echo ($week == 0) ? __('Schedule varies','rsvpmaker') : $weekarray[$week].' '.$dayarray[$dow];		
+
+//backward compatability
+if(is_array($template["week"]))
+	{
+		$weeks = $template["week"];
+		$dows = $template["dayofweek"];
+	}
+else
+	{
+		$weeks[0] = $template["week"];
+		$dows[0] = $template["dayofweek"];
 	}
 
+$weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
+$dayarray = Array(__("Sunday",'rsvpmaker'),__("Monday",'rsvpmaker'),__("Tuesday",'rsvpmaker'),__("Wednesday",'rsvpmaker'),__("Thursday",'rsvpmaker'),__("Friday",'rsvpmaker'),__("Saturday",'rsvpmaker'));
+
+if($weeks[0] == 0)
+	echo __('Schedule varies','rsvpmaker');
+else
+	{
+	foreach($weeks as $week)
+		{
+		if(!empty($s))
+			$s .= '/ ';
+		$s .= $weekarray[(int) $week].' ';
+		}
+	foreach($dows as $dow)
+		$s .= $dayarray[(int) $dow] . ' ';	
+	echo $s;
+		
 	}
+
+	} // end sked
+
+	} // end event dates column
 }
 
 function rsvpmaker_admin_notice() {
@@ -1628,4 +1662,111 @@ function rsvpmaker_sort_message() {
 	}
 }
 add_action('admin_notices','rsvpmaker_sort_message');
+
+function is_rsvpmaker_future($event_id) {
+global $wpdb;
+$sql = "SELECT datetime FROM ".$wpdb->prefix."rsvp_dates WHERE datetime > CURDATE() AND postID=".$event_id;
+$date = $wpdb->get_var($sql);
+return (!empty($date));
+}
+
+function rsvpmaker_get_projected($template) {
+
+/*
+echo "<pre>";
+print_r($template);
+echo "</pre>";
+*/
+
+//backward compatability
+if(is_array($template["week"]))
+	{
+		$weeks = $template["week"];
+		$dows = $template["dayofweek"];
+	}
+else
+	{
+		$weeks[0] = $template["week"];
+		$dows[0] = $template["dayofweek"];
+	}
+
+/*
+echo "<pre>";
+print_r($template);
+echo "</pre>";
+*/
+
+$cy = date("Y");
+$cm = date("m");
+
+if(!empty($template["stop"]))
+	$stopdate = strtotime($template["stop"].' 23:59:59');
+
+foreach($weeks as $week)
+foreach($dows as $dow) {
+
+//debug
+//echo "week: $week day: $dow <br />";
+
+if($week == 6)
+	{
+	$stop = 26;
+	for ($i = 0; $i <= $stop; $i++)
+		{
+		$text = rsvpmaker_day($dow,'strtotime') ." +".$i." week";
+		//echo $text.'<br />';
+		$ts = strtotime($text);
+		if(isset($stopdate) && $ts > $stopdate)
+			{
+			//echo "stop break <br />";
+			break;
+			}
+		$projected[$ts] = $ts; // add numeric value for 1 week
+		}
+	}
+else {
+	//monthly
+	$futuremonths = 12;
+	for($i =0; $i < $futuremonths; $i++)
+		{
+		$ts = mktime(0,0,0,$cm+$i,1,$cy); // first day of month
+		if(isset($stopdate) && $ts > $stopdate)
+			{
+			//echo "stop break <br />";
+			break;
+			}
+		$firstdays[$ts] = $ts;
+		if($week == 0)
+			$projected[$ts] = $ts;
+		}
+	if($week > 0)
+		{
+			if($week == 5)
+				$wtext = 'Last';
+			else
+				$wtext = '+'. ($week - 1) .' week';
+			foreach($firstdays as $i => $firstday)
+				{
+				$datetext =  "$wtext ".rsvpmaker_day($dow,'strtotime')." ".date("F Y",$firstday);
+				$ts = strtotime($datetext);
+				if(isset($stopdate) && $ts > $stopdate)
+					break;
+				$projected[$ts] = $ts;
+				}
+		}
+	}
+}
+
+//order by timestamp
+ksort($projected);
+
+/*
+echo "<pre>";
+print_r($projected);
+echo "</pre>";
+*/
+
+return $projected; 
+}
+
 ?>

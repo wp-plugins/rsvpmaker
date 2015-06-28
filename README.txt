@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 4.2.2
-Stable tag: 3.2.8
+Stable tag: 3.3
 
 Event scheduling and RSVP tracking.
 
@@ -90,6 +90,12 @@ For basic usage, you can also have a look at the [plugin homepage](http://www.rs
 	development kit for PHP.
 
 == Changelog ==
+
+= 3.3 =
+
+* Event templates modified to support multiple choices on frequency and day of the week. For example, "Every week on Monday and Wednesday" or "First and Third Monday"
+* Add to Google Calendar / Download to Outlook (iCal) icons now shown by default (can be disabled on settings screen)
+* Added rsvpmaker_calendar shortcode for displaying the calendar independently of the rsvpmaker_upcoming event listing.
 
 = 3.2.8 =
 
