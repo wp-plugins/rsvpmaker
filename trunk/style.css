@@ -1,0 +1,73 @@
+#rsvpconfirm {
+padding: 10px; margin-bottom: 10px; border: medium solid #EEE;
+}
+.attendee_list {
+padding: 10px; margin-bottom: 10px; border: medium solid #EEE;
+}
+.rsvperror {
+color: #FF0000;
+}
+.signed_up, .rsvp_status {
+font-style: italic;
+}
+.dateblock{
+padding-top: 1em; padding-bottom: 1em; font-weight: bold;
+}
+a.calendar_item {
+font-size: x-small;  line-height: 1;
+color: #fff;
+}
+.rsvp_validation_error {
+color: #F00;
+font-weight: bold;
+}
+.rsvp_missing {
+margin-left: 20px;
+}
+#rsvpform table {
+margin: 0;
+}
+select.tickets
+{
+display: inline-block; margin: 0; margin-right: 5px;
+}
+#rsvpform input, #rsvpform textarea {
+max-width: 90%;
+}
+#cpcalendar td, #cpcalendar th {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+	width: 10%;
+	max-width: 40px;
+	overflow: hidden;
+	padding-right: 0;
+}
+#cpcalendar td {
+	background-color: #fff;
+}
+#jumpform input {
+	width: 100px;
+}
+table#cpcalendar {
+width: 100%;
+}
+td.today {
+background-color: #FFA;
+}
+td.past {
+background-color: #EEE;
+}
+#cpcalendar th {
+color: #fff;
+background-color:  #333;
+padding-left: 2px;
+}
+.calendar_item {
+display: block;
+width: 100%;
+text-decoration: none;
+color: #fff;
+background-color:  #333;
+padding: 2px;
+margin-bottom: 5px;
+}
