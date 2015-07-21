@@ -112,6 +112,8 @@ if(is_array($template["week"]))
 	}
 else
 	{
+		$weeks = array();
+		$dows = array();
 		$weeks[0] = $template["week"];
 		$dows[0] = $template["dayofweek"];
 	}
@@ -1254,17 +1256,19 @@ elseif(isset($custom_fields["_sked"][0]))
 	{
 		$sked = unserialize($custom_fields["_sked"][0]);
 
-//backward compatability
-if(is_array($sked["week"]))
-	{
-		$weeks = $sked["week"];
-		$dows = $sked["dayofweek"];
-	}
-else
-	{
-		$weeks[0] = $sked["week"];
-		$dows[0] = $sked["dayofweek"];
-	}
+		//backward compatability
+		if(is_array($sked["week"]))
+			{
+				$weeks = $sked["week"];
+				$dows = $sked["dayofweek"];
+			}
+		else
+			{
+				$weeks = array();
+				$dows = array();
+				$weeks[0] = $sked["week"];
+				$dows[0] = $sked["dayofweek"];
+			}
 
 		$dayarray = Array(__("Sunday",'rsvpmaker'),__("Monday",'rsvpmaker'),__("Tuesday",'rsvpmaker'),__("Wednesday",'rsvpmaker'),__("Thursday",'rsvpmaker'),__("Friday",'rsvpmaker'),__("Saturday",'rsvpmaker'));
 		$weekarray = Array(__("Varies",'rsvpmaker'),__("First",'rsvpmaker'),__("Second",'rsvpmaker'),__("Third",'rsvpmaker'),__("Fourth",'rsvpmaker'),__("Last",'rsvpmaker'),__("Every",'rsvpmaker'));
@@ -2235,6 +2239,8 @@ while ( have_posts() ) : the_post();
 			}
 		else
 			{
+				$weeks = array();
+				$dows = array();
 				$weeks[0] = $sked["week"];
 				$dows[0] = $sked["dayofweek"];
 			}
@@ -2264,6 +2270,8 @@ while ( have_posts() ) : the_post();
 			{
 			$template_edit_url = admin_url('post.php?action=edit&post='.$post->ID);
 			$title = sprintf('<a href="%s">%s</a>',$template_edit_url,$post->post_title);
+			if(strpos($post->post_content,'[toastmaster') && function_exists('agenda_setup_url')) // rsvpmaker for toastmasters
+				$title .= sprintf(' (<a href="%s">Toastmasters %s</a>)',agenda_setup_url($post->ID),__('Agenda Setup','rsvptoast'));
 			$template_options .= sprintf('<option value="%d">%s</option>',$post->ID,$post->post_title);
 			}
 		else
