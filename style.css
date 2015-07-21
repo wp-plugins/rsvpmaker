@@ -15,6 +15,7 @@ padding-top: 1em; padding-bottom: 1em; font-weight: bold;
 }
 a.calendar_item {
 font-size: x-small;  line-height: 1;
+color: #fff;
 }
 .rsvp_validation_error {
 color: #F00;
@@ -39,10 +40,34 @@ max-width: 90%;
 	width: 10%;
 	max-width: 40px;
 	overflow: hidden;
+	padding-right: 0;
+}
+#cpcalendar td {
+	background-color: #fff;
 }
 #jumpform input {
 	width: 100px;
 }
 table#cpcalendar {
 width: 100%;
+}
+td.today {
+background-color: #FFA;
+}
+td.past {
+background-color: #EEE;
+}
+#cpcalendar th {
+color: #fff;
+background-color:  #333;
+padding-left: 2px;
+}
+.calendar_item {
+display: block;
+width: 100%;
+text-decoration: none;
+color: #fff;
+background-color:  #333;
+padding: 2px;
+margin-bottom: 5px;
 }
