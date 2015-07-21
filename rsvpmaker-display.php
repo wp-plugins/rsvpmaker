@@ -464,6 +464,10 @@ else
 	return $where . " AND datetime > ".$d.' AND datetime < DATE_ADD('.$d.', INTERVAL 5 WEEK) ';
 }
 
+function rsvpmaker_calendar_clear($g) {
+return '';
+}
+
 add_shortcode("rsvpmaker_calendar","rsvpmaker_calendar");
 function rsvpmaker_calendar($atts) 
 {
@@ -489,6 +493,8 @@ $backup = $wp_query;
 add_filter('posts_join', 'rsvpmaker_join' );
 add_filter('posts_where', 'rsvpmaker_calendar_where' );
 add_filter('posts_orderby', 'rsvpmaker_orderby' );
+add_filter('posts_groupby', 'rsvpmaker_calendar_clear' );
+add_filter('posts_distinct', 'rsvpmaker_calendar_clear' );
 add_filter('posts_fields', 'rsvpmaker_select' );
 
 $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
@@ -512,6 +518,8 @@ $wp_query = new WP_Query($querystring);
 remove_filter('posts_join', 'rsvpmaker_join' );
 remove_filter('posts_where', 'rsvpmaker_calendar_where' );
 remove_filter('posts_orderby', 'rsvpmaker_orderby' );
+remove_filter('posts_groupby', 'rsvpmaker_calendar_clear' );
+remove_filter('posts_distinct', 'rsvpmaker_calendar_clear' );
 remove_filter('posts_fields', 'rsvpmaker_select' );
 
 if ( have_posts() ) {
