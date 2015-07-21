@@ -7,7 +7,7 @@ License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 3.0
 Tested up to: 4.2.2
-Stable tag: 3.3.1
+Stable tag: 3.3.3
 
 Event scheduling and RSVP tracking.
 

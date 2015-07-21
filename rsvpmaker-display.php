@@ -485,11 +485,10 @@ $showbutton = true;
 
 $backup = $wp_query;
 
+//removing groupby, which interferes with display of multi-day events
 add_filter('posts_join', 'rsvpmaker_join' );
 add_filter('posts_where', 'rsvpmaker_calendar_where' );
-add_filter('posts_groupby', 'rsvpmaker_groupby' );
 add_filter('posts_orderby', 'rsvpmaker_orderby' );
-add_filter('posts_distinct', 'rsvpmaker_distinct' );
 add_filter('posts_fields', 'rsvpmaker_select' );
 
 $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
@@ -512,9 +511,7 @@ $wp_query = new WP_Query($querystring);
 // clean up so this doesn't interfere with other operations
 remove_filter('posts_join', 'rsvpmaker_join' );
 remove_filter('posts_where', 'rsvpmaker_calendar_where' );
-remove_filter('posts_groupby', 'rsvpmaker_groupby' );
 remove_filter('posts_orderby', 'rsvpmaker_orderby' );
-remove_filter('posts_distinct', 'rsvpmaker_distinct' );
 remove_filter('posts_fields', 'rsvpmaker_select' );
 
 if ( have_posts() ) {
